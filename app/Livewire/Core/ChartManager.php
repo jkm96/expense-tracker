@@ -11,109 +11,102 @@ use Livewire\Component;
 
 class ChartManager extends Component
 {
-    public $filterDate = 'this_month';
-    #[Url]
-    public $filterCategory = 'all';
-    public $customDate;
-
-    public $categories = [];
+    public $filterMonth;
 
     public function mount()
     {
-        $this->categories = ExpenseCategory::cases();
-    }
-
-    public function updatedFilterDate()
-    {
-        if ($this->filterDate !== 'custom') {
-            $this->customDate = null;
-        }
-        $this->filterExpenses(); // Ensure filters apply immediately
-    }
-
-    public function updatedFilterCategory()
-    {
-        $this->filterExpenses(); // Ensure expenses update when category changes
+        $this->filterMonth = Carbon::now()->format('Y-m'); // ✅ Default: Current Month
     }
 
     public function filterExpenses()
     {
-        $this->dispatch('expensesUpdated', $this->generateChartData());
+        $this->dispatch('expensesUpdated', $this->generateChartData($this->filterMonth));
     }
 
-    public function resetFilters()
-    {
-        $this->filterDate = 'this_month';
-        $this->filterCategory = 'all';
-        $this->customDate = null;
-        $this->dispatch('expensesUpdated', $this->generateChartData());
-    }
-
-    private function generateChartData()
+    private function generateChartData($filterMonth = null)
     {
         $userId = Auth::id();
         $expenses = Expense::where('user_id', $userId)
             ->orderBy('date', 'asc')
             ->get();
 
-        $categories = ExpenseCategory::values(); // ['food', 'transport', 'rent', 'utilities', 'entertainment', 'other']
-        $monthlyCategories = [];
+        $categories = ExpenseCategory::values();
+        $monthlyExpenses = []; // For Line Chart (Yearly Trends)
+        $dailyExpenses = [];   // For Bar Chart (Daily Trends in Selected Month)
 
-        // 1️⃣ Group expenses by Month & Category
         foreach ($expenses as $expense) {
-            $month = Carbon::parse($expense->date)->format('Y-m');
-            $category = $expense->category->value; // Convert enum to string
+            $date = Carbon::parse($expense->date);
+            $monthKey = $date->format('Y-m'); // Group for Line Chart
+            $dayKey = $date->format('Y-m-d'); // Group for Bar Chart
+            $category = $expense->category->value;
 
-            if (!isset($monthlyCategories[$month][$category])) {
-                $monthlyCategories[$month][$category] = 0;
+            // **Group by Month (For Yearly Line Chart - No Filter)**
+            if (!isset($monthlyExpenses[$monthKey][$category])) {
+                $monthlyExpenses[$monthKey][$category] = 0;
             }
-            $monthlyCategories[$month][$category] += $expense->amount;
+            $monthlyExpenses[$monthKey][$category] += $expense->amount;
+
+            // **Group by Day (For Monthly Bar Chart - Strict Filter)**
+            if ($filterMonth && $date->format('Y-m') === $filterMonth) {
+                if (!isset($dailyExpenses[$dayKey][$category])) {
+                    $dailyExpenses[$dayKey][$category] = 0;
+                }
+                $dailyExpenses[$dayKey][$category] += $expense->amount;
+            }
         }
 
-        // 2️⃣ Prepare chart labels (X-axis) and data structure
-        $chartLabels = []; // X-axis months
-        $chartSeries = []; // Bar chart series
-        $lineSeries = [];  // Line chart series
+        // ✅ Prepare Line Chart Data (Yearly Trends)
+        $lineLabels = [];
+        $lineSeries = [];
 
-        // Initialize each category with an empty array
         foreach ($categories as $category) {
-            $chartSeries[$category] = [];
             $lineSeries[$category] = [];
         }
 
-        // 3️⃣ Populate data for each month
-        foreach ($monthlyCategories as $month => $categoryData) {
-            $chartLabels[] = Carbon::createFromFormat('Y-m', $month)->format('F Y');
+        foreach ($monthlyExpenses as $month => $categoryData) {
+            $lineLabels[] = Carbon::createFromFormat('Y-m', $month)->format('F Y');
 
-            // Ensure each category has a value (default to 0 if missing)
             foreach ($categories as $category) {
-                $chartSeries[$category][] = $categoryData[$category] ?? 0;
                 $lineSeries[$category][] = $categoryData[$category] ?? 0;
             }
         }
 
-        // 4️⃣ Convert `chartSeries` into ApexCharts format
-        $formattedChartSeries = array_map(fn ($category) => [
-            'name' => ucfirst($category),
-            'data' => $chartSeries[$category]
-        ], $categories);
-
-        // 5️⃣ Convert `lineSeries` into ApexCharts format
         $formattedLineSeries = array_map(fn ($category) => [
             'name' => ucfirst($category),
             'data' => $lineSeries[$category]
         ], $categories);
 
-        // 6️⃣ Return structured data for ApexCharts
+        // ✅ Prepare Bar Chart Data (Strictly Within Selected Month)
+        $barLabels = [];
+        $barSeries = [];
+
+        foreach ($categories as $category) {
+            $barSeries[$category] = [];
+        }
+
+        foreach ($dailyExpenses as $day => $categoryData) {
+            $barLabels[] = Carbon::createFromFormat('Y-m-d', $day)->format('j M');
+
+            foreach ($categories as $category) {
+                $barSeries[$category][] = $categoryData[$category] ?? 0;
+            }
+        }
+
+        $formattedBarSeries = array_map(fn ($category) => [
+            'name' => ucfirst($category),
+            'data' => $barSeries[$category]
+        ], $categories);
+
         return [
-            'chartLabels' => json_encode($chartLabels, JSON_UNESCAPED_UNICODE),
-            'chartSeries' => json_encode($formattedChartSeries, JSON_UNESCAPED_UNICODE),
+            'barLabels' => json_encode($barLabels, JSON_UNESCAPED_UNICODE),
+            'barSeries' => json_encode($formattedBarSeries, JSON_UNESCAPED_UNICODE),
+            'lineLabels' => json_encode($lineLabels, JSON_UNESCAPED_UNICODE),
             'lineSeries' => json_encode($formattedLineSeries, JSON_UNESCAPED_UNICODE),
         ];
     }
 
     public function render()
     {
-        return view('livewire.core.chart-manager', $this->generateChartData());
+        return view('livewire.core.chart-manager', $this->generateChartData($this->filterMonth));
     }
 }

@@ -3,14 +3,9 @@
 
     <!-- 🔹 Filters -->
     <div class="bg-gray-100 p-4 rounded flex flex-wrap gap-4 items-end">
-
-        <!-- View Mode Toggle -->
         <div>
-            <label class="block text-sm">View Mode</label>
-            <select wire:model="filterMode" class="border rounded p-2">
-                <option value="yearly">Yearly (Months)</option>
-                <option value="monthly">Monthly (Weeks)</option>
-            </select>
+            <label class="block text-sm">Select Month</label>
+            <input type="month" wire:model="filterMonth" class="border rounded p-2">
         </div>
 
         <button wire:click="filterExpenses" class="bg-green-500 text-white p-2 rounded">
@@ -34,7 +29,7 @@
 
         <!-- 📈 Line Chart (Monthly Trends) -->
         <div class="bg-white p-6 rounded shadow">
-            <h2 class="text-lg font-semibold mb-3">📈 Monthly Trends</h2>
+            <h2 class="text-lg font-semibold mb-3">📈 Yearly Trends</h2>
             <div id="lineChart"></div>
         </div>
     </div>
@@ -44,13 +39,13 @@
     document.addEventListener("DOMContentLoaded", function () {
         var barChart, lineChart;
 
-        function renderCharts(chartLabels, chartSeries, lineSeries) {
+        function renderCharts(barLabels, barSeries, lineLabels, lineSeries) {
             // 📊 Bar Chart (Monthly Expenses by Category)
             if (!barChart) {
                 barChart = new ApexCharts(document.querySelector("#expenseChart"), {
                     chart: { type: 'bar', height: 350 },
-                    series: chartSeries,
-                    xaxis: { categories: chartLabels },
+                    series: barSeries,
+                    xaxis: { categories: barLabels },
                     colors: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#FF9800', '#9C27B0'],
                     plotOptions: {
                         bar: {
@@ -72,8 +67,8 @@
                 });
                 barChart.render();
             } else {
-                barChart.updateSeries(chartSeries);
-                barChart.updateOptions({ xaxis: { categories: chartLabels } });
+                barChart.updateSeries(barSeries);
+                barChart.updateOptions({ xaxis: { categories: barLabels } });
             }
 
             // 📈 Line Chart (Monthly Trends)
@@ -81,7 +76,7 @@
                 lineChart = new ApexCharts(document.querySelector("#lineChart"), {
                     chart: { type: 'line', height: 350 },
                     series: lineSeries,
-                    xaxis: { categories: chartLabels },
+                    xaxis: { categories: lineLabels },
                     colors: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#FF9800', '#9C27B0'],
                     stroke: { curve: 'smooth' ,width:2 },
                     markers: { size: 5 }
@@ -89,14 +84,15 @@
                 lineChart.render();
             } else {
                 lineChart.updateSeries(lineSeries);
-                lineChart.updateOptions({ xaxis: { categories: chartLabels } });
+                lineChart.updateOptions({ xaxis: { categories: lineLabels } });
             }
         }
 
         // 🔹 Initial render with PHP-generated data
         renderCharts(
-            JSON.parse(@json($chartLabels)),
-            JSON.parse(@json($chartSeries)),
+            JSON.parse(@json($barLabels)),
+            JSON.parse(@json($barSeries)),
+            JSON.parse(@json($lineLabels)),
             JSON.parse(@json($lineSeries))
         );
     });
