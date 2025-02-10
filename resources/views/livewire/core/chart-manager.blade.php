@@ -4,35 +4,17 @@
     <!-- 🔹 Filters -->
     <div class="bg-gray-100 p-4 rounded flex flex-wrap gap-4 items-end">
 
+        <!-- View Mode Toggle -->
         <div>
-            <label class="block text-sm">Date Range</label>
-            <select wire:model="filterDate" class="border rounded p-2">
-                <option value="this_month">This Month</option>
-                <option value="last_month">Last Month</option>
-                <option value="this_year">This Year</option>
-                <option value="custom">Custom</option>
+            <label class="block text-sm">View Mode</label>
+            <select wire:model="filterMode" class="border rounded p-2">
+                <option value="yearly">Yearly (Months)</option>
+                <option value="monthly">Monthly (Weeks)</option>
             </select>
         </div>
 
-        <div>
-            <label class="block text-sm">Category</label>
-            <select wire:model="filterCategory" class="border rounded p-2">
-                <option value="all">All Categories</option>
-                @foreach($categories as $category)
-                    <option value="{{ $category->value }}">{{ ucfirst($category->value) }}</option>
-                @endforeach
-            </select>
-        </div>
-
-        @if ($filterDate === 'custom')
-            <div>
-                <label class="block text-sm">Pick a Date</label>
-                <input type="date" wire:model="customDate" class="border rounded p-2">
-            </div>
-        @endif
-
-        <button wire:click="resetFilters" class="bg-red-500 text-white p-2 rounded">
-            Reset Filters
+        <button wire:click="filterExpenses" class="bg-green-500 text-white p-2 rounded">
+            Filter
         </button>
     </div>
 
@@ -60,37 +42,63 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        var chartLabels = JSON.parse(@json($chartLabels));
-        var chartData = JSON.parse(@json($chartData)).map(Number);
-        var pieLabels = JSON.parse(@json($pieLabels));
-        var pieData = JSON.parse(@json($pieData)).map(Number);
+        var barChart, lineChart;
 
-        // 📊 Bar Chart (Monthly Expenses)
-        new ApexCharts(document.querySelector("#expenseChart"), {
-            chart: { type: 'bar', height: 350 },
-            series: [{ name: 'Total Expenses (KES)', data: chartData }],
-            xaxis: { categories: chartLabels },
-            colors: ['#1E88E5'],
-            plotOptions: { bar: { borderRadius: 4, horizontal: false } },
-            dataLabels: { enabled: false }
-        }).render();
+        function renderCharts(chartLabels, chartSeries, lineSeries) {
+            // 📊 Bar Chart (Monthly Expenses by Category)
+            if (!barChart) {
+                barChart = new ApexCharts(document.querySelector("#expenseChart"), {
+                    chart: { type: 'bar', height: 350 },
+                    series: chartSeries,
+                    xaxis: { categories: chartLabels },
+                    colors: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#FF9800', '#9C27B0'],
+                    plotOptions: {
+                        bar: {
+                            horizontal: false,
+                            columnWidth: '55%',
+                            borderRadius: 5,
+                            borderRadiusApplication: 'end'
+                        }
+                    },
+                    dataLabels: { enabled: false },
+                    stroke: {
+                        show: true,
+                        width: 2,
+                        colors: ['transparent']
+                    },
+                    fill: {
+                        opacity: 1
+                    }
+                });
+                barChart.render();
+            } else {
+                barChart.updateSeries(chartSeries);
+                barChart.updateOptions({ xaxis: { categories: chartLabels } });
+            }
 
-        // 🥧 Pie Chart (Category Distribution)
-        new ApexCharts(document.querySelector("#pieChart"), {
-            chart: { type: 'pie', height: 350 },
-            series: pieData,
-            labels: pieLabels,
-            colors: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#FF9800']
-        }).render();
+            // 📈 Line Chart (Monthly Trends)
+            if (!lineChart) {
+                lineChart = new ApexCharts(document.querySelector("#lineChart"), {
+                    chart: { type: 'line', height: 350 },
+                    series: lineSeries,
+                    xaxis: { categories: chartLabels },
+                    colors: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#FF9800', '#9C27B0'],
+                    stroke: { curve: 'smooth' ,width:2 },
+                    markers: { size: 5 }
+                });
+                lineChart.render();
+            } else {
+                lineChart.updateSeries(lineSeries);
+                lineChart.updateOptions({ xaxis: { categories: chartLabels } });
+            }
+        }
 
-        // 📈 Line Chart (Monthly Trends)
-        new ApexCharts(document.querySelector("#lineChart"), {
-            chart: { type: 'line', height: 350 },
-            series: [{ name: 'Expenses', data: chartData }],
-            xaxis: { categories: chartLabels },
-            colors: ['#FF5722'],
-            stroke: { curve: 'smooth' },
-            markers: { size: 5 }
-        }).render();
+        // 🔹 Initial render with PHP-generated data
+        renderCharts(
+            JSON.parse(@json($chartLabels)),
+            JSON.parse(@json($chartSeries)),
+            JSON.parse(@json($lineSeries))
+        );
     });
 </script>
+

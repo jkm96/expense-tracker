@@ -40,7 +40,7 @@ class DashboardManager extends Component
 
         // Get expenses based on filters
         $query = Expense::where('user_id', $userId);
-        $expenses = $query->orderBy('date', 'desc')->paginate(10);
+        $expenses = $query->orderBy('date', 'desc')->take(5)->get();
 
         return view('livewire.core.dashboard-manager', compact(
             'totalExpenses',

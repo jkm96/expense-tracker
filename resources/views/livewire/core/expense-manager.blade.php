@@ -51,7 +51,7 @@
         </div>
     @endif
 
-    <div class="mt-2">
+    <div class="mt-2 mb-10">
         <div class="flex justify-between items-center mb-4">
             <h2 class="text-lg font-bold mb-2">Current Expenses</h2>
             <div class="flex items-center">
@@ -67,7 +67,7 @@
 
         <!-- Expense Cards -->
         @forelse($expenses as $group => $groupedExpenses)
-            <h3 class="text-lg font-semibold mt-2 mb-2">{{ $group }}</h3> <!-- Year - Month Header -->
+            <h3 class="text-lg font-semibold mt-2 mb-2 underline">{{ $group }}</h3> <!-- Year - Month Header -->
 
             <!-- Total Amount for the Group -->
             <p class="text-green-600 text-sm mb-1">Spent: KES {{ number_format($totals[$group], 2) }}</p>
@@ -97,6 +97,10 @@
                     </div>
                 @endforeach
             </div>
+
+            <!-- Horizontal line after each group -->
+            <hr class="my-4 border-gray-300">
+
         @empty
             <p>No expenses found</p>
         @endforelse
