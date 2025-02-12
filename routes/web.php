@@ -16,5 +16,8 @@ Route::group(['middleware' => ['guest']], function () {
 
 Route::group(['middleware' => ['auth:web']], function () {
     Route::get('/my-dashboard', [DashboardController::class, 'dashboard'])->name('user.dashboard');
+    Route::get('/chart-data/monthly', [DashboardController::class, 'getMonthlyChartData'])->name('chart.data.monthly');
+    Route::get('/chart-data/yearly', [DashboardController::class, 'getYearlyChartData'])->name('chart.data.yearly');
+
     Route::get('/manage-expenses', [CoreController::class, 'expense_page'])->name('expense.manage');
 });

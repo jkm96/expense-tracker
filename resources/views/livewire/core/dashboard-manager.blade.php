@@ -25,34 +25,31 @@
         </div>
     </div>
 
-    {{-- Charts --}}
-    <livewire:core.chart-manager/>
-
     {{-- Recent Expenses --}}
-    <div class="md:col-span-4 bg-white p-1 rounded shadow mt-4">
-        <h3 class="text-lg font-semibold mb-2">Recent Expenses</h3>
-        <table class="w-full border-collapse border">
-            <thead>
-            <tr class="bg-gray-200">
-                <th class="border p-2">Item</th>
-                <th class="border p-2">Amount(KES)</th>
-                <th class="border p-2">Date</th>
-            </tr>
-            </thead>
-            <tbody>
-            @forelse($expenses as $expense)
-                <tr>
-                    <td class="border p-2">{{ ucfirst($expense->name) }}</td>
-                    <td class="border p-2 text-green-600">{{ number_format($expense->amount, 2) }}</td>
-                    <td class="border p-2">{{ $expense->date->format('d-m-Y') }}</td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="5" class="text-center p-4">No expenses found.</td>
-                </tr>
-            @endforelse
-            </tbody>
-        </table>
-    </div>
+{{--    <div class="md:col-span-4 bg-white p-1 rounded shadow mt-4">--}}
+{{--        <h3 class="text-lg font-semibold mb-2">Recent Expenses</h3>--}}
+{{--        <table class="w-full border-collapse border">--}}
+{{--            <thead>--}}
+{{--            <tr class="bg-gray-200">--}}
+{{--                <th class="border p-2">Item</th>--}}
+{{--                <th class="border p-2">Amount(KES)</th>--}}
+{{--                <th class="border p-2">Date</th>--}}
+{{--            </tr>--}}
+{{--            </thead>--}}
+{{--            <tbody>--}}
+{{--            @forelse($expenses as $expense)--}}
+{{--                <tr>--}}
+{{--                    <td class="border p-2">{{ ucfirst($expense->name) }}</td>--}}
+{{--                    <td class="border p-2 text-green-600">{{ number_format($expense->amount, 2) }}</td>--}}
+{{--                    <td class="border p-2">{{ $expense->date->format('d-m-Y') }}</td>--}}
+{{--                </tr>--}}
+{{--            @empty--}}
+{{--                <tr>--}}
+{{--                    <td colspan="5" class="text-center p-4">No expenses found.</td>--}}
+{{--                </tr>--}}
+{{--            @endforelse--}}
+{{--            </tbody>--}}
+{{--        </table>--}}
+{{--    </div>--}}
 
 </div>

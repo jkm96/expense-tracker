@@ -12,6 +12,9 @@
     <!-- Livewire Styles -->
     @livewireStyles
 
+    <!--- jquery section---->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <!--- apex charts section---->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
