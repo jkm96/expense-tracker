@@ -29,11 +29,11 @@
             </div>
 
             <!-- Fetch Data Button -->
-            <button id="fetchData" class="bg-green-500 text-white p-2 rounded">Fetch Data</button>
+            <button id="fetchData" class="bg-green-500 text-white p-2 rounded">Filter</button>
         </div>
 
 
-        <div id="chartContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 mb-4">
+        <div id="chartContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 mb-10">
             <!-- 📊 Column Chart (Daily Trends in Selected Month) -->
             <div class="bg-white p-6 rounded shadow">
                 <h2 class="text-lg font-semibold mb-3">
@@ -56,67 +56,91 @@
     <script>
         $(document).ready(function () {
             var barChart, lineChart;
-            var today = new Date();
-            var currentMonth = today.toISOString().slice(0, 7); // Format: YYYY-MM
-            $("#monthlyFilter").val(currentMonth);
 
-            // ✅ Ensure the correct field is shown based on the default "Monthly" selection
-            $("#monthlyPicker").show();
-            $("#yearlyPicker").hide();
+            // ✅ Load saved filters from localStorage (Use a common key)
+            var savedFilters = JSON.parse(localStorage.getItem("expenseFilter"));
 
+            // ✅ Handle case where localStorage is empty (first page load)
+            if (!savedFilters || !savedFilters.type) {
+                savedFilters = {
+                    type: "monthly", // Default: Monthly
+                    month: new Date().toISOString().slice(0, 7), // Default: Current Month (YYYY-MM)
+                    year: new Date().getFullYear() // Default: Current Year (YYYY)
+                };
+
+                // ✅ Save default filter to localStorage to prevent future empty loads
+                localStorage.setItem("expenseFilter", JSON.stringify(savedFilters));
+            }
+
+            // ✅ Set the saved values in the dropdowns
+            $("#filterType").val(savedFilters.type);
+            $("#monthlyFilter").val(savedFilters.month);
+            $("#yearlyFilter").val(savedFilters.year);
+
+            // ✅ Function to update chart layout based on filter type
+            function updateChartLayout(selectedType) {
+                if (selectedType === "yearly") {
+                    $("#chartContainer").removeClass("md:grid-cols-2").addClass("grid-cols-1");
+                    $("#monthlyPicker").hide();
+                    $("#yearlyPicker").show();
+                } else {
+                    $("#chartContainer").removeClass("grid-cols-1").addClass("md:grid-cols-2");
+                    $("#monthlyPicker").show();
+                    $("#yearlyPicker").hide();
+                }
+            }
+
+            // ✅ Function to update chart titles dynamically
             function updateChartTitles(selectedType) {
                 if (selectedType === "monthly") {
-                    $("#chartContainer").removeClass("grid-cols-1").addClass("md:grid-cols-2"); // ✅ Display charts in two columns for monthly view
-
-                    var selectedMonth = $("#monthlyFilter").val(); // Format: YYYY-MM
-
+                    var selectedMonth = $("#monthlyFilter").val();
                     if (selectedMonth) {
-                        var monthName = new Date(selectedMonth + "-01").toLocaleString('default', {month: 'long'}); // Convert to full month name
-                        var year = selectedMonth.split("-")[0]; // Extract year
+                        var monthName = new Date(selectedMonth + "-01").toLocaleString('default', { month: 'long' });
+                        var year = selectedMonth.split("-")[0];
                         $("#barTitle").text(`Weekly Expenses in ${monthName} ${year}`);
                         $("#lineTitle").text(`Monthly Expense Trends for ${monthName} ${year}`);
-                    } else {
-                        $("#barTitle").text("Weekly Expenses");
-                        $("#lineTitle").text("Weekly Expense Trends");
                     }
                 } else {
-                    $("#chartContainer").removeClass("md:grid-cols-2").addClass("grid-cols-1"); // ✅ Stack charts in a single column
-
                     var selectedYear = $("#yearlyFilter").val();
                     if (selectedYear) {
-                        $("#barTitle").text(`Yearly Expenses in ${selectedYear}`);
+                        $("#barTitle").text(`Monthly Expenses in ${selectedYear}`);
                         $("#lineTitle").text(`Yearly Expense Trends for ${selectedYear}`);
-                    } else {
-                        $("#barTitle").text("Monthly Expenses in Selected Year");
-                        $("#lineTitle").text("Yearly Expense Trends");
                     }
                 }
             }
 
+            // ✅ Save filter selections to localStorage
+            function saveFilters() {
+                var filters = {
+                    type: $("#filterType").val(),
+                    month: $("#monthlyFilter").val(),
+                    year: $("#yearlyFilter").val()
+                };
+                localStorage.setItem("expenseFilter", JSON.stringify(filters));
+            }
+
+            // ✅ Apply saved settings on page load
+            updateChartLayout(savedFilters.type);
+            updateChartTitles(savedFilters.type);
+
             // 📊 Initialize Charts with Empty Data (Avoids first-time errors)
             initializeCharts();
 
-            // Handle dropdown selection to toggle filters
-            $("#filterType").on("change", function () {
-                var selectedType = $(this).val();
+            // ✅ Handle filter selection change
+            $("#filterType, #monthlyFilter, #yearlyFilter").on("change", function () {
+                var selectedType = $("#filterType").val();
                 updateChartTitles(selectedType);
-
-                if (selectedType === "monthly") {
-                    $("#monthlyPicker").show();
-                    $("#yearlyPicker").hide();
-                } else {
-                    $("#monthlyPicker").hide();
-                    $("#yearlyPicker").show();
-                }
+                updateChartLayout(selectedType);
+                saveFilters(); // ✅ Save selection
             });
 
-            // Fetch Data Based on Selection
+            // ✅ Handle fetch data button click
             $("#fetchData").on("click", function () {
                 var selectedType = $("#filterType").val();
-                var requestData = {};
-
                 updateChartTitles(selectedType);
+                saveFilters(); // ✅ Save selection before fetching
 
+                var requestData = {};
                 if (selectedType === "monthly") {
                     requestData.month = $("#monthlyFilter").val();
                     fetchChartData("{{ route('chart.data.monthly') }}", requestData);
@@ -126,25 +150,21 @@
                 }
             });
 
-            // 📊 Initialize Empty Charts (So they exist before AJAX updates them)
+            // 📊 Initialize Empty Charts (Ensures charts exist before data loads)
             function initializeCharts() {
                 barChart = new ApexCharts(document.querySelector("#barChart"), {
                     chart: {
                         type: 'bar',
                         height: 350,
                         id: 'barChart',
-                        zoom: {enabled: false},
+                        zoom: { enabled: false },
                     },
                     series: [],
-                    xaxis: {categories: [], tickPlacement: 'on'},
+                    xaxis: { categories: [], tickPlacement: 'on' },
                     colors: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#FF9800', '#9C27B0'],
-                    plotOptions: {bar: {columnWidth: '55%', borderRadius: 5}},
-                    dataLabels: {enabled: false},
-                    stroke: {
-                        show: true,
-                        width: 2,
-                        colors: ['transparent']
-                    }
+                    plotOptions: { bar: { columnWidth: '55%', borderRadius: 5 } },
+                    dataLabels: { enabled: false },
+                    stroke: { show: true, width: 2, colors: ['transparent'] }
                 });
                 barChart.render();
 
@@ -153,14 +173,14 @@
                         type: 'line',
                         height: 350,
                         id: 'lineChart',
-                        zoom: {enabled: false},
+                        zoom: { enabled: false },
                     },
                     series: [],
-                    xaxis: {categories: []},
-                    stroke: {curve: 'smooth', width: 3},
-                    markers: {size: 5},
+                    xaxis: { categories: [] },
+                    stroke: { curve: 'smooth', width: 3 },
+                    markers: { size: 5 },
                     colors: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#FF9800', '#9C27B0'],
-                    dataLabels: {enabled: false}
+                    dataLabels: { enabled: false }
                 });
                 lineChart.render();
             }
@@ -203,17 +223,23 @@
 
                 if (barChart && lineChart) {
                     barChart.updateSeries(series);
-                    barChart.updateOptions({xaxis: {categories: labels}});
+                    barChart.updateOptions({ xaxis: { categories: labels } });
 
                     lineChart.updateSeries(series);
-                    lineChart.updateOptions({xaxis: {categories: labels}});
+                    lineChart.updateOptions({ xaxis: { categories: labels } });
                 } else {
                     console.warn("Charts not initialized yet!");
                 }
             }
 
-            fetchChartData("{{ route('chart.data.monthly') }}", {month: currentMonth});
+            // ✅ Load default data on page load based on saved filter
+            if (savedFilters.type === "monthly") {
+                fetchChartData("{{ route('chart.data.monthly') }}", { month: savedFilters.month });
+            } else {
+                fetchChartData("{{ route('chart.data.yearly') }}", { year: savedFilters.year });
+            }
         });
     </script>
+
 
 @endsection
