@@ -6,6 +6,7 @@ use App\Models\Expense;
 use App\Utils\Enums\ExpenseCategory;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -73,7 +74,7 @@ class ExpenseManager extends Component
             $expense = Expense::where('id', $this->expense_id)->where('user_id', Auth::id())->first();
             if ($expense) {
                 $expense->update([
-                    'name' => $this->name,
+                    'name' => Str::title($this->name),
                     'amount' => $this->amount,
                     'date' => $this->date,
                     'category' => ExpenseCategory::tryFrom($this->category)?->value,
@@ -85,7 +86,7 @@ class ExpenseManager extends Component
         } else {
             // Create new expense
             Expense::create([
-                'name' => $this->name,
+                'name' => Str::title($this->name),
                 'amount' => $this->amount,
                 'date' => $this->date,
                 'category' => $this->category,

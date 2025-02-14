@@ -77,16 +77,27 @@
             $("#monthlyFilter").val(savedFilters.month);
             $("#yearlyFilter").val(savedFilters.year);
 
+            // ✅ Ensure the correct picker is shown based on the saved filter type
+            function updatePickerVisibility(selectedType) {
+                if (selectedType === "yearly") {
+                    $("#monthlyPicker").hide();
+                    $("#yearlyPicker").show();
+                } else {
+                    $("#monthlyPicker").show();
+                    $("#yearlyPicker").hide();
+                }
+            }
+
             // ✅ Function to update chart layout based on filter type
             function updateChartLayout(selectedType) {
                 if (selectedType === "yearly") {
                     $("#chartContainer").removeClass("md:grid-cols-2").addClass("grid-cols-1");
-                    $("#monthlyPicker").hide();
-                    $("#yearlyPicker").show();
+                    // $("#monthlyPicker").hide();
+                    // $("#yearlyPicker").show();
                 } else {
                     $("#chartContainer").removeClass("grid-cols-1").addClass("md:grid-cols-2");
-                    $("#monthlyPicker").show();
-                    $("#yearlyPicker").hide();
+                    // $("#monthlyPicker").show();
+                    // $("#yearlyPicker").hide();
                 }
             }
 
@@ -120,6 +131,7 @@
             }
 
             // ✅ Apply saved settings on page load
+            updatePickerVisibility(savedFilters.type);
             updateChartLayout(savedFilters.type);
             updateChartTitles(savedFilters.type);
 
@@ -127,10 +139,16 @@
             initializeCharts();
 
             // ✅ Handle filter selection change
-            $("#filterType, #monthlyFilter, #yearlyFilter").on("change", function () {
+            $("#filterType").on("change", function () {
                 var selectedType = $("#filterType").val();
-                updateChartTitles(selectedType);
-                updateChartLayout(selectedType);
+                updatePickerVisibility(selectedType);
+                saveFilters(); // ✅ Save selection
+            });
+
+            $("#monthlyFilter, #yearlyFilter").on("change", function () {
+                var selectedType = $("#filterType").val();
+                // updateChartTitles(selectedType);
+                // updateChartLayout(selectedType);
                 saveFilters(); // ✅ Save selection
             });
 
@@ -138,6 +156,7 @@
             $("#fetchData").on("click", function () {
                 var selectedType = $("#filterType").val();
                 updateChartTitles(selectedType);
+                updateChartLayout(selectedType);
                 saveFilters(); // ✅ Save selection before fetching
 
                 var requestData = {};
