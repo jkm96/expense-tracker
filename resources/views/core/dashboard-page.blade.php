@@ -37,6 +37,14 @@
             <!-- 📊 Column Chart (Daily Trends in Selected Month) -->
             <div class="bg-white p-6 rounded shadow">
                 <h2 class="text-lg font-semibold mb-3">
+                    📊 <span id="pieTitle">Weekly Expenses</span>
+                </h2>
+                <div id="pieChart"></div>
+            </div>
+
+            <!-- 📊 Column Chart (Daily Trends in Selected Month) -->
+            <div class="bg-white p-6 rounded shadow">
+                <h2 class="text-lg font-semibold mb-3">
                     📊 <span id="barTitle">Weekly Expenses</span>
                 </h2>
                 <div id="barChart"></div>
@@ -55,7 +63,7 @@
 
     <script>
         $(document).ready(function () {
-            var barChart, lineChart;
+            var barChart, lineChart, pieChart;
 
             // ✅ Load saved filters from localStorage (Use a common key)
             var savedFilters = JSON.parse(localStorage.getItem("expenseFilter"));
@@ -110,12 +118,14 @@
                         var year = selectedMonth.split("-")[0];
                         $("#barTitle").text(`Weekly Expenses in ${monthName} ${year}`);
                         $("#lineTitle").text(`Monthly Expense Trends for ${monthName} ${year}`);
+                        $("#pieTitle").text("Monthly Expense Per Category");
                     }
                 } else {
                     var selectedYear = $("#yearlyFilter").val();
                     if (selectedYear) {
                         $("#barTitle").text(`Monthly Expenses in ${selectedYear}`);
                         $("#lineTitle").text(`Yearly Expense Trends for ${selectedYear}`);
+                        $("#pieTitle").text("Yearly Expense Per Category");
                     }
                 }
             }
@@ -167,6 +177,8 @@
                     requestData.year = $("#yearlyFilter").val();
                     fetchChartData("{{ route('chart.data.yearly') }}", requestData);
                 }
+
+                fetchPieChartData();
             });
 
             // 📊 Initialize Empty Charts (Ensures charts exist before data loads)
@@ -202,6 +214,14 @@
                     dataLabels: { enabled: false }
                 });
                 lineChart.render();
+
+                pieChart = new ApexCharts(document.querySelector("#pieChart"), {
+                    chart: { type: 'pie', height: 350, id: 'pieChart' },
+                    series: [],
+                    labels: [],
+                    colors: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#FF9800', '#9C27B0']
+                });
+                pieChart.render();
             }
 
             // 📊 Fetch Data via AJAX & Debug Response
@@ -228,6 +248,50 @@
                     }
                 });
             }
+
+            // 🥧 Fetch Data for Pie Chart
+            function fetchPieChartData() {
+                let filters = JSON.parse(localStorage.getItem("expenseFilter")) || {};
+                let requestData = { type: filters.type || "monthly" };
+
+                if (requestData.type === "monthly") {
+                    requestData.month = filters.month || new Date().toISOString().slice(0, 7);
+                } else {
+                    requestData.year = filters.year || new Date().getFullYear();
+                }
+
+                $.ajax({
+                    url: "/chart-data/pie",
+                    type: "GET",
+                    data: filters,
+                    success: function (response) {
+                        if (!response.pieLabels || !response.pieData) {
+                            console.warn("Invalid pie chart response format:", response);
+                            return;
+                        }
+
+                        updatePieChart(response.pieLabels, response.pieData);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Pie Chart AJAX Error:", error);
+                    }
+                });
+            }
+
+            function updatePieChart(pieLabels, pieData) {
+                // ✅ Convert all values to numbers
+                pieData = pieData.map(value => parseFloat(value) || 0);
+
+                // ✅ Prevent empty chart issue
+                if (pieData.every(value => value === 0)) {
+                    pieLabels = ['No Data'];
+                    pieData = [1]; // Fake data to force rendering
+                }
+
+                pieChart.updateSeries(pieData);
+                pieChart.updateOptions({ labels: pieLabels });
+            }
+
 
             // 📊 Update Charts Dynamically
             function updateCharts(labels, series) {
@@ -257,6 +321,8 @@
             } else {
                 fetchChartData("{{ route('chart.data.yearly') }}", { year: savedFilters.year });
             }
+
+            fetchPieChartData()
         });
     </script>
 

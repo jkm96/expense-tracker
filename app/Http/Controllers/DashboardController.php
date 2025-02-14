@@ -142,4 +142,49 @@ class DashboardController extends Controller
             ], $categories),
         ]);
     }
+
+    public function getPieChartData(Request $request)
+    {
+        $userId = auth()->id();
+        $type = $request->input('type', 'monthly'); // Default to Monthly
+        $categories = ExpenseCategory::values(); // Get all categories as strings
+
+        if ($type === 'monthly') {
+            $filterMonth = $request->input('month', Carbon::now()->format('Y-m'));
+            $categoryExpenses = Expense::where('user_id', $userId)
+                ->whereMonth('date', Carbon::parse($filterMonth)->month)
+                ->whereYear('date', Carbon::parse($filterMonth)->year)
+                ->groupBy('category')
+                ->selectRaw('category, SUM(amount) as total')
+                ->get()
+                ->mapWithKeys(function ($item) {
+                    return [$item->category instanceof ExpenseCategory ? $item->category->value : (string) $item->category => $item->total];
+                });
+        } else {
+            $filterYear = $request->input('year', Carbon::now()->year);
+            $categoryExpenses = Expense::where('user_id', $userId)
+                ->whereYear('date', $filterYear)
+                ->groupBy('category')
+                ->selectRaw('category, SUM(amount) as total')
+                ->get()
+                ->mapWithKeys(function ($item) {
+                    return [$item->category instanceof ExpenseCategory ? $item->category->value : (string) $item->category => $item->total];
+                });
+        }
+
+        // ✅ Prepare data for the pie chart
+        $pieLabels = $categories;
+        $pieData = [];
+
+        foreach ($categories as $category) {
+            $pieData[] = $categoryExpenses[$category] ?? 0; // ✅ Avoid Illegal Offset Error
+        }
+        Log::info('Pie Chart Final Data:', ['labels' => $pieLabels, 'data' => $pieData]);
+
+        return response()->json([
+            'pieLabels' => $pieLabels,
+            'pieData' => $pieData
+        ]);
+    }
+
 }
