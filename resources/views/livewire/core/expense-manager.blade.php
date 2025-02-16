@@ -8,8 +8,8 @@
 
     <!-- Floating Add Button -->
     <button wire:click="$toggle('showForm')"
-            class="fixed bottom-16 right-4 bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-full shadow-lg transition">
-        + Add Expense
+            class="fixed bottom-16 right-4 bg-green-400 hover:bg-green-700 text-white w-14 h-14 flex items-center justify-center rounded-full shadow-lg transition">
+        <i class="fas fa-plus text-xl"></i>
     </button>
 
     <!-- Expense Form (Modal Style) -->
@@ -74,15 +74,21 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 @foreach($groupedExpenses as $expense)
-                    <div class="border p-2 mb-2 rounded bg-gray-100">
+                    <div class="border p-2 mb-2 rounded bg-gray-200">
                         <div class="flex justify-between mb-1">
-                            <h2 class="font-semibold">{{ $expense->name }}</h2>
-                            <p class="text-gray-700 text-sm">{{ Carbon\Carbon::parse($expense->date)->format('d-m-Y') }}</p>
+                            <div class="flex items-center gap-x-1">
+                                <!-- ✅ Category Color Circle -->
+                                <span class="w-3 h-3 rounded-full {{ get_category_color($expense->category->value) }}"></span>
+                                <h2 class="font-semibold">{{ $expense->name }}</h2>
+                            </div>
+                            <p class="text-gray-700 text-sm">{{ Carbon\Carbon::parse($expense->date)->format('jS M Y') }}</p>
                         </div>
 
+                        <hr class="mt-1 mb-1 border-gray-50">
+
                         <div class="flex items-center">
-                            <p class="text-md text-gray-700 mt-1 mb-1 mr-1">{{ ucfirst($expense->category->value) }}</p>
-                            <p class="text-md text-green-600 mt-1 mb-1">KES {{ number_format($expense->amount, 2) }}</p>
+                            <p class="text-md text-gray-700 mt-1 mb-1 mr-1">{{ ucfirst($expense->category->value) }}</p>|
+                            <p class="text-md text-green-600 mt-1 mb-1 ml-1">KES {{ number_format($expense->amount, 2) }}</p>
                         </div>
 
                         <!-- Content -->
@@ -90,8 +96,37 @@
 
                         <!-- Actions -->
                         <div class="mt-2 text-sm flex justify-end">
-                            <button wire:click="editExpense({{ $expense->id }})" class="text-blue-500">Edit</button>
-                            <button wire:click="deleteExpense({{ $expense->id }})" class="text-red-500 ml-2">Delete
+                            <button wire:click="editExpense({{ $expense->id }})" class="text-blue-500 hover:underline">Edit</button>
+
+                            <!-- Confirmation Modal -->
+                            @if($showDeleteModal)
+                                <div x-data="{ open: @entangle('showDeleteModal') }" x-show="open"
+                                     class="fixed inset-0 z-50 flex items-center justify-center  bg-opacity-60 backdrop-blur-sm">
+
+                                    <!-- Modal Content -->
+                                    <div class="bg-white rounded-lg shadow-lg w-96 p-6">
+                                        <h2 class="text-lg font-bold text-gray-800">Delete Expense</h2>
+                                        <p class="mt-4 text-gray-600">Are you sure you want to delete this expense?
+                                            This action cannot be undone.</p>
+                                        <div class="mt-6 flex justify-end space-x-4">
+                                            <button @click="open = false"
+                                                    class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded">
+                                                Cancel
+                                            </button>
+                                            <button wire:click="confirmDelete"
+                                                    class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            <button
+                                wire:click="showDeleteConfirmation({{ $expense->id }})"
+                                class="ml-1 hover:underline text-red-600"
+                            >
+                                Delete
                             </button>
                         </div>
                     </div>

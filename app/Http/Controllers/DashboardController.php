@@ -8,6 +8,7 @@ use App\Utils\Enums\ExpenseCategory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class DashboardController extends Controller
 {
@@ -16,7 +17,6 @@ class DashboardController extends Controller
         return view('core.dashboard-page');
     }
 
-    // 🔹 Fetch Data for Monthly Filter (Weeks)
     public function getMonthlyChartData(Request $request)
     {
         $userId = auth()->id();
@@ -27,13 +27,13 @@ class DashboardController extends Controller
         // ✅ Start from the 1st of the selected month
         $startOfMonth = Carbon::parse($filterMonth)->startOfMonth();
         $endOfMonth = Carbon::parse($filterMonth)->endOfMonth();
-        $currentWeekStart = $startOfMonth->copy(); // ✅ First week starts from the 1st
+        $currentWeekStart = $startOfMonth->copy(); //First week starts from the 1st
         $weekNumber = 1;
 
         while ($currentWeekStart->lte($endOfMonth)) {
-            $weekEnd = $currentWeekStart->copy()->addDays(6); // ✅ 7-day week range
+            $weekEnd = $currentWeekStart->copy()->addDays(6); //7-day week range
             if ($weekEnd->gt($endOfMonth)) {
-                $weekEnd = $endOfMonth; // ✅ Ensure last week does not exceed month end
+                $weekEnd = $endOfMonth; //Ensure last week does not exceed month end
             }
 
             // Label Example: W1 (1-7), W2 (8-14)
@@ -45,9 +45,10 @@ class DashboardController extends Controller
                 'data' => array_fill_keys($categories, 0)
             ];
 
+            //Move to next week
             $test = $weekEnd->copy()->addDay();
-            $currentWeekStart = $test;// ✅ Move to next week
-            $weekNumber++; // ✅ Increase week count
+            $currentWeekStart = $test;
+            $weekNumber++;
         }
 
         // ✅ Fetch expenses grouped by week
@@ -158,7 +159,7 @@ class DashboardController extends Controller
                 ->selectRaw('category, SUM(amount) as total')
                 ->get()
                 ->mapWithKeys(function ($item) {
-                    return [$item->category instanceof ExpenseCategory ? $item->category->value : (string) $item->category => $item->total];
+                    return [$item->category instanceof ExpenseCategory ? $item->category->value : (string)$item->category => $item->total];
                 });
         } else {
             $filterYear = $request->input('year', Carbon::now()->year);
@@ -168,18 +169,20 @@ class DashboardController extends Controller
                 ->selectRaw('category, SUM(amount) as total')
                 ->get()
                 ->mapWithKeys(function ($item) {
-                    return [$item->category instanceof ExpenseCategory ? $item->category->value : (string) $item->category => $item->total];
+                    return [$item->category instanceof ExpenseCategory ? $item->category->value : (string)$item->category => $item->total];
                 });
         }
 
-        // ✅ Prepare data for the pie chart
-        $pieLabels = $categories;
+        //Prepare data for the pie chart
+        $pieLabels = [];
         $pieData = [];
+        foreach ($categories as $category) {
+            $pieLabels[] = Str::ucfirst($category);
+        }
 
         foreach ($categories as $category) {
-            $pieData[] = $categoryExpenses[$category] ?? 0; // ✅ Avoid Illegal Offset Error
+            $pieData[] = $categoryExpenses[$category] ?? 0;
         }
-        Log::info('Pie Chart Final Data:', ['labels' => $pieLabels, 'data' => $pieData]);
 
         return response()->json([
             'pieLabels' => $pieLabels,

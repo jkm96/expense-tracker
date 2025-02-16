@@ -6,9 +6,10 @@ enum ExpenseCategory: string
 {
     case FOOD = 'food';
     case TRANSPORT = 'transport';
-    case RENT = 'rent';
+    case CLOTHING = 'clothing';
     case UTILITIES = 'utilities';
-    case ENTERTAINMENT = 'entertainment';
+    case KNOWLEDGE = 'knowledge';
+    case LIFESTYLE = 'lifestyle';
     case OTHER = 'other';
 
     public static function values(): array

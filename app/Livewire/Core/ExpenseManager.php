@@ -21,6 +21,8 @@ class ExpenseManager extends Component
     public $categories = [];
     #[Url]
     public $filter = 'all';
+    public $showDeleteModal = false;
+    public $expenseIdToDelete;
 
     public function mount()
     {
@@ -78,7 +80,7 @@ class ExpenseManager extends Component
                     'amount' => $this->amount,
                     'date' => $this->date,
                     'category' => ExpenseCategory::tryFrom($this->category)?->value,
-                    'notes' => $this->notes,
+                    'notes' => !empty($this->notes) ? $this->notes : "Payment for ". Str::title($this->name),
                 ]);
 
                 session()->flash('success', 'Expense updated successfully!');
@@ -90,7 +92,7 @@ class ExpenseManager extends Component
                 'amount' => $this->amount,
                 'date' => $this->date,
                 'category' => $this->category,
-                'notes' => $this->notes,
+                'notes' => !empty($this->notes) ? $this->notes : "Payment for ". Str::title($this->name),
                 'user_id' => Auth::id(),
             ]);
 
@@ -115,13 +117,24 @@ class ExpenseManager extends Component
         }
     }
 
-    public function deleteExpense($id)
+    public function showDeleteConfirmation($id)
     {
-        $expense = Expense::where('id', $id)->where('user_id', Auth::id())->first();
+        $this->expenseIdToDelete = $id;
+        $this->showDeleteModal = true;
+    }
+
+    public function confirmDelete()
+    {
+        $expense = Expense::where('id', $this->expenseIdToDelete)->where('user_id', Auth::id())->first();
         if ($expense) {
             $expense->delete();
             session()->flash('success', 'Expense deleted successfully!');
         }
+
+        $this->showDeleteModal = false;
+        $this->expenseIdToDelete = null;
+
+        $this->resetPage();
     }
 
     public function resetFields()

@@ -35,7 +35,7 @@ class DashboardManager extends Component
             ->orderByDesc('total')
             ->first();
 
-        $topCategory = $topCategoryData ? $topCategoryData->category : 'N/A';
+        $topCategory = $topCategoryData ? $topCategoryData->category : null;
         $topCategoryTotal = $topCategoryData ? $topCategoryData->total : 0;
 
         // Get expenses based on filters

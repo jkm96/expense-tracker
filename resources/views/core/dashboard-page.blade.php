@@ -8,52 +8,49 @@
         <!-- 🔹 Filters -->
         <div class="bg-gray-100 p-4 rounded shadow mt-5 flex flex-wrap gap-4 items-end">
             <!-- View Mode Selection -->
-            <div>
+            <div class="w-full sm:w-auto">
                 <label class="block text-sm">Aggregate</label>
-                <select id="filterType" class="border rounded p-2">
+                <select id="filterType" class="border rounded p-2 w-full sm:w-auto">
                     <option value="monthly" selected>Monthly</option>
                     <option value="yearly">Yearly</option>
                 </select>
             </div>
 
             <!-- Monthly Picker (Initially Visible) -->
-            <div id="monthlyPicker">
+            <div id="monthlyPicker" class="w-full sm:w-auto">
                 <label class="block text-sm">Select Month</label>
-                <input type="month" id="monthlyFilter" class="border rounded p-2">
+                <input type="month" id="monthlyFilter" class="border rounded p-2 w-full sm:w-auto">
             </div>
 
             <!-- Yearly Picker (Hidden by Default) -->
-            <div id="yearlyPicker" style="display: none;">
+            <div id="yearlyPicker" class="w-full sm:w-auto" style="display: none;">
                 <label class="block text-sm">Select Year</label>
-                <input type="number" id="yearlyFilter" class="border rounded p-2" min="2000" max="2099" step="1">
+                <input type="number" id="yearlyFilter" class="border rounded p-2 w-full sm:w-auto" min="2000" max="2099" step="1">
             </div>
 
             <!-- Fetch Data Button -->
-            <button id="fetchData" class="bg-green-500 text-white p-2 rounded">Filter</button>
+            <button id="fetchData" class="bg-green-400 text-black p-2 rounded w-full sm:w-auto">Filter</button>
         </div>
 
 
         <div id="chartContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 mb-10">
-            <!-- 📊 Column Chart (Daily Trends in Selected Month) -->
             <div class="bg-white p-6 rounded shadow">
                 <h2 class="text-lg font-semibold mb-3">
-                    📊 <span id="pieTitle">Weekly Expenses</span>
+                    <i class="fas fa-chart-pie"></i> <span id="pieTitle">Weekly Expenses</span>
                 </h2>
                 <div id="pieChart"></div>
             </div>
 
-            <!-- 📊 Column Chart (Daily Trends in Selected Month) -->
             <div class="bg-white p-6 rounded shadow">
                 <h2 class="text-lg font-semibold mb-3">
-                    📊 <span id="barTitle">Weekly Expenses</span>
+                    <i class="fas fa-chart-bar"></i> <span id="barTitle">Weekly Expenses</span>
                 </h2>
                 <div id="barChart"></div>
             </div>
 
-            <!-- 📈 Line Chart (Yearly Trends) -->
             <div class="bg-white p-6 rounded shadow">
                 <h2 class="text-lg font-semibold mb-3">
-                    📈 <span id="lineTitle">Weekly Expense Trends</span>
+                    <i class="fas fa-chart-line"></i> <span id="lineTitle">Weekly Expense Trends</span>
                 </h2>
                 <div id="lineChart"></div>
             </div>
@@ -64,6 +61,14 @@
     <script>
         $(document).ready(function () {
             var barChart, lineChart, pieChart;
+            const categoryColors = [
+                "#4ade80",  // Food (Green)
+                "#60a5fa",  // Transport (Blue)
+                "#fb923c",  // Rent (Orange)
+                "#facc15",  // Utilities (Yellow)
+                "#f87171",  // Entertainment (Red)
+                "#9ca3af"   // Other (Gray)
+            ];
 
             // ✅ Load saved filters from localStorage (Use a common key)
             var savedFilters = JSON.parse(localStorage.getItem("expenseFilter"));
@@ -114,7 +119,7 @@
                 if (selectedType === "monthly") {
                     var selectedMonth = $("#monthlyFilter").val();
                     if (selectedMonth) {
-                        var monthName = new Date(selectedMonth + "-01").toLocaleString('default', { month: 'long' });
+                        var monthName = new Date(selectedMonth + "-01").toLocaleString('default', {month: 'long'});
                         var year = selectedMonth.split("-")[0];
                         $("#barTitle").text(`Weekly Expenses in ${monthName} ${year}`);
                         $("#lineTitle").text(`Monthly Expense Trends for ${monthName} ${year}`);
@@ -188,14 +193,14 @@
                         type: 'bar',
                         height: 350,
                         id: 'barChart',
-                        zoom: { enabled: false },
+                        zoom: {enabled: false},
                     },
                     series: [],
-                    xaxis: { categories: [], tickPlacement: 'on' },
-                    colors: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#FF9800', '#9C27B0'],
-                    plotOptions: { bar: { columnWidth: '55%', borderRadius: 5 } },
-                    dataLabels: { enabled: false },
-                    stroke: { show: true, width: 2, colors: ['transparent'] }
+                    xaxis: {categories: [], tickPlacement: 'on'},
+                    colors: categoryColors,
+                    plotOptions: {bar: {columnWidth: '55%', borderRadius: 5}},
+                    dataLabels: {enabled: false},
+                    stroke: {show: true, width: 2, colors: ['transparent']}
                 });
                 barChart.render();
 
@@ -204,22 +209,22 @@
                         type: 'line',
                         height: 350,
                         id: 'lineChart',
-                        zoom: { enabled: false },
+                        zoom: {enabled: false},
                     },
                     series: [],
-                    xaxis: { categories: [] },
-                    stroke: { curve: 'smooth', width: 3 },
-                    markers: { size: 5 },
-                    colors: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#FF9800', '#9C27B0'],
-                    dataLabels: { enabled: false }
+                    xaxis: {categories: []},
+                    stroke: {curve: 'smooth', width: 3},
+                    markers: {size: 5},
+                    colors: categoryColors,
+                    dataLabels: {enabled: false}
                 });
                 lineChart.render();
 
                 pieChart = new ApexCharts(document.querySelector("#pieChart"), {
-                    chart: { type: 'pie', height: 350, id: 'pieChart' },
+                    chart: {type: 'pie', height: 350, id: 'pieChart'},
                     series: [],
                     labels: [],
-                    colors: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#FF9800', '#9C27B0']
+                    colors: categoryColors
                 });
                 pieChart.render();
             }
@@ -252,7 +257,7 @@
             // 🥧 Fetch Data for Pie Chart
             function fetchPieChartData() {
                 let filters = JSON.parse(localStorage.getItem("expenseFilter")) || {};
-                let requestData = { type: filters.type || "monthly" };
+                let requestData = {type: filters.type || "monthly"};
 
                 if (requestData.type === "monthly") {
                     requestData.month = filters.month || new Date().toISOString().slice(0, 7);
@@ -289,7 +294,7 @@
                 }
 
                 pieChart.updateSeries(pieData);
-                pieChart.updateOptions({ labels: pieLabels });
+                pieChart.updateOptions({labels: pieLabels});
             }
 
 
@@ -306,10 +311,10 @@
 
                 if (barChart && lineChart) {
                     barChart.updateSeries(series);
-                    barChart.updateOptions({ xaxis: { categories: labels } });
+                    barChart.updateOptions({xaxis: {categories: labels}});
 
                     lineChart.updateSeries(series);
-                    lineChart.updateOptions({ xaxis: { categories: labels } });
+                    lineChart.updateOptions({xaxis: {categories: labels}});
                 } else {
                     console.warn("Charts not initialized yet!");
                 }
@@ -317,14 +322,13 @@
 
             // ✅ Load default data on page load based on saved filter
             if (savedFilters.type === "monthly") {
-                fetchChartData("{{ route('chart.data.monthly') }}", { month: savedFilters.month });
+                fetchChartData("{{ route('chart.data.monthly') }}", {month: savedFilters.month});
             } else {
-                fetchChartData("{{ route('chart.data.yearly') }}", { year: savedFilters.year });
+                fetchChartData("{{ route('chart.data.yearly') }}", {year: savedFilters.year});
             }
 
             fetchPieChartData()
         });
     </script>
-
 
 @endsection
