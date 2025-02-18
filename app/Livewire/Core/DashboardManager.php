@@ -22,6 +22,7 @@ class DashboardManager extends Component
         $monthlyTotal = Expense::where('user_id', $userId)
             ->whereMonth('date', Carbon::now()->month)
             ->sum('amount');
+        $currentMonth = Carbon::now()->format('F');
 
         // Get this year expenses
         $yearlyTotal = Expense::where('user_id', $userId)
@@ -45,6 +46,7 @@ class DashboardManager extends Component
         return view('livewire.core.dashboard-manager', compact(
             'totalExpenses',
             'monthlyTotal',
+            'currentMonth',
             'yearlyTotal',
             'topCategory',
             'topCategoryTotal',

@@ -7,7 +7,7 @@
         <div class="bg-white shadow rounded p-4 flex items-center gap-3">
             <i class="fas fa-calendar-alt text-gray-500 text-2xl"></i>
             <div>
-                <p class="text-sm text-gray-500">This Month</p>
+                <p class="text-sm text-gray-500">This Month ({{ $currentMonth }})</p>
                 <h2 class="text-xl font-bold">KES {{ number_format($monthlyTotal, 2) }}</h2>
             </div>
         </div>
