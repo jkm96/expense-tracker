@@ -1,7 +1,25 @@
-<footer id="footer" class="bg-black text-white p-4 md:px-0 px-2">
-    <div class="container mx-auto px-4">
-       Footer
+<footer id="footer" class="bg-black text-white p-2 md:px-0">
+    <nav class="text-center items-center text-sm">
+        <a href="{{ route('home') }}" class="text-gray-300 hover:text-white text-sm">Home</a> |
+        @auth
+            <a href="{{ route('user.dashboard') }}" class="text-gray-300 hover:text-white text-sm">Dashboard</a> |
+            <a href="{{ route('expense.manage') }}" class="text-gray-300 hover:text-white text-sm">Expenses</a>
+        @else
+            <a href="{{ route('login.user') }}" class="text-gray-300 hover:text-white text-sm">Login</a> |
+            <a href="{{ route('register.user') }}" class="text-gray-300 hover:text-white text-sm">Sign Up</a>
+        @endauth
+    </nav>
+
+    <hr class="border-t border-gray-700 mt-1 mb-1 md:w-1/3 mx-auto">
+
+    <!-- Copyright & Quick Links -->
+    <div class="text-center text-gray-400 text-sm">
+        © <span id="year"></span> Expense Tracker. All rights reserved.
     </div>
+
+    <script>
+        document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
 </footer>
 
 <script>

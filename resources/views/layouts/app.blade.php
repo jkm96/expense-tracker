@@ -26,13 +26,13 @@
           href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 </head>
-<body class="font-sans antialiased">
+<body class="font-sans antialiased flex flex-col min-h-screen">
 
 <!-- Navigation bar -->
 @include('navs.navbar')
 
 <!-- Main Content Section -->
-<main>
+<main class="flex-grow">
     @yield('content')
 </main>
 

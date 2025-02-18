@@ -43,7 +43,7 @@ class ExpenseManager extends Component
         }
 
         // Paginate first before grouping
-        $paginatedExpenses = $query->orderBy('date', 'desc')->paginate(10);
+        $paginatedExpenses = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->paginate(10);
 
         // Manually group expenses by Year - Month
         $expenses = $paginatedExpenses->getCollection()->groupBy(function ($expense) {
@@ -70,6 +70,7 @@ class ExpenseManager extends Component
         ];
 
         $this->validate($rules);
+        $defaultNote = $this->generateDefaultNote($this->category, $this->name);
 
         if ($this->expense_id) {
             // Update existing expense
@@ -80,7 +81,7 @@ class ExpenseManager extends Component
                     'amount' => $this->amount,
                     'date' => $this->date,
                     'category' => ExpenseCategory::tryFrom($this->category)?->value,
-                    'notes' => !empty($this->notes) ? $this->notes : "Payment for ". Str::title($this->name),
+                    'notes' => !empty($this->notes) ? $this->notes : $defaultNote,
                 ]);
 
                 session()->flash('success', 'Expense updated successfully!');
@@ -92,7 +93,7 @@ class ExpenseManager extends Component
                 'amount' => $this->amount,
                 'date' => $this->date,
                 'category' => $this->category,
-                'notes' => !empty($this->notes) ? $this->notes : "Payment for ". Str::title($this->name),
+                'notes' => !empty($this->notes) ? $this->notes : $defaultNote,
                 'user_id' => Auth::id(),
             ]);
 
@@ -100,6 +101,22 @@ class ExpenseManager extends Component
         }
 
         $this->resetFields();
+    }
+
+    private function generateDefaultNote(string $category, string $name): string
+    {
+        $formattedName = Str::title($name);
+
+        return match ($category) {
+            ExpenseCategory::FOOD->value => "Purchased food items: $formattedName",
+            ExpenseCategory::TRANSPORT->value => "Transport expense for: $formattedName",
+            ExpenseCategory::CLOTHING->value => "Bought clothing or accessories: $formattedName",
+            ExpenseCategory::UTILITIES->value => "Utility payment for: $formattedName",
+            ExpenseCategory::KNOWLEDGE->value => "Invested in learning materials: $formattedName",
+            ExpenseCategory::LIFESTYLE->value => "Personal purchase: $formattedName",
+            ExpenseCategory::OTHER->value => "Miscellaneous expense: $formattedName",
+            default => "Expense recorded for $formattedName",
+        };
     }
 
     public function editExpense($id)

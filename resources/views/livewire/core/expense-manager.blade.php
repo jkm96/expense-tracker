@@ -78,7 +78,8 @@
                         <div class="flex justify-between mb-1">
                             <div class="flex items-center gap-x-1">
                                 <!-- ✅ Category Color Circle -->
-                                <span class="w-3 h-3 rounded-full {{ get_category_color($expense->category->value) }}"></span>
+                                <span
+                                    class="w-3 h-3 rounded-full {{ get_category_color($expense->category->value) }}"></span>
                                 <h2 class="font-semibold">{{ $expense->name }}</h2>
                             </div>
                             <p class="text-gray-700 text-sm">{{ Carbon\Carbon::parse($expense->date)->format('jS M Y') }}</p>
@@ -87,8 +88,10 @@
                         <hr class="mt-1 mb-1 border-gray-50">
 
                         <div class="flex items-center">
-                            <p class="text-md text-gray-700 mt-1 mb-1 mr-1">{{ ucfirst($expense->category->value) }}</p>|
-                            <p class="text-md text-green-600 mt-1 mb-1 ml-1">KES {{ number_format($expense->amount, 2) }}</p>
+                            <p class="text-md text-gray-700 mt-1 mb-1 mr-1">{{ ucfirst($expense->category->value) }}</p>
+                            |
+                            <p class="text-md text-green-600 mt-1 mb-1 ml-1">
+                                KES {{ number_format($expense->amount, 2) }}</p>
                         </div>
 
                         <!-- Content -->
@@ -96,7 +99,9 @@
 
                         <!-- Actions -->
                         <div class="mt-2 text-sm flex justify-end">
-                            <button wire:click="editExpense({{ $expense->id }})" class="text-blue-500 hover:underline">Edit</button>
+                            <button wire:click="editExpense({{ $expense->id }})" class="text-blue-500 hover:underline">
+                                Edit
+                            </button>
 
                             <!-- Confirmation Modal -->
                             @if($showDeleteModal)
@@ -134,7 +139,9 @@
             </div>
 
             <!-- Horizontal line after each group -->
-            <hr class="my-4 border-gray-300">
+            @if (!$loop->last)
+                <hr class="my-4 border-gray-300">
+            @endif
 
         @empty
             <p>No expenses found</p>
