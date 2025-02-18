@@ -60,13 +60,14 @@
 
     <script>
         $(document).ready(function () {
-            var barChart, lineChart, pieChart;
+            let barChart, lineChart, pieChart;
             const categoryColors = [
                 "#4ade80",  // Food (Green)
                 "#60a5fa",  // Transport (Blue)
-                "#fb923c",  // Rent (Orange)
+                "#fb923c",  // Clothing (Orange)
                 "#facc15",  // Utilities (Yellow)
-                "#f87171",  // Entertainment (Red)
+                "#f87171",  // Knowledge (Red)
+                "#111827",   // Lifestyle (Black)
                 "#9ca3af"   // Other (Gray)
             ];
 
