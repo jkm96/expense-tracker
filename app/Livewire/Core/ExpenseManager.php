@@ -36,7 +36,15 @@ class ExpenseManager extends Component
 
     public function mount()
     {
+        $this->filter = 'all';
+        $this->page = 1;
         $this->categories = ExpenseCategory::cases();
+        $this->loadExpenses();
+    }
+
+    public function updatedFilter()
+    {
+        $this->page = 1; // Reset pagination on filter change
         $this->loadExpenses();
     }
 
@@ -45,7 +53,11 @@ class ExpenseManager extends Component
         $query = Expense::where('user_id', Auth::id());
 
         if ($this->filter !== 'all') {
-            $query->where('category', $this->filter);
+            $query->where('category', '=', ExpenseCategory::from($this->filter));
+        }
+        // Reset expenses on new filter to avoid persisting old records
+        if ($this->page === 1) {
+            $this->expenses = collect();
         }
 
         // Fetch paginated expenses
@@ -64,7 +76,12 @@ class ExpenseManager extends Component
 
         // Merge new expenses with existing ones
         foreach ($newExpenses as $month => $group) {
-            $this->expenses[$month] = $this->expenses->get($month, collect())->merge($group);
+            $existingGroup = $this->expenses->get($month, collect());
+
+            // Merge unique expenses by 'id'
+            $mergedGroup = $existingGroup->concat($group)->unique('id');
+
+            $this->expenses[$month] = $mergedGroup;
         }
 
         // Calculate totals
