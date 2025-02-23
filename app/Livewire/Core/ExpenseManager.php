@@ -15,6 +15,10 @@ use Livewire\WithPagination;
 class ExpenseManager extends Component
 {
     use WithPagination;
+    public $expenses = [];
+    public $totals = [];
+    public $page = 1;
+    public $hasMorePages = true;
 
     public $name, $amount, $date, $category, $notes, $expense_id;
     public $showForm = false;
@@ -24,17 +28,19 @@ class ExpenseManager extends Component
     public $showDeleteModal = false;
     public $expenseIdToDelete;
 
+    public function loadMore()
+    {
+        $this->page++;
+        $this->loadExpenses();
+    }
+
     public function mount()
     {
-        $this->categories = ExpenseCategory::cases(); // Store categories for dropdown
+        $this->categories = ExpenseCategory::cases();
+        $this->loadExpenses();
     }
 
     public function loadExpenses()
-    {
-        $this->render();
-    }
-
-    public function render()
     {
         $query = Expense::where('user_id', Auth::id());
 
@@ -42,20 +48,38 @@ class ExpenseManager extends Component
             $query->where('category', $this->filter);
         }
 
-        // Paginate first before grouping
-        $paginatedExpenses = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->paginate(10);
+        // Fetch paginated expenses
+        $paginatedExpenses = $query
+            ->orderBy('date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10, ['*'], 'page', $this->page);
 
-        // Manually group expenses by Year - Month
-        $expenses = $paginatedExpenses->getCollection()->groupBy(function ($expense) {
-            return Carbon::parse($expense->date)->format('Y - F'); // Example: "2024 - January"
+        // Group expenses by year-month
+        $newExpenses = $paginatedExpenses->getCollection()->groupBy(function ($expense) {
+            return Carbon::parse($expense->date)->format('Y - F');
         });
 
-        $totals = $expenses->map(fn($group) => $group->sum('amount'));
+        // Ensure $this->expenses is a collection
+        $this->expenses = collect($this->expenses);
 
+        // Merge new expenses with existing ones
+        foreach ($newExpenses as $month => $group) {
+            $this->expenses[$month] = $this->expenses->get($month, collect())->merge($group);
+        }
+
+        // Calculate totals
+        $this->totals = $this->expenses->map(fn($group) => $group->sum('amount'));
+
+        // Check if there are more pages
+        $this->hasMorePages = $paginatedExpenses->hasMorePages();
+    }
+
+    public function render()
+    {
         return view('livewire.core.expense-manager', [
-            'expenses' => $expenses,
-            'totals' => $totals,
-            'pagination' => $paginatedExpenses
+            'expenses' => $this->expenses,
+            'totals' => $this->totals,
+            'hasMorePages' => $this->hasMorePages,
         ]);
     }
 

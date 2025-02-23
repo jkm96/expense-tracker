@@ -1,7 +1,7 @@
 <div class="mx-auto mt-5">
 
     @if (session()->has('success'))
-        <div class="bg-green-100 text-green-700 p-2 rounded mb-2">
+        <div class="bg-green-500 text-white p-2 shadow-md rounded mb-2">
             {{ session('success') }}
         </div>
     @endif
@@ -14,35 +14,35 @@
 
     <!-- Expense Form (Modal Style) -->
     @if ($showForm)
-        <div class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-            <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+        <div class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+            <div class="bg-gray-700 p-6 rounded-lg shadow-lg w-96">
                 <h2 class="text-lg font-bold mb-4">{{ $expense_id ? 'Edit Expense' : 'Add Expense' }}</h2>
 
                 <form wire:submit.prevent="addExpense" class="space-y-3">
                     <input type="text" wire:model="name" placeholder="Expense Name"
-                           class="w-full p-2 border rounded focus:ring focus:ring-blue-300">
+                           class="w-full p-2 bg-gray-700 border rounded focus:ring focus:ring-blue-300">
                     <input type="number" wire:model="amount" placeholder="Amount"
-                           class="w-full p-2 border rounded focus:ring focus:ring-blue-300">
+                           class="w-full p-2 bg-gray-700 border rounded focus:ring focus:ring-blue-300">
                     <input type="date" wire:model="date"
-                           class="w-full p-2 border rounded focus:ring focus:ring-blue-300">
+                           class="w-full p-2 bg-gray-700 border rounded focus:ring focus:ring-blue-300">
                     <select wire:model="category"
-                            class="w-full p-2 border rounded focus:ring focus:ring-blue-300">
+                            class="w-full p-2 bg-gray-700 border rounded focus:ring focus:ring-blue-300">
                         <option value="">Select Category</option>
                         @foreach($categories as $category)
                             <option value="{{ $category->value }}">{{ ucfirst($category->value) }}</option>
                         @endforeach
                     </select>
                     <textarea wire:model="notes" placeholder="Notes"
-                              class="w-full p-2 border rounded focus:ring focus:ring-blue-300"></textarea>
+                              class="w-full p-2 bg-gray-700 border rounded focus:ring focus:ring-blue-300"></textarea>
 
                     <div class="flex justify-between">
                         <button type="button" wire:click="resetFields"
-                                class="bg-red-600 text-white px-4 py-2 rounded shadow hover:bg-red-500 transition">
+                                class="bg-red-600 text-white px-2 py-1 rounded shadow hover:bg-red-500 transition">
                             Cancel
                         </button>
 
                         <button type="submit"
-                                class="bg-green-500 text-white px-4 py-2 rounded shadow hover:bg-green-600 transition">
+                                class="bg-green-500 text-white px-2 py-1 rounded shadow hover:bg-green-600 transition">
                             {{ $expense_id ? 'Update' : 'Add' }}
                         </button>
                     </div>
@@ -56,7 +56,7 @@
             <h2 class="text-lg font-bold mb-2">Current Expenses</h2>
             <div class="flex items-center">
                 <select wire:model.live="filter" wire:change="loadExpenses"
-                        class="bg-gray-100 border rounded-full px-2 py-1">
+                        class="bg-gray-800 border rounded-full px-2 py-1">
                     <option value="all">All</option>
                     @foreach($categories as $category)
                         <option value="{{ $category->value }}">{{ ucfirst($category->value) }}</option>
@@ -74,7 +74,7 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 @foreach($groupedExpenses as $expense)
-                    <div class="border p-2 mb-2 rounded bg-gray-200">
+                    <div class="p-2 mb-2 shadow-md rounded bg-gray-700">
                         <div class="flex justify-between mb-1">
                             <div class="flex items-center gap-x-1">
                                 <!-- ✅ Category Color Circle -->
@@ -82,13 +82,13 @@
                                     class="w-3 h-3 rounded-full {{ get_category_color($expense->category->value) }}"></span>
                                 <h2 class="font-semibold">{{ $expense->name }}</h2>
                             </div>
-                            <p class="text-gray-700 text-sm">{{ Carbon\Carbon::parse($expense->date)->format('jS M Y') }}</p>
+                            <p class="text-gray-300 text-sm">{{ Carbon\Carbon::parse($expense->date)->format('jS M Y') }}</p>
                         </div>
 
-                        <hr class="mt-1 mb-1 border-gray-50">
+                        <hr class="mt-1 mb-1 border-gray-600">
 
                         <div class="flex items-center">
-                            <p class="text-md text-gray-700 mt-1 mb-1 mr-1">{{ ucfirst($expense->category->value) }}</p>
+                            <p class="text-md text-gray-200 mt-1 mb-1 mr-1">{{ ucfirst($expense->category->value) }}</p>
                             |
                             <p class="text-md text-green-600 mt-1 mb-1 ml-1">
                                 KES {{ number_format($expense->amount, 2) }}</p>
@@ -106,14 +106,14 @@
                             <!-- Confirmation Modal -->
                             @if($showDeleteModal)
                                 <div x-data="{ open: @entangle('showDeleteModal') }" x-show="open"
-                                     class="fixed inset-0 z-50 flex items-center justify-center  bg-opacity-60 backdrop-blur-sm">
+                                     class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
 
                                     <!-- Modal Content -->
-                                    <div class="bg-white rounded-lg shadow-lg w-96 p-6">
-                                        <h2 class="text-lg font-bold text-gray-800">Delete Expense</h2>
-                                        <p class="mt-4 text-gray-600">Are you sure you want to delete this expense?
+                                    <div class="bg-gray-700 rounded-lg shadow-lg w-96 p-6">
+                                        <h2 class="text-lg font-bold">Delete Expense</h2>
+                                        <p class="mt-4">Are you sure you want to delete this expense?
                                             This action cannot be undone.</p>
-                                        <div class="mt-6 flex justify-end space-x-4">
+                                        <div class="mt-6 flex justify-between space-x-4">
                                             <button @click="open = false"
                                                     class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded">
                                                 Cancel
@@ -140,7 +140,7 @@
 
             <!-- Horizontal line after each group -->
             @if (!$loop->last)
-                <hr class="my-4 border-gray-300">
+                <hr class="my-4 border-gray-500">
             @endif
 
         @empty
@@ -150,7 +150,9 @@
     </div>
 
     <!-- Pagination Links -->
-    <div class="mt-4">
-        {{ $pagination->links() }}
+    <div class="mt-4 text-center">
+        @if($hasMorePages)
+            <button wire:click="loadMore" class="px-2 py-1.5 bg-green-400 text-white rounded">Load More</button>
+        @endif
     </div>
 </div>

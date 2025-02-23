@@ -1,4 +1,4 @@
-<footer id="footer" class="bg-black text-white p-2 md:px-0">
+<footer id="footer" class="bg-gray-900 text-white p-2 md:px-0">
     <nav class="text-center items-center text-sm">
         <a href="{{ route('home') }}" class="text-gray-300 hover:text-white text-sm">Home</a> |
         @auth

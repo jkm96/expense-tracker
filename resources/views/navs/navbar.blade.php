@@ -1,4 +1,4 @@
-<nav class="bg-black text-white p-4 md:px-0 px-2">
+<nav class="bg-gray-900 text-white p-4 md:px-0 px-2">
     <div class="container mx-auto px-4 flex justify-between items-center">
         <!-- Left side -->
         @auth

@@ -93,11 +93,6 @@ Access the app at: `http://localhost:8000`
 - **Monthly View:** Select a month to view weekly expenses.
 - **Yearly View:** Select a year for a comprehensive breakdown of monthly expenses.
 
-## License
-This project is licensed under the **Personal Use License**:
-- **Allowed:** Personal use and modification
-- **Prohibited:** Commercial use or redistribution without prior authorization
-
 ## Contribution Guidelines
 1. Fork the repository and create a feature branch.
 2. Commit changes with clear and concise messages.

@@ -15,6 +15,7 @@
     <!--- jquery section---->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+    <!--- font-awesome section---->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <!--- apex charts section---->
@@ -26,7 +27,7 @@
           href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
 </head>
-<body class="font-sans antialiased flex flex-col min-h-screen">
+<body class="font-sans antialiased flex flex-col min-h-screen text-white bg-gray-800">
 
 <!-- Navigation bar -->
 @include('navs.navbar')

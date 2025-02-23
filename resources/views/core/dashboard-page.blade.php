@@ -6,11 +6,11 @@
         <livewire:core.dashboard-manager/>
 
         <!-- 🔹 Filters -->
-        <div class="bg-gray-100 p-4 rounded shadow mt-5 flex flex-wrap gap-4 items-end">
+        <div class="bg-gray-700 p-4 rounded shadow mt-5 flex flex-wrap gap-4 items-end">
             <!-- View Mode Selection -->
             <div class="w-full sm:w-auto">
                 <label class="block text-sm">Aggregate</label>
-                <select id="filterType" class="border rounded p-2 w-full sm:w-auto">
+                <select id="filterType" class="bg-gray-800 border rounded p-1.5 w-full sm:w-auto">
                     <option value="monthly" selected>Monthly</option>
                     <option value="yearly">Yearly</option>
                 </select>
@@ -19,37 +19,36 @@
             <!-- Monthly Picker (Initially Visible) -->
             <div id="monthlyPicker" class="w-full sm:w-auto">
                 <label class="block text-sm">Select Month</label>
-                <input type="month" id="monthlyFilter" class="border rounded p-2 w-full sm:w-auto">
+                <input type="month" id="monthlyFilter" class="bg-gray-800 border rounded p-1 w-full sm:w-auto">
             </div>
 
             <!-- Yearly Picker (Hidden by Default) -->
             <div id="yearlyPicker" class="w-full sm:w-auto" style="display: none;">
                 <label class="block text-sm">Select Year</label>
-                <input type="number" id="yearlyFilter" class="border rounded p-2 w-full sm:w-auto" min="2000" max="2099" step="1">
+                <input type="number" id="yearlyFilter" class="bg-gray-800 border rounded p-1 w-full sm:w-auto" min="2000" max="2099" step="1">
             </div>
 
             <!-- Fetch Data Button -->
-            <button id="fetchData" class="bg-green-400 text-black p-2 rounded w-full sm:w-auto">Filter</button>
+            <button id="fetchData" class="bg-green-400 text-black p-1.5 rounded w-full sm:w-auto">Filter</button>
         </div>
 
-
         <div id="chartContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 mb-10">
-            <div class="bg-white p-6 rounded shadow">
-                <h2 class="text-lg font-semibold mb-3">
+            <div class="bg-gray-700 p-6 rounded shadow">
+                <h2 class="text-md font-semibold mb-3">
                     <i class="fas fa-chart-pie"></i> <span id="pieTitle">Weekly Expenses</span>
                 </h2>
                 <div id="pieChart"></div>
             </div>
 
-            <div class="bg-white p-6 rounded shadow">
-                <h2 class="text-lg font-semibold mb-3">
+            <div class="bg-gray-700 p-6 rounded shadow">
+                <h2 class="text-md font-semibold mb-3">
                     <i class="fas fa-chart-bar"></i> <span id="barTitle">Weekly Expenses</span>
                 </h2>
                 <div id="barChart"></div>
             </div>
 
-            <div class="bg-white p-6 rounded shadow">
-                <h2 class="text-lg font-semibold mb-3">
+            <div class="bg-gray-700 p-6 rounded shadow">
+                <h2 class="text-md font-semibold mb-3">
                     <i class="fas fa-chart-line"></i> <span id="lineTitle">Weekly Expense Trends</span>
                 </h2>
                 <div id="lineChart"></div>
@@ -197,11 +196,34 @@
                         zoom: {enabled: false},
                     },
                     series: [],
-                    xaxis: {categories: [], tickPlacement: 'on'},
+                    xaxis: {
+                        categories: [],
+                        tickPlacement: 'on',
+                        labels: {
+                            style: {
+                                colors: '#FFFFFF'
+                            }
+                        }
+                    },
+                    yaxis: {
+                        labels: {
+                            style: {
+                                colors: '#FFFFFF'
+                            }
+                        }
+                    },
                     colors: categoryColors,
                     plotOptions: {bar: {columnWidth: '55%', borderRadius: 5}},
                     dataLabels: {enabled: false},
-                    stroke: {show: true, width: 2, colors: ['transparent']}
+                    stroke: {show: true, width: 2, colors: ['transparent']},
+                    legend: {
+                        labels: {
+                            colors: '#FFFFFF'
+                        }
+                    },
+                    tooltip: {
+                        theme: 'dark'
+                    }
                 });
                 barChart.render();
 
@@ -213,11 +235,33 @@
                         zoom: {enabled: false},
                     },
                     series: [],
-                    xaxis: {categories: []},
+                    xaxis: {
+                        categories: [],
+                        labels: {
+                            style: {
+                                colors: '#FFFFFF'
+                            }
+                        }
+                    },
+                    yaxis: {
+                        labels: {
+                            style: {
+                                colors: '#FFFFFF'
+                            }
+                        }
+                    },
                     stroke: {curve: 'smooth', width: 3},
                     markers: {size: 5},
                     colors: categoryColors,
-                    dataLabels: {enabled: false}
+                    dataLabels: {enabled: false},
+                    legend: {
+                        labels: {
+                            colors: '#FFFFFF'
+                        }
+                    },
+                    tooltip: {
+                        theme: 'dark'
+                    }
                 });
                 lineChart.render();
 
@@ -225,7 +269,12 @@
                     chart: {type: 'pie', height: 350, id: 'pieChart'},
                     series: [],
                     labels: [],
-                    colors: categoryColors
+                    colors: categoryColors,
+                    legend: {
+                        labels: {
+                            colors: '#FFFFFF'
+                        }
+                    }
                 });
                 pieChart.render();
             }

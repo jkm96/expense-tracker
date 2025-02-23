@@ -8,13 +8,13 @@
             <p class="mt-2">A verification email has been sent to your registered email address. Please check your inbox and
                 verify your email to activate your account.</p>
 
-            <a href="{{ route('login.user') }}" class="text-black">
+            <a href="{{ route('login.user') }}">
                 <button class="mt-4 px-4 py-2 bg-blue-500 text-white rounded">
                     Proceed to Login
                 </button>
             </a>
 
-            <p class="mt-4 text-sm text-gray-700">
+            <p class="mt-4 text-sm">
                 Didn’t receive the email?
                 <a href="{{ route('resend.verification') }}" class="text-blue-500 underline">
                     Resend Verification Email
@@ -23,42 +23,42 @@
         </div>
 
     @else
-        <h2 class="text-3xl font-semibold text-gray-800 mb-6">Create An Account</h2>
+        <h2 class="text-2xl font-semibold mb-6">Create An Account</h2>
 
         <form wire:submit.prevent="registerUser">
 
             <!-- Username Input -->
             <div class="mb-4">
-                <label for="username" class="block text-sm font-semibold text-gray-700 text-left">Username</label>
+                <label for="username" class="block text-sm font-semibold  text-left">Username</label>
                 <input type="text" id="username" wire:model="username"
-                       class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required/>
+                       class="mt-1 block w-full p-2 bg-gray-800 border border-gray-300 rounded-md" required/>
                 @error('username') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
             </div>
 
             <div class="mb-4">
-                <label for="email" class="block text-sm font-semibold text-gray-700 text-left">Email</label>
+                <label for="email" class="block text-sm font-semibold  text-left">Email</label>
                 <input type="email" id="email" wire:model="email"
-                       class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required/>
+                       class="mt-1 block w-full p-2 bg-gray-800 border border-gray-300 rounded-md" required/>
                 @error('email') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
             </div>
 
             <div class="mb-4">
-                <label for="password" class="block text-sm font-semibold text-gray-700 text-left">Password</label>
+                <label for="password" class="block text-sm font-semibold  text-left">Password</label>
                 <input type="password" id="password" wire:model="password"
-                       class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required/>
+                       class="mt-1 block w-full p-2 bg-gray-800 border border-gray-300 rounded-md" required/>
                 @error('password') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
             </div>
 
             <div class="mb-4">
-                <label for="password_confirmation" class="block text-sm font-semibold text-gray-700 text-left">Confirm
+                <label for="password_confirmation" class="block text-sm font-semibold  text-left">Confirm
                     Password</label>
                 <input type="password" id="password_confirmation" wire:model="password_confirmation"
-                       class="mt-1 block w-full p-2 border border-gray-300 rounded-md" required/>
+                       class="mt-1 block w-full p-2 bg-gray-800 border border-gray-300 rounded-md" required/>
                 @error('password_confirmation') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
             </div>
 
             <div class="mt-6 text-center">
-                <button type="submit" class="bg-green-400 text-black px-6 py-3 rounded-md">Create Account
+                <button type="submit" class="bg-green-400 text-black px-2 py-1.5 rounded-md">Create Account
                     <div wire:loading>
                         <svg class="animate-spin h-5 w-5 text-white mx-auto">...</svg>
                     </div>
@@ -68,7 +68,7 @@
 
         <!-- Redirect to Login Section -->
         <div class="mt-4 text-center">
-            <p class="text-sm text-gray-600">
+            <p class="text-sm">
                 Already have an account?
                 <a class="text-green-500 font-semibold hover:underline" href={{ route('login.user') }} >
                     Login here

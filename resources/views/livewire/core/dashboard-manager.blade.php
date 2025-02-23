@@ -4,19 +4,19 @@
     <div class="md:col-span-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
         <!-- 📅 This Month -->
-        <div class="bg-white shadow rounded p-4 flex items-center gap-3">
-            <i class="fas fa-calendar-alt text-gray-500 text-2xl"></i>
+        <div class="bg-gray-700 shadow rounded p-4 flex items-center gap-3">
+            <i class="fas fa-calendar-alt text-orange-500 text-2xl"></i>
             <div>
-                <p class="text-sm text-gray-500">This Month ({{ $currentMonth }})</p>
+                <p class="text-sm text-gray-400">This Month ({{ $currentMonth }})</p>
                 <h2 class="text-xl font-bold">KES {{ number_format($monthlyTotal, 2) }}</h2>
             </div>
         </div>
 
         <!-- 🔝 Top Category -->
-        <div class="bg-white shadow rounded p-4 flex items-center gap-3">
+        <div class="bg-gray-700 shadow rounded p-4 flex items-center gap-3">
             <i class="fas fa-chart-pie text-blue-500 text-2xl"></i>
             <div>
-                <p class="text-sm text-gray-500">Top Category</p>
+                <p class="text-sm text-gray-400">Top Category</p>
                 <h2 class="text-xl font-bold">
                     @if($topCategory != null)
                         {{ ucfirst($topCategory->value) }} -
@@ -29,23 +29,22 @@
         </div>
 
         <!-- 📆 This Year -->
-        <div class="bg-white shadow rounded p-4 flex items-center gap-3">
+        <div class="bg-gray-700 shadow rounded p-4 flex items-center gap-3">
             <i class="fas fa-calendar text-green-500 text-2xl"></i>
             <div>
-                <p class="text-sm text-gray-500">This Year</p>
+                <p class="text-sm text-gray-400">This Year</p>
                 <h2 class="text-xl font-bold">KES {{ number_format($yearlyTotal, 2) }}</h2>
             </div>
         </div>
 
         <!-- 💰 Total Expenses -->
-        <div class="bg-white shadow rounded p-4 flex items-center gap-3">
+        <div class="bg-gray-700 shadow rounded p-4 flex items-center gap-3">
             <i class="fas fa-wallet text-red-500 text-2xl"></i>
             <div>
-                <p class="text-sm text-gray-500">Total Expenses</p>
+                <p class="text-sm text-gray-400">Total Expenses</p>
                 <h2 class="text-xl font-bold">KES {{ number_format($totalExpenses, 2) }}</h2>
             </div>
         </div>
-
     </div>
 
 
