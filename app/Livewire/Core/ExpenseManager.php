@@ -36,6 +36,7 @@ class ExpenseManager extends Component
 
     public function mount()
     {
+        $this->date = Carbon::now()->format('Y-m-d');
         $this->filter = 'all';
         $this->page = 1;
         $this->categories = ExpenseCategory::cases();
@@ -142,6 +143,7 @@ class ExpenseManager extends Component
         }
 
         $this->resetFields();
+        $this->loadExpenses();
     }
 
     private function generateDefaultNote(string $category, string $name): string
@@ -198,5 +200,6 @@ class ExpenseManager extends Component
     public function resetFields()
     {
         $this->reset(['name', 'amount', 'date', 'category', 'notes', 'expense_id', 'showForm','filter']);
+        $this->date = Carbon::now()->format('Y-m-d');
     }
 }
