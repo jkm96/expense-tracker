@@ -35,10 +35,33 @@ class UserNotifications extends Component
         $this->unreadCount = $user->unreadNotifications()->count();
     }
 
+    public function markAsRead($notificationId)
+    {
+        $notification = Auth::user()->notifications()->find($notificationId);
+
+        if ($notification && !$notification->read_at) {
+            $notification->markAsRead();
+            $this->loadNotifications();
+        }
+    }
+
     public function markAllAsRead()
     {
         Auth::user()->unreadNotifications->markAsRead();
-        $this->loadNotifications(); // Refresh the notifications
+        $this->unreadCount = 0;
+        $this->loadNotifications();
+    }
+
+    public function deleteNotification($notificationId)
+    {
+        Auth::user()->notifications()->where('id', $notificationId)->delete();
+        $this->emit('notificationUpdated');
+    }
+
+    public function deleteAllNotifications()
+    {
+        Auth::user()->notifications()->delete();
+        $this->emit('notificationUpdated');
     }
 
     public function render()
