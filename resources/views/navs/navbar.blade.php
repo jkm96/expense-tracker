@@ -14,6 +14,10 @@
         <!-- Right side -->
         <div class="flex items-center gap-3">
             @auth
+                <!-- Notification Dropdown -->
+                <livewire:core.user-notifications />
+
+                <!-- User profile -->
                 <div x-data="{ open: false }" class="relative">
                     <!-- Profile Button -->
                     <button @click="open = !open" class="flex items-center space-x-2">

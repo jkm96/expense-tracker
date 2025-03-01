@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -24,6 +25,15 @@ class User extends Authenticatable
         'is_email_verified',
         'email_verified_at',
     ];
+
+    /**
+     * Get expenses belonging to the user
+     * @return HasMany
+     */
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(Expense::class);
+    }
 
     /**
      * The attributes that should be hidden for serialization.

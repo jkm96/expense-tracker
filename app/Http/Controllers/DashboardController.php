@@ -7,7 +7,6 @@ use App\Models\Expense;
 use App\Utils\Enums\ExpenseCategory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class DashboardController extends Controller

@@ -2,12 +2,15 @@
 
 namespace App\Console\Commands;
 
+use App\Events\ExpenseReminderEvent;
 use App\Models\User;
+use App\Notifications\ExpenseReminderNotification;
+use App\Utils\Enums\NotificationType;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
-class NotifyMissingExpenses extends Command
+class ExpenseReminderCommand extends Command
 {
     /**
      * The name and signature of the console command.
@@ -28,7 +31,9 @@ class NotifyMissingExpenses extends Command
      */
     public function handle()
     {
-        $threshold = Carbon::now()->subDays(3); // Adjust the days as needed
+        Log::info('Started expense check!');
+
+        $threshold = Carbon::now()->subDays(1); // Adjust the days as needed
 
         $users = User::whereDoesntHave('expenses', function ($query) use ($threshold) {
             $query->where('created_at', '>=', $threshold);
@@ -36,7 +41,13 @@ class NotifyMissingExpenses extends Command
 
         foreach ($users as $user) {
             $message = "Hello {$user->name}, do not forget to log your expenses!";
-            event(new MissingExpenseNotification($user, $message));
+
+            // Send and save the notification
+            $user->notify(new ExpenseReminderNotification($message, NotificationType::REMINDER));
+
+            //send realtime event
+            event(new ExpenseReminderEvent($user->id, $message,NotificationType::REMINDER));
+
             Log::info("Notification sent to: {$user->email}");
         }
 
