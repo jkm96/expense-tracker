@@ -2,13 +2,15 @@
 
 namespace App\Console\Commands;
 
-use App\Events\ExpenseNotificationEvent;
+use App\Events\ExpenseReminderEvent;
 use App\Models\User;
+use App\Notifications\ExpenseReminderNotification;
+use App\Utils\Enums\NotificationType;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
-class NotifyMissingExpensesCommand extends Command
+class ExpenseReminderCommand extends Command
 {
     /**
      * The name and signature of the console command.
@@ -39,7 +41,13 @@ class NotifyMissingExpensesCommand extends Command
 
         foreach ($users as $user) {
             $message = "Hello {$user->name}, do not forget to log your expenses!";
-            event(new ExpenseNotificationEvent($user->id, $message));
+
+            // Send and save the notification
+            $user->notify(new ExpenseReminderNotification($message, NotificationType::REMINDER));
+
+            //send realtime event
+            event(new ExpenseReminderEvent($user->id, $message,NotificationType::REMINDER));
+
             Log::info("Notification sent to: {$user->email}");
         }
 

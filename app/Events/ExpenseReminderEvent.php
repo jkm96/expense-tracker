@@ -2,31 +2,31 @@
 
 namespace App\Events;
 
+use App\Utils\Enums\NotificationType;
+use App\Utils\Helpers\DateHelper;
 use Carbon\Carbon;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 
-class ExpenseNotificationEvent implements ShouldBroadcast
+class ExpenseReminderEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $userId;
     public $message;
+    public NotificationType $type;
 
     /**
      * Create a new event instance.
      */
-    public function __construct($userId, $message)
+    public function __construct($userId, $message, NotificationType $type = NotificationType::REMINDER)
     {
         $this->userId = $userId;
         $this->message = $message;
-        Log::info("Dispatching ExpenseNotificationEvent for user: {$userId}");
+        $this->type = $type;
     }
 
     /**
@@ -42,7 +42,8 @@ class ExpenseNotificationEvent implements ShouldBroadcast
         return [
             'userId' => $this->userId,
             'message' => $this->message,
-            'timestamp' => Carbon::now()->format('jS F Y h:iA'),
+            'type' => $this->type->value,
+            'timestamp' => Carbon::now()->setTimezone(config('app.timezone')),
         ];
     }
 
@@ -51,6 +52,6 @@ class ExpenseNotificationEvent implements ShouldBroadcast
      */
     public function broadcastAs(): string
     {
-        return 'expense.notification';
+        return 'expense.reminder';
     }
 }

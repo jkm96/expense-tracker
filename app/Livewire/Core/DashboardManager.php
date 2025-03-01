@@ -3,11 +3,9 @@
 namespace App\Livewire\Core;
 
 use App\Models\Expense;
-use App\Utils\Enums\ExpenseCategory;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
-use Livewire\WithPagination;
 
 class DashboardManager extends Component
 {
