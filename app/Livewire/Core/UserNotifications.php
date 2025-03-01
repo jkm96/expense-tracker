@@ -66,7 +66,7 @@ class UserNotifications extends Component
 
     public function render()
     {
-        $notifications = Auth::user()->notifications()->latest()->paginate(20)->through(function ($notification) {
+        $notifications = Auth::user()->notifications()->latest()->paginate(10)->through(function ($notification) {
             $notification->type = NotificationType::tryFrom($notification->data['type']) ?? NotificationType::REMINDER;
             $notification->formattedTimestamp = DateHelper::formatTimestamp($notification->created_at);
 

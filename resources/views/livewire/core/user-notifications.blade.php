@@ -67,7 +67,7 @@
                 <p class="px-4 py-6 text-gray-600 text-center">No new notifications.</p>
             @endforelse
 
-            @if(count($notifications) > 20)
+            @if(count($notifications) >= 10)
                 <div class="flex items-center justify-between px-4 py-2 border-t dark:border-gray-700">
                     <span class="text-sm text-gray-600 dark:text-gray-400">
                         {{ $notifications->firstItem() }}-{{ $notifications->lastItem() }} of {{ $notifications->total() }}

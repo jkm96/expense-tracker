@@ -26,6 +26,11 @@ The **Expense Tracker** is a simple web application to track and categorize dail
 - Dynamic charts: Pie, Bar, and Line
 - Monthly and yearly summaries
 
+### Real-Time Notifications (New Feature!):
+- View in app notifications from various actions.
+- Manage notifications - Mark one/all as read, delete one/all.
+- Notifications are displayed in the UI with a dynamic counter.
+
 ## Setup & Installation
 
 ### Prerequisites
@@ -34,6 +39,9 @@ Ensure you have the following installed:
 - Composer
 - MySQL
 - Node.js (for frontend assets)
+- Laravel Livewire (For frontend components)
+- Alpine Js
+- Laravel Reverb
 
 ### Installation Steps
 
@@ -67,6 +75,10 @@ DB_PORT=3306
 DB_DATABASE=expense_tracker
 DB_USERNAME=root
 DB_PASSWORD=your_password
+
+BROADCAST_DRIVER=reverb
+REVERB_HOST=127.0.0.1
+REVERB_PORT=6001
 ```
 
 5. Run database migrations:
@@ -75,7 +87,12 @@ DB_PASSWORD=your_password
 php artisan migrate
 ```
 
-6. Start the development servers:
+6. Run Laravel Reverb for real-time notifications:
+```bash
+php artisan reverb:start
+```
+
+7. Start the development servers:
 
 ```bash
 php artisan serve
