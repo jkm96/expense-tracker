@@ -6,33 +6,34 @@ use App\Utils\Enums\NotificationType;
 use App\Utils\Helpers\DateHelper;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class UserNotifications extends Component
 {
-    public $notifications;
+    use WithPagination;
+    protected $queryString = [];
     public $unreadCount = 0;
 
-    protected $listeners = ['notificationReceived' => 'loadNotifications'];
+    protected $listeners = ['notificationReceived' => 'loadUnreadCount'];
 
     public function mount()
     {
-        $this->loadNotifications();
+        $this->loadUnreadCount();
     }
 
-    public function loadNotifications()
+    public function loadUnreadCount()
     {
-        $user = Auth::user();
+        $this->unreadCount = Auth::user()->unreadNotifications()->count();
+    }
 
-        // Get the latest 5 notifications
-        $this->notifications = $user->notifications()->latest()->take(15)->get()->map(function ($notification) {
-            $notification->type = NotificationType::tryFrom($notification->data['type']) ?? NotificationType::REMINDER;
-            $notification->formattedTimestamp = DateHelper::formatTimestamp($notification->created_at);
+    public function goToPreviousPage()
+    {
+        $this->previousPage();
+    }
 
-            return $notification;
-        });
-
-        // Count unread notifications
-        $this->unreadCount = $user->unreadNotifications()->count();
+    public function goToNextPage()
+    {
+        $this->nextPage();
     }
 
     public function markAsRead($notificationId)
@@ -41,31 +42,39 @@ class UserNotifications extends Component
 
         if ($notification && !$notification->read_at) {
             $notification->markAsRead();
-            $this->loadNotifications();
+            $this->loadUnreadCount();
         }
     }
 
     public function markAllAsRead()
     {
         Auth::user()->unreadNotifications->markAsRead();
-        $this->unreadCount = 0;
-        $this->loadNotifications();
+        $this->loadUnreadCount();
     }
 
     public function deleteNotification($notificationId)
     {
         Auth::user()->notifications()->where('id', $notificationId)->delete();
-        $this->emit('notificationUpdated');
+        $this->loadUnreadCount();
     }
 
     public function deleteAllNotifications()
     {
         Auth::user()->notifications()->delete();
-        $this->emit('notificationUpdated');
+        $this->loadUnreadCount();
     }
 
     public function render()
     {
-        return view('livewire.core.user-notifications');
+        $notifications = Auth::user()->notifications()->latest()->paginate(20)->through(function ($notification) {
+            $notification->type = NotificationType::tryFrom($notification->data['type']) ?? NotificationType::REMINDER;
+            $notification->formattedTimestamp = DateHelper::formatTimestamp($notification->created_at);
+
+            return $notification;
+        });
+
+        return view('livewire.core.user-notifications', [
+            'notifications' => $notifications,
+        ]);
     }
 }

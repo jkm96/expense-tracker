@@ -1,7 +1,8 @@
 <div class="relative" x-data="{ open: false }">
     <!-- Notification Bell -->
     <button @click="open = true" class="relative">
-        <svg class="w-6 h-6 text-gray-300 hover:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg class="w-6 h-6 text-gray-300 hover:text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+             viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405C18.403 14.21 18 13.105 18 12V8c0-3.866-3.134-7-7-7S4 4.134 4
             8v4c0 1.105-.403 2.21-1.595 3.595L1 17h5m8 4a3 3 0 01-6 0"></path>
         </svg>
@@ -43,19 +44,56 @@
 
                     <div class="flex items-center space-x-2">
                         <i class="fas fa-thumbtack text-sm {{ $notification->type->badgeColor() }}"></i>
-                        <span class="text-sm {{ $notification->unread() ? 'font-bold' : '' }}">{{ $notification->data['message'] }}</span>
+                        <span
+                            class="text-sm {{ $notification->unread() ? 'font-bold' : '' }}">{{ $notification->data['message'] }}</span>
                     </div>
 
                     <div class="flex items-center justify-between mt-1 text-xs">
-                        <small class="font-semibold {{ $notification->type->badgeColor() }}">
-                            {{ ucfirst($notification->type->value) }}
-                        </small>
+                        <div>
+                            <small class="font-semibold {{ $notification->type->badgeColor() }}">
+                                {{ ucfirst($notification->type->value) }}
+                            </small>
+                            <small>
+                                <button wire:click="deleteNotification('{{ $notification->id }}')"
+                                        class="text-red-500 hover:underline ml-1">
+                                    Delete
+                                </button>
+                            </small>
+                        </div>
                         <small class="text-gray-400">{{ $notification->formattedTimestamp }}</small>
                     </div>
                 </div>
             @empty
                 <p class="px-4 py-6 text-gray-600 text-center">No new notifications.</p>
             @endforelse
+
+            @if(count($notifications) > 20)
+                <div class="flex items-center justify-between px-4 py-2 border-t dark:border-gray-700">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">
+                        {{ $notifications->firstItem() }}-{{ $notifications->lastItem() }} of {{ $notifications->total() }}
+                    </span>
+
+                    <div class="flex items-center space-x-4">
+                        @if($notifications->onFirstPage())
+                            <span class="text-gray-400 cursor-not-allowed">Prev</span>
+                        @else
+                            <button @click="$wire.goToPreviousPage()" x-on:click.stop
+                                    class="text-blue-500 hover:underline">
+                                Prev
+                            </button>
+                        @endif
+
+                        @if($notifications->hasMorePages())
+                            <button @click="$wire.goToNextPage()" x-on:click.stop class="text-blue-500 hover:underline">
+                                Next
+                            </button>
+                        @else
+                            <span class="text-gray-400 cursor-not-allowed">Next</span>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
         </div>
 
         <div class="border-t dark:border-gray-700 p-4 flex justify-between">
