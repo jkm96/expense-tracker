@@ -2,6 +2,9 @@
 
 namespace App\Livewire\Auth;
 
+use App\Notifications\ExpenseReminderNotification;
+use App\Utils\Enums\NotificationType;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -25,6 +28,9 @@ class LoginUser extends Component
         if (Auth::attempt($credentials)) {
             session()->regenerate();
             session()->flash('success', 'Welcome, '.$this->identifier);
+            $timestamp = Carbon::now()->setTimezone(config('app.timezone'))->toDayDateTimeString();
+            Auth::user()->notify(new ExpenseReminderNotification("Logged in successfully on: $timestamp", NotificationType::SYSTEM));
+
             return redirect()->route('user.dashboard'); // Adjust to your desired route
         } else {
             $this->addError('identifier', 'Invalid credentials. Please try again.');

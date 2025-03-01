@@ -12,7 +12,7 @@ export default {
     safelist: [
         // Matches text color classes like text-green-500, text-red-400
         {
-            pattern: /text-(red|green|gray|yellow)-\d{3}/,
+            pattern: /text-(red|green|gray|orange|yellow)-\d{3}/,
         },
         // Matches background color classes like bg-green-500, bg-blue-700
         {
