@@ -195,6 +195,7 @@ class ExpenseManager extends Component
         $this->expenseIdToDelete = null;
 
         $this->resetPage();
+        $this->loadExpenses();
     }
 
     public function resetFields()
