@@ -11,7 +11,7 @@ class SessionManager extends Component
     public $sessions = [];
     public $password;
     public $showLogoutModal = false;
-    public $sessionToLogout = null;
+    public $sessionIdToLogout;
 
     public function mount()
     {
@@ -34,21 +34,18 @@ class SessionManager extends Component
 
     public function confirmLogout($sessionId)
     {
-        $this->sessionToLogout = $sessionId;
+        $this->sessionIdToLogout = $sessionId;
         $this->showLogoutModal = true;
     }
 
-    public function cancelLogout()
+    public function logoutSession()
     {
-        $this->sessionToLogout = null;
-        $this->showLogoutModal = false;
-    }
-
-    public function logoutSession($sessionId)
-    {
-        DB::table('sessions')->where('id', $sessionId)->delete();
-        $this->getActiveSessions();
-        session()->flash('success', 'Logged out successfully!');
+        if ($this->sessionIdToLogout) {
+            DB::table('sessions')->where('id', $this->sessionIdToLogout)->delete();
+            $this->getActiveSessions();
+            $this->sessionIdToLogout = null;
+            session()->flash('success', 'Logged out successfully!');
+        }
     }
 
     public function logoutOtherDevices()
