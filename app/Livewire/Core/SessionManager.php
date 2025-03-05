@@ -11,6 +11,7 @@ class SessionManager extends Component
     public $sessions = [];
     public $password;
     public $showLogoutModal = false;
+    public $showLogoutOtherDevicesModal = false;
     public $sessionIdToLogout;
 
     public function mount()
@@ -48,15 +49,26 @@ class SessionManager extends Component
         }
     }
 
+    public function confirmLogoutOtherDevices()
+    {
+        if (!$this->password) {
+            session()->flash('error', 'Please enter your password.');
+            return;
+        }
+        $this->showLogoutOtherDevicesModal = true;
+    }
+
     public function logoutOtherDevices()
     {
         if (!Auth::validate(['email' => auth()->user()->email, 'password' => $this->password])) {
+            $this->showLogoutOtherDevicesModal = false;
             session()->flash('error', 'Incorrect password.');
             return;
         }
 
         Auth::logoutOtherDevices($this->password);
         $this->password = '';
+        $this->showLogoutOtherDevicesModal = false;
         $this->getActiveSessions();
         session()->flash('success', 'Logged out from other devices.');
     }

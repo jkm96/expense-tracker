@@ -1,4 +1,4 @@
-<div class="mt-2 p-2">
+<div class="p-2">
     <div class="space-y-1 py-2">
         <div class="flex items-center justify-between">
             <h2 class="text-lg font-bold flex items-center gap-2">
@@ -22,13 +22,13 @@
 
     <div class="">
         @if(session()->has('success'))
-            <div class="bg-green-500 text-white p-2 shadow-md rounded mb-2">
+            <div class="bg-gray-700 border border-green-500 text-green-500 p-2 shadow-md rounded mb-2">
                 {{ session('success') }}
             </div>
         @endif
 
         @if(session()->has('error'))
-            <div class="bg-red-500 text-white p-2 shadow-md rounded mb-2">
+            <div class="bg-gray-700 border border-red-500 text-red-500 p-2 shadow-md rounded mb-2">
                 {{ session('error') }}
             </div>
         @endif
@@ -102,7 +102,7 @@
                                                 Current Session
                                             </span>
                                 @else
-                                    <!-- Confirmation Modal -->
+                                    <!-- Logout Confirmation Modal -->
                                     @if($showLogoutModal)
                                         <div x-data="{ open: @entangle('showLogoutModal') }" x-show="open"
                                              class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
@@ -170,8 +170,8 @@
                 />
 
                 <button
-                    wire:click="logoutOtherDevices"
-                    class="inline-flex items-center justify-center gap-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors"
+                    wire:click="confirmLogoutOtherDevices"
+                    class="inline-flex items-center justify-center gap-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md transition-colors"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -184,8 +184,31 @@
             </div>
 
             <p class="text-sm text-red-500">
-                For security reasons, please enter your password to confirm this action.
+                For security reasons, please enter your password to perform this action.
             </p>
         </div>
+
+        <!-- Logout Other Devices Confirmation Modal -->
+        @if($showLogoutOtherDevicesModal)
+            <div x-data="{ open: @entangle('showLogoutOtherDevicesModal') }" x-show="open"
+                 class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+
+                <!-- Modal Content -->
+                <div class="bg-gray-700 rounded-lg shadow-lg w-96 p-6">
+                    <h2 class="text-lg font-bold">Confirm Logout Other Devices</h2>
+                    <p class="mb-4">Are you sure you want to log out from all other devices?</p>
+                    <div class="mt-6 flex justify-between space-x-4">
+                        <button @click="open = false"
+                                class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded">
+                            Cancel
+                        </button>
+                        <button wire:click="logoutOtherDevices"
+                                class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded">
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 </div>
