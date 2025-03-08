@@ -33,7 +33,7 @@ class ExpenseReminderCommand extends Command
     {
         Log::info('Started expense check!');
 
-        $threshold = Carbon::now()->subDays(1); // Adjust the days as needed
+        $threshold = Carbon::now()->subDays(1);
 
         $users = User::whereDoesntHave('expenses', function ($query) use ($threshold) {
             $query->where('created_at', '>=', $threshold);
