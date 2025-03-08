@@ -45,7 +45,7 @@ class ExpenseManager extends Component
 
     public function updatedFilter()
     {
-        $this->page = 1; // Reset pagination on filter change
+        $this->page = 1;
         $this->loadExpenses();
     }
 
@@ -61,7 +61,6 @@ class ExpenseManager extends Component
             $this->expenses = collect();
         }
 
-        // Fetch paginated expenses
         $paginatedExpenses = $query
             ->orderBy('date', 'desc')
             ->orderBy('created_at', 'desc')
@@ -72,10 +71,8 @@ class ExpenseManager extends Component
             return Carbon::parse($expense->date)->format('Y - F');
         });
 
-        // Ensure $this->expenses is a collection
         $this->expenses = collect($this->expenses);
 
-        // Merge new expenses with existing ones
         foreach ($newExpenses as $month => $group) {
             $existingGroup = $this->expenses->get($month, collect());
 
@@ -85,10 +82,8 @@ class ExpenseManager extends Component
             $this->expenses[$month] = $mergedGroup;
         }
 
-        // Calculate totals
         $this->totals = $this->expenses->map(fn($group) => $group->sum('amount'));
 
-        // Check if there are more pages
         $this->hasMorePages = $paginatedExpenses->hasMorePages();
     }
 

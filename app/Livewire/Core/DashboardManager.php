@@ -13,16 +13,13 @@ class DashboardManager extends Component
     {
         $userId = Auth::id();
 
-        // Get total expenses
         $totalExpenses = Expense::where('user_id', $userId)->sum('amount');
 
-        // Get this month expenses
         $monthlyTotal = Expense::where('user_id', $userId)
             ->whereMonth('date', Carbon::now()->month)
             ->sum('amount');
         $currentMonth = Carbon::now()->format('F');
 
-        // Get this year expenses
         $yearlyTotal = Expense::where('user_id', $userId)
             ->whereYear('date', Carbon::now()->year)
             ->sum('amount');

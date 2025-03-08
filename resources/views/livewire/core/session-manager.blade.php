@@ -27,6 +27,12 @@
             </div>
         @endif
 
+        @if(session()->has('info'))
+            <div class="bg-gray-700 border border-blue-500 text-blue-500 p-2 shadow-md rounded mb-2">
+                {{ session('info') }}
+            </div>
+        @endif
+
         @if(session()->has('error'))
             <div class="bg-gray-700 border border-red-500 text-red-500 p-2 shadow-md rounded mb-2">
                 {{ session('error') }}
