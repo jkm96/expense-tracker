@@ -11,7 +11,7 @@ class Expense extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'amount', 'date', 'category', 'notes', 'user_id'];
+    protected $fillable = ['name', 'amount', 'date', 'category', 'notes', 'user_id','is_recurring'];
 
     /**
      * Get the user owning the expense
@@ -20,6 +20,11 @@ class Expense extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function recurring()
+    {
+        return $this->hasOne(RecurringExpense::class);
     }
 
     protected $casts = [
