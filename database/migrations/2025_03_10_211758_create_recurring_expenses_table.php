@@ -15,6 +15,7 @@ return new class extends Migration
         Schema::create('recurring_expenses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('expense_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->date('start_date');
             $table->enum('frequency', ExpenseFrequency::values());
             $table->boolean('is_active')->default(true);

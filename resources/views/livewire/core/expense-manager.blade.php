@@ -82,16 +82,31 @@
                                     class="w-3 h-3 rounded-full {{ get_category_color($expense->category->value) }}"></span>
                                 <h2 class="font-semibold">{{ $expense->name }}</h2>
                             </div>
-                            <p class="text-gray-300 text-sm">{{ Carbon\Carbon::parse($expense->date)->format('jS M Y') }}</p>
+                            <p class="text-gray-300 text-sm">
+                                <i class="fas fa-calendar-alt text-orange-400"></i>
+                                {{ Carbon\Carbon::parse($expense->date)->format('jS M Y') }}
+                            </p>
                         </div>
 
                         <hr class="mt-1 mb-1 border-gray-600">
 
                         <div class="flex items-center">
-                            <p class="text-md text-gray-200 mt-1 mb-1 mr-1">{{ ucfirst($expense->category->value) }}</p>
+                            <p class="text-md mt-1 mb-1 mr-1">
+                                <i class="fas fa-folder-open text-yellow-400"></i>
+                                {{ ucfirst($expense->category->value) }}
+                            </p>
                             |
-                            <p class="text-md text-green-600 mt-1 mb-1 ml-1">
-                                KES {{ number_format($expense->amount, 2) }}</p>
+                            <p class="text-md mt-1 mb-1 mr-1 ml-1">
+                                <i class="fas fa-money-bill-wave text-green-600"></i>
+                                <small class="text-xs">KES</small> {{ number_format($expense->amount, 2) }}
+                            </p>
+                            @if($expense->is_recurring)
+                                |
+                                <p class="text-md mt-1 mb-1 mr-1 ml-1">
+                                    <i class="fas fa-sync-alt text-orange-600"></i>
+                                    {{ ucfirst($expense->recurring->frequency->value) }}
+                                </p>
+                            @endif
                         </div>
 
                         <!-- Content -->

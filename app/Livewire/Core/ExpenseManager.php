@@ -4,6 +4,7 @@ namespace App\Livewire\Core;
 
 use App\Models\Expense;
 use App\Utils\Enums\ExpenseCategory;
+use App\Utils\Helpers\ExpenseHelper;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -51,7 +52,7 @@ class ExpenseManager extends Component
 
     public function loadExpenses()
     {
-        $query = Expense::where('user_id', Auth::id());
+        $query = Expense::with('recurring')->where('user_id', Auth::id());
 
         if ($this->filter !== 'all') {
             $query->where('category', '=', ExpenseCategory::from($this->filter));
@@ -107,7 +108,7 @@ class ExpenseManager extends Component
         ];
 
         $this->validate($rules);
-        $defaultNote = $this->generateDefaultNote($this->category, $this->name);
+        $defaultNote = ExpenseHelper::generateDefaultNote($this->category, $this->name);
 
         if ($this->expense_id) {
             // Update existing expense
@@ -139,22 +140,6 @@ class ExpenseManager extends Component
 
         $this->resetFields();
         $this->loadExpenses();
-    }
-
-    private function generateDefaultNote(string $category, string $name): string
-    {
-        $formattedName = Str::title($name);
-
-        return match ($category) {
-            ExpenseCategory::FOOD->value => "Purchased food items: $formattedName",
-            ExpenseCategory::TRANSPORT->value => "Transport expense for: $formattedName",
-            ExpenseCategory::CLOTHING->value => "Bought clothing or accessories: $formattedName",
-            ExpenseCategory::UTILITIES->value => "Utility payment for: $formattedName",
-            ExpenseCategory::KNOWLEDGE->value => "Invested in learning materials: $formattedName",
-            ExpenseCategory::LIFESTYLE->value => "Personal purchase: $formattedName",
-            ExpenseCategory::OTHER->value => "Miscellaneous expense: $formattedName",
-            default => "Expense recorded for $formattedName",
-        };
     }
 
     public function editExpense($id)
