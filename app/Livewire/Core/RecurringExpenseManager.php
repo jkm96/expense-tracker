@@ -10,29 +10,56 @@ use App\Utils\Helpers\ExpenseHelper;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 class RecurringExpenseManager extends Component
 {
+    #[Url]
+    public $categoryFilter = 'all';
+    #[Url]
+    public $frequencyFilter = 'all';
     public $recurringExpenses = [];
+    public $categories = [];
+    public $frequencies = [];
     public $showForm = false;
     public $name, $amount, $category, $start_date, $recurring_expense_id;
     public $frequency;
-    public $categories = [];
 
     public function mount()
     {
         $this->start_date = Carbon::now()->format('Y-m-d');
         $this->categories = ExpenseCategory::cases();
+        $this->frequencies = ExpenseFrequency::cases();
+        $this->loadRecurringExpenses();
+    }
+
+    public function updatedFilter()
+    {
+        $this->loadRecurringExpenses();
+    }
+
+    public function updatedFrequencyFilter()
+    {
         $this->loadRecurringExpenses();
     }
 
     public function loadRecurringExpenses()
     {
-        $this->recurringExpenses = RecurringExpense::with('expense')
-            ->where('user_id', auth()->id())
-            ->latest()
-            ->get();
+        $query = RecurringExpense::with('expense')
+            ->where('user_id', auth()->id());
+
+        if ($this->categoryFilter !== 'all') {
+            $query->whereHas('expense', function ($q) {
+                $q->where('category', $this->categoryFilter);
+            });
+        }
+
+        if ($this->frequencyFilter !== 'all') {
+            $query->where('frequency', $this->frequencyFilter);
+        }
+
+        $this->recurringExpenses = $query->latest()->get();
     }
 
     public function upsertRecurringExpense()

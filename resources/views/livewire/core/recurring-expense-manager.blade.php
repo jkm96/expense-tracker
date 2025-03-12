@@ -73,6 +73,29 @@
         </div>
     @endif
 
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-bold mb-2">Recurring Expenses</h2>
+        <div class="flex items-center space-x-4">
+            <!-- Category Filter -->
+            <select wire:model.live="categoryFilter" wire:change="loadRecurringExpenses"
+                    class="bg-gray-800 border rounded-full px-2 py-1">
+                <option value="all">All Categories</option>
+                @foreach($categories as $category)
+                    <option value="{{ $category->value }}">{{ ucfirst($category->value) }}</option>
+                @endforeach
+            </select>
+
+            <!-- Frequency Filter -->
+            <select wire:model.live="frequencyFilter" wire:change="loadRecurringExpenses"
+                    class="bg-gray-800 border rounded-full px-2 py-1">
+                <option value="all">All Frequencies</option>
+                @foreach($frequencies as $freq)
+                    <option value="{{ $freq->value }}">{{ ucfirst($freq->value) }}</option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         @forelse($recurringExpenses as $recurringExpense)
             <div class="p-2 mb-2 shadow-md rounded bg-gray-700">
