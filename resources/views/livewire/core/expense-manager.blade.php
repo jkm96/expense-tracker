@@ -100,13 +100,6 @@
                                 <i class="fas fa-money-bill-wave text-green-600"></i>
                                 <small class="text-xs">KES</small> {{ number_format($expense->amount, 2) }}
                             </p>
-                            @if($expense->is_recurring)
-                                |
-                                <p class="text-md mt-1 mb-1 mr-1 ml-1">
-                                    <i class="fas fa-sync-alt text-orange-600"></i>
-                                    {{ ucfirst($expense->recurring->frequency->value) }}
-                                </p>
-                            @endif
                         </div>
 
                         <!-- Content -->

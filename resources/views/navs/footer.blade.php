@@ -3,7 +3,8 @@
         <a href="{{ route('home') }}" class="text-gray-300 hover:text-white text-sm">Home</a> |
         @auth
             <a href="{{ route('user.dashboard') }}" class="text-gray-300 hover:text-white text-sm">Dashboard</a> |
-            <a href="{{ route('expense.manage') }}" class="text-gray-300 hover:text-white text-sm">Expenses</a>
+            <a href="{{ route('expense.manage') }}" class="text-gray-300 hover:text-white text-sm">Expenses</a> |
+            <a href="{{ route('recurring.expense.manage') }}" class="text-gray-300 hover:text-white text-sm">Recurring Expenses</a>
         @else
             <a href="{{ route('login.user') }}" class="text-gray-300 hover:text-white text-sm">Login</a> |
             <a href="{{ route('register.user') }}" class="text-gray-300 hover:text-white text-sm">Sign Up</a>

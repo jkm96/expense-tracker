@@ -1,4 +1,4 @@
-<div class="mx-auto mt-5">
+<div class="mx-auto mt-2">
 
     @if (session()->has('success'))
         <div class="bg-green-500 text-white p-2 shadow-md rounded mb-2">
@@ -73,8 +73,9 @@
         </div>
     @endif
 
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-bold mb-2">Recurring Expenses</h2>
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
+        <h2 class="text-lg font-bold mb-2 sm:mb-0">Recurring Expenses</h2>
+
         <div class="flex items-center space-x-4">
             <!-- Category Filter -->
             <select wire:model.live="categoryFilter" wire:change="loadRecurringExpenses"
@@ -95,6 +96,7 @@
             </select>
         </div>
     </div>
+
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         @forelse($recurringExpenses as $recurringExpense)

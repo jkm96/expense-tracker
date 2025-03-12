@@ -15,6 +15,7 @@ use Livewire\Component;
 
 class RecurringExpenseManager extends Component
 {
+    private ExpenseHelper $expenseHelper;
     #[Url]
     public $categoryFilter = 'all';
     #[Url]
@@ -28,6 +29,7 @@ class RecurringExpenseManager extends Component
 
     public function mount()
     {
+        $this->expenseHelper = app(ExpenseHelper::class);
         $this->start_date = Carbon::now()->format('Y-m-d');
         $this->categories = ExpenseCategory::cases();
         $this->frequencies = ExpenseFrequency::cases();
@@ -82,13 +84,14 @@ class RecurringExpenseManager extends Component
             $expense->name = Str::title($this->name);
             $expense->amount = $this->amount;
             if (empty($expense->notes)){
-                $expense->notes = ExpenseHelper::generateDefaultNote($this->category, $this->name);
+                $expense->notes = $this->expenseHelper->generateDefaultNote($this->category, $this->name);
             }
             $expense->update();
 
             $recurringExpense->update([
                 'start_date' => $this->start_date,
                 'frequency' => $this->frequency,
+                'last_processed_at' => $this->start_date,
             ]);
 
             session()->flash('success', 'Recurring expense updated successfully.');
@@ -100,8 +103,7 @@ class RecurringExpenseManager extends Component
                 'amount' => $this->amount,
                 'category' => $this->category,
                 'date' => now(),
-                'notes' => ExpenseHelper::generateDefaultNote($this->category, $this->name),
-                'is_recurring' => true,
+                'notes' => $this->expenseHelper->generateDefaultNote($this->category, $this->name)
             ]);
 
             RecurringExpense::create([
@@ -109,6 +111,8 @@ class RecurringExpenseManager extends Component
                 'user_id' => auth()->id(),
                 'start_date' => $this->start_date,
                 'frequency' => $this->frequency,
+                'is_active' => true,
+                'last_processed_at' => $this->start_date,
             ]);
 
             session()->flash('success', 'Recurring expense added successfully.');

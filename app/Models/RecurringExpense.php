@@ -7,7 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class RecurringExpense extends Model
 {
-    protected $fillable = ['expense_id','user_id', 'start_date', 'frequency', 'is_active'];
+    protected $fillable = [
+        'expense_id',
+        'user_id',
+        'start_date',
+        'frequency',
+        'is_active',
+        'last_processed_at',
+    ];
 
     protected $casts = [
         'frequency' => ExpenseFrequency::class,

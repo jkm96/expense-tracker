@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 
 class ExpenseHelper
 {
-    public static function generateDefaultNote(string $category, string $name): string
+    public function generateDefaultNote(string $category, string $name): string
     {
         $formattedName = Str::title($name);
 
