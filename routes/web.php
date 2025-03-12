@@ -21,5 +21,6 @@ Route::group(['middleware' => ['auth:web']], function () {
     Route::get('/chart-data/pie', [DashboardController::class, 'getPieChartData'])->name('chart.data.pie');
 
     Route::get('/manage-expenses', [CoreController::class, 'expense_page'])->name('expense.manage');
+    Route::get('/manage-recurring-expenses', [CoreController::class, 'recurring_expense_page'])->name('recurring.expense.manage');
     Route::get('/manage/settings', [CoreController::class, 'settings_page'])->name('settings.manage');
 });

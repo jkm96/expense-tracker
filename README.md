@@ -16,6 +16,9 @@ The **Expense Tracker** is a simple web application to track and categorize dail
 ### User Authentication:
 - Email registration and login
 - Email verification for new users
+- Session Management (New Feature!):
+  - View and manage active login sessions. 
+  - Ability to log out from other/specific devices.
 
 ### Expense Management:
 - Create, read, update, and delete (CRUD) operations for expenses

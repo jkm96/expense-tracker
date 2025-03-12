@@ -14,6 +14,11 @@ class CoreController extends Controller
         return view('core.expense-page');
     }
 
+    public function recurring_expense_page()
+    {
+        return view('core.recurring-expense-page');
+    }
+
     public function settings_page()
     {
         return view('core.settings-page');
