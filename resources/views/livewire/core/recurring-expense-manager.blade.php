@@ -144,12 +144,86 @@
 
                 <!-- Actions -->
                 <div class="mt-2 text-sm flex justify-end">
+                    <button wire:click="showRecurringExpenseDetails({{ $recurringExpense->id }})"
+                            class="text-green-500 hover:underline">
+                        View
+                    </button>
+
                     <button wire:click="editRecurringExpense({{ $recurringExpense->id }})"
-                            class="text-blue-500 hover:underline">
+                            class="text-blue-500 ml-1 hover:underline">
                         Edit
                     </button>
 
-                    <!-- Confirmation Modal -->
+                    <button wire:click="showToggleConfirmation({{ $recurringExpense->id }})"
+                            class="ml-1 hover:underline {{ $recurringExpense->is_active ? 'text-orange-500' : 'text-green-500' }}">
+                        {{ $recurringExpense->is_active ? 'Stop' : 'Resume' }}
+                    </button>
+
+                    <button
+                        wire:click="showDeleteConfirmation({{ $recurringExpense->id }})"
+                        class="ml-1 hover:underline text-red-600"
+                    >
+                        Delete
+                    </button>
+
+                    @if($showDetailsModal && $selectedExpense)
+                        <div x-data="{ open: @entangle('showDetailsModal') }" x-show="open"
+                             class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+
+                            <div class="bg-gray-700 rounded-lg shadow-lg w-96 p-6">
+                                <h2 class="text-lg font-bold">Expense Details</h2>
+
+                                <div class="mt-4 space-y-2">
+                                    <p><strong>Category:</strong> {{ ucfirst($selectedExpense->expense->category->value) }}</p>
+                                    <p><strong>Amount:</strong> KES {{ number_format($selectedExpense->expense->amount, 2) }}</p>
+                                    <p><strong>Frequency:</strong> {{ $selectedExpense->frequency->name }}</p>
+                                    <p><strong>Start Date:</strong> {{ $selectedExpense->start_date->format('Y-m-d h:i A') }}</p>
+                                    <p><strong>Last Processed At:</strong> {{ $selectedExpense->last_processed_at->format('Y-m-d h:i A') }}</p>
+                                    <p><strong>Status:</strong> {{ $selectedExpense->is_active ? 'Active' : 'Inactive' }}</p>
+                                    <p><strong>Note:</strong> {{ $selectedExpense->expense->notes }}</p>
+                                </div>
+
+                                <div class="mt-6 flex justify-end space-x-4">
+                                    <button @click="open = false"
+                                            class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded">
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if($showToggleModal)
+                        <div x-data="{ open: @entangle('showToggleModal') }" x-show="open"
+                             class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+
+                            <div class="bg-gray-700 rounded-lg shadow-lg w-96 p-6">
+                                <h2 class="text-lg font-bold">
+                                    {{ $recurringExpense->is_active ? 'Stop Recurring Expense' : 'Resume Recurring Expense' }}
+                                </h2>
+
+                                <p class="mt-4">
+                                    {{ $recurringExpense->is_active
+                                        ? 'Are you sure you want to stop this recurring expense? This action will deactivate it.'
+                                        : 'Are you sure you want to resume this recurring expense? This will reactivate it.' }}
+                                </p>
+
+                                <div class="mt-6 flex justify-between space-x-4">
+                                    <button @click="open = false"
+                                            class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded">
+                                        Cancel
+                                    </button>
+
+                                    <button wire:click="toggleRecurringExpense"
+                                            class="{{ $recurringExpense->is_active ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-500 hover:bg-green-600' }} text-white py-2 px-4 rounded">
+                                        {{ $recurringExpense->is_active ? 'Stop' : 'Resume' }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Confirm Deletion Modal -->
                     @if($showDeleteModal)
                         <div x-data="{ open: @entangle('showDeleteModal') }" x-show="open"
                              class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
@@ -173,12 +247,6 @@
                         </div>
                     @endif
 
-                    <button
-                        wire:click="showDeleteConfirmation({{ $recurringExpense->id }})"
-                        class="ml-1 hover:underline text-red-600"
-                    >
-                        Delete
-                    </button>
                 </div>
             </div>
         @empty

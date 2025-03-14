@@ -27,7 +27,10 @@ class RecurringExpenseManager extends Component
     public $name, $amount, $category, $start_date, $recurring_expense_id;
     public $frequency;
     public $showDeleteModal = false;
-    public $recurringExpenseIdToDelete;
+    public $showDetailsModal = false;
+    public $selectedExpense;
+    public $showToggleModal = false;
+    public $selectedExpenseId;
     public function mount()
     {
         $this->start_date = Carbon::now()->toDateTimeString();
@@ -136,25 +139,51 @@ class RecurringExpenseManager extends Component
         $this->showForm = true;
     }
 
+    public function showToggleConfirmation($id)
+    {
+        $this->selectedExpenseId = $id;
+        $this->showToggleModal = true;
+    }
+
+    public function toggleRecurringExpense()
+    {
+        $expense = RecurringExpense::findOrFail($this->selectedExpenseId);
+        $expense->update(['is_active' => !$expense->is_active]);
+
+        $status = $expense->is_active ? 'resumed' : 'stopped';
+        session()->flash('message', "Recurring expense has been {$status}.");
+
+        $this->showToggleModal = false;
+        $this->selectedExpenseId = null;
+        $this->resetFields();
+        $this->loadRecurringExpenses();
+    }
+
     public function showDeleteConfirmation($id)
     {
-        $this->recurringExpenseIdToDelete = $id;
+        $this->selectedExpenseId = $id;
         $this->showDeleteModal = true;
     }
 
     public function confirmDelete()
     {
-        $expense = RecurringExpense::where('id', $this->recurringExpenseIdToDelete)->first();
+        $expense = RecurringExpense::where('id', $this->selectedExpenseId)->first();
         if ($expense) {
             $expense->delete();
             session()->flash('success', 'Recurring expense deleted successfully!');
         }
 
         $this->showDeleteModal = false;
-        $this->recurringExpenseIdToDelete = null;
+        $this->selectedExpenseId = null;
 
         $this->resetFields();
         $this->loadRecurringExpenses();
+    }
+
+    public function showRecurringExpenseDetails($id)
+    {
+        $this->selectedExpense = RecurringExpense::with('expense')->findOrFail($id);
+        $this->showDetailsModal = true;
     }
 
     public function resetFields()
