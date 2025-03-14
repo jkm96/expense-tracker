@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Expense;
 use App\Models\RecurringExpense;
+use App\Utils\Enums\ExpenseFrequency;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -29,16 +30,20 @@ class ProcessRecurringExpenses extends Command
      */
     public function handle()
     {
-        $today = Carbon::today();
+        $now = Carbon::now();
 
         // Fetch all active recurring expenses
         $recurringExpenses = RecurringExpense::with('expense')
             ->where('is_active', true)
             ->get();
 
-        $recurringExpenses->each(function ($recurring) use ($today) {
+        $recurringExpenses->each(function ($recurring) use ($now) {
+            Log::info("Recurring Expense: {$recurring->expense->name}");
             $lastProcessed = Carbon::parse($recurring->last_processed_at);
-            $shouldProcess = $this->isDueForProcessing($recurring->frequency, $lastProcessed, $today);
+            Log::info("Last Processed: {$lastProcessed}");
+
+            $shouldProcess = $this->isDueForProcessing($recurring->frequency, $lastProcessed, $now);
+            Log::info("Should Process: {$shouldProcess}");
 
             if ($shouldProcess) {
                 // Create a new expense record
@@ -47,29 +52,28 @@ class ProcessRecurringExpenses extends Command
                     'amount'     => $recurring->amount,
                     'category'   => $recurring->expense->category,
                     'note'       => $recurring->expense->note,
-                    'date'       => $today->toDateString(),
+                    'date'       => $now->toDateString(),
                 ]);
 
                 // Update last_processed_at
-                $recurring->update(['last_processed_at' => $today]);
+                $recurring->update(['last_processed_at' => $now->toDateTimeString()]);
                 Log::info("Processed recurring expense: {$recurring->expense->note}");
             }
         });
 
-        Log::info('Recurring expenses processed successfully!');
+        Log::info('Finished processing Recurring expenses!');
     }
 
     /**
      * Determine if the recurring expense is due for processing.
      */
-    private function isDueForProcessing(string $frequency, Carbon $lastProcessed, Carbon $today): bool
+    private function isDueForProcessing(ExpenseFrequency $frequency, Carbon $lastProcessed, Carbon $now): bool
     {
         return match ($frequency) {
-            'daily'   => $lastProcessed->lt($today),
-            'weekly'  => $lastProcessed->diffInDays($today) >= 7,
-            'monthly' => $lastProcessed->diffInMonths($today) >= 1,
-            'yearly'  => $lastProcessed->diffInYears($today) >= 1,
-            default   => false,
+            ExpenseFrequency::DAILY   => $lastProcessed->lt($now->startOfDay()),
+            ExpenseFrequency::WEEKLY  => $lastProcessed->diffInDays($now) >= 7,
+            ExpenseFrequency::MONTHLY => $lastProcessed->diffInMonths($now) >= 1,
+            ExpenseFrequency::YEARLY  => $lastProcessed->diffInYears($now) >= 1
         };
     }
 }

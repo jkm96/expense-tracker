@@ -16,7 +16,6 @@ use Livewire\WithPagination;
 class ExpenseManager extends Component
 {
     use WithPagination;
-    private ExpenseHelper $expenseHelper;
 
     public $expenses = [];
     public $totals = [];
@@ -39,7 +38,6 @@ class ExpenseManager extends Component
 
     public function mount()
     {
-        $this->expenseHelper = app(ExpenseHelper::class);
         $this->date = Carbon::now()->format('Y-m-d');
         $this->filter = 'all';
         $this->page = 1;
@@ -115,7 +113,7 @@ class ExpenseManager extends Component
         ];
 
         $this->validate($rules);
-        $defaultNote = $this->expenseHelper->generateDefaultNote($this->category, $this->name);
+        $defaultNote = ExpenseHelper::generateDefaultNote($this->category, $this->name);
 
         if ($this->expense_id) {
             // Update existing expense

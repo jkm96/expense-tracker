@@ -91,15 +91,22 @@
                         <hr class="mt-1 mb-1 border-gray-600">
 
                         <div class="flex items-center">
-                            <p class="text-md mt-1 mb-1 mr-1">
+                            <p class="text-sm mt-1 mb-1 mr-1">
                                 <i class="fas fa-folder-open text-yellow-400"></i>
                                 {{ ucfirst($expense->category->value) }}
                             </p>
                             |
-                            <p class="text-md mt-1 mb-1 mr-1 ml-1">
+                            <p class="text-sm mt-1 mb-1 mr-1 ml-1">
                                 <i class="fas fa-money-bill-wave text-green-600"></i>
                                 <small class="text-xs">KES</small> {{ number_format($expense->amount, 2) }}
                             </p>
+                            @if($expense->recurringExpense)
+                                |
+                                <p class="text-sm mt-1 mb-1 mr-1 ml-1">
+                                    <i class="fas fa-sync-alt text-orange-500"></i>
+                                    {{ ucfirst($expense->recurringExpense->frequency->value) }}
+                                </p>
+                            @endif
                         </div>
 
                         <!-- Content -->

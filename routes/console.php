@@ -3,9 +3,9 @@
 use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('app:notify-missing-expenses')
-    ->daily()
+    ->dailyAt("7:00")
     ->runInBackground();
 
 Schedule::command('app:process-recurring-expenses')
-    ->daily()
+    ->everyMinute()
     ->runInBackground();
