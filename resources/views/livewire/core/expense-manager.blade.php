@@ -79,7 +79,7 @@
                             <div class="flex items-center gap-x-1">
                                 <!-- ✅ Category Color Circle -->
                                 <span
-                                    class="w-3 h-3 rounded-full {{ get_category_color($expense->category->value) }}"></span>
+                                    class="w-3 h-3 rounded-full {{ get_category_color($expense->category)[0] }}"></span>
                                 <h2 class="font-semibold">{{ $expense->name }}</h2>
                             </div>
                             <p class="text-gray-300 text-sm">

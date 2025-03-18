@@ -103,9 +103,15 @@
             <div class="p-2 mb-2 shadow-md rounded bg-gray-700">
                 <div class="flex justify-between mb-1">
                     <div class="flex items-center gap-x-1">
-                        <!-- ✅ Category Color Circle -->
-                        <span
-                            class="w-3 h-3 rounded-full {{ get_category_color($recurringExpense->expense->category->value) }}"></span>
+                        @if($recurringExpense->is_active)
+                            <span class="relative flex h-3 w-3">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ get_category_color($recurringExpense->expense->category)[0] }} opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-3 w-3 {{ get_category_color($recurringExpense->expense->category)[1] }}"></span>
+                            </span>
+                        @else
+                            <span
+                                class="w-3 h-3 rounded-full {{ get_category_color($recurringExpense->expense->category)[0] }}"></span>
+                        @endif
                         <h2 class="font-semibold">{{ $recurringExpense->expense->name }}</h2>
                     </div>
                     <div class="flex items-center gap-x-1">
@@ -116,7 +122,7 @@
                         |
                         <p class="text-sm">
                             <i class="fas fa-clock text-blue-400"></i>
-                            {{ $recurringExpense->last_processed_at->format('Y-m-d h:i A') }}
+                            {{ $recurringExpense->next_process_at?->format('Y-m-d h:i A') }}
                         </p>
                     </div>
                 </div>
@@ -174,12 +180,26 @@
                                 <h2 class="text-lg font-bold">Expense Details</h2>
 
                                 <div class="mt-4 space-y-2">
+                                    <p><strong>Name:</strong> {{ ucfirst($selectedExpense->expense->name) }}</p>
                                     <p><strong>Category:</strong> {{ ucfirst($selectedExpense->expense->category->value) }}</p>
                                     <p><strong>Amount:</strong> KES {{ number_format($selectedExpense->expense->amount, 2) }}</p>
                                     <p><strong>Frequency:</strong> {{ $selectedExpense->frequency->name }}</p>
                                     <p><strong>Start Date:</strong> {{ $selectedExpense->start_date->format('Y-m-d h:i A') }}</p>
-                                    <p><strong>Last Processed At:</strong> {{ $selectedExpense->last_processed_at->format('Y-m-d h:i A') }}</p>
-                                    <p><strong>Status:</strong> {{ $selectedExpense->is_active ? 'Active' : 'Inactive' }}</p>
+                                    <p><strong>Last Processed At:</strong> {{ $selectedExpense->last_processed_at?->format('Y-m-d h:i A') }}</p>
+                                    <p><strong>Next Process At:</strong> {{ $selectedExpense->next_process_at?->format('Y-m-d h:i A') }}</p>
+                                    <p class="flex items-center"><strong class="mr-1">Status:</strong>
+                                        @if($selectedExpense->is_active)
+                                            <span class="relative flex h-3 w-3 mr-0.5">
+                                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ get_category_color($selectedExpense->expense->category)[0] }} opacity-75"></span>
+                                                <span class="relative inline-flex rounded-full h-3 w-3 {{ get_category_color($selectedExpense->expense->category)[1] }}"></span>
+                                            </span>
+                                        @else
+                                            <span class="relative flex h-3 w-3 mr-0.5">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                                            </span>
+                                        @endif
+                                        {{ $selectedExpense->is_active ? 'Active' : 'Inactive' }}</p>
                                     <p><strong>Note:</strong> {{ $selectedExpense->expense->notes }}</p>
                                 </div>
 
@@ -193,17 +213,17 @@
                         </div>
                     @endif
 
-                    @if($showToggleModal)
+                    @if($showToggleModal && $selectedExpense)
                         <div x-data="{ open: @entangle('showToggleModal') }" x-show="open"
                              class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
 
                             <div class="bg-gray-700 rounded-lg shadow-lg w-96 p-6">
                                 <h2 class="text-lg font-bold">
-                                    {{ $recurringExpense->is_active ? 'Stop Recurring Expense' : 'Resume Recurring Expense' }}
+                                    {{ $selectedExpense->is_active ? 'Stop Recurring Expense' : 'Resume Recurring Expense' }}
                                 </h2>
 
                                 <p class="mt-4">
-                                    {{ $recurringExpense->is_active
+                                    {{ $selectedExpense->is_active
                                         ? 'Are you sure you want to stop this recurring expense? This action will deactivate it.'
                                         : 'Are you sure you want to resume this recurring expense? This will reactivate it.' }}
                                 </p>
@@ -215,8 +235,8 @@
                                     </button>
 
                                     <button wire:click="toggleRecurringExpense"
-                                            class="{{ $recurringExpense->is_active ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-500 hover:bg-green-600' }} text-white py-2 px-4 rounded">
-                                        {{ $recurringExpense->is_active ? 'Stop' : 'Resume' }}
+                                            class="{{ $selectedExpense->is_active ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-500 hover:bg-green-600' }} text-white py-2 px-4 rounded">
+                                        {{ $selectedExpense->is_active ? 'Stop' : 'Resume' }}
                                     </button>
                                 </div>
                             </div>

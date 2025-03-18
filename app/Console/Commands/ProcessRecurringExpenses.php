@@ -4,10 +4,15 @@ namespace App\Console\Commands;
 
 use App\Models\Expense;
 use App\Models\RecurringExpense;
+use App\Models\User;
+use App\Notifications\ExpenseReminderNotification;
 use App\Utils\Enums\ExpenseFrequency;
+use App\Utils\Enums\NotificationType;
+use App\Utils\Helpers\ExpenseHelper;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
 
 class ProcessRecurringExpenses extends Command
 {
@@ -32,48 +37,38 @@ class ProcessRecurringExpenses extends Command
     {
         $now = Carbon::now();
 
-        // Fetch all active recurring expenses
         $recurringExpenses = RecurringExpense::with('expense')
             ->where('is_active', true)
+            ->where('next_process_at', '<=', $now)
             ->get();
 
         $recurringExpenses->each(function ($recurring) use ($now) {
-            Log::info("Recurring Expense: {$recurring->expense->name}");
-            $lastProcessed = Carbon::parse($recurring->last_processed_at);
-            Log::info("Last Processed: {$lastProcessed}");
+            Log::info("Processing: {$recurring->expense->name}");
 
-            $shouldProcess = $this->isDueForProcessing($recurring->frequency, $lastProcessed, $now);
-            Log::info("Should Process: {$shouldProcess}");
+            Expense::create([
+                'user_id' => $recurring->user_id,
+                'recurring_expense_id' => $recurring->id,
+                'name' => $recurring->expense->name,
+                'amount' => $recurring->expense->amount,
+                'category' => $recurring->expense->category,
+                'notes' => $recurring->expense->notes,
+                'date' => $now->toDateString(),
+            ]);
 
-            if ($shouldProcess) {
-                // Create a new expense record
-                Expense::create([
-                    'user_id'    => $recurring->user_id,
-                    'amount'     => $recurring->amount,
-                    'category'   => $recurring->expense->category,
-                    'note'       => $recurring->expense->note,
-                    'date'       => $now->toDateString(),
-                ]);
+            $nextProcessTime = ExpenseHelper::calculateNextProcessTime($recurring->frequency, $now);
 
-                // Update last_processed_at
-                $recurring->update(['last_processed_at' => $now->toDateTimeString()]);
-                Log::info("Processed recurring expense: {$recurring->expense->note}");
-            }
+            $recurring->update([
+                'last_processed_at' => $now->toDateTimeString(),
+                'next_process_at' => $nextProcessTime->toDateTimeString(),
+            ]);
+
+            $user = User::findOrFail($recurring->expense->user_id);
+            $message = "Your recurring expense: {$recurring->expense->name} has been processed successfully at: {$recurring->last_processed_at}";
+            $user->notify(new ExpenseReminderNotification($message, NotificationType::ALERT));
+
+            Log::info("Processed: {$recurring->expense->name}");
         });
 
-        Log::info('Finished processing Recurring expenses!');
-    }
-
-    /**
-     * Determine if the recurring expense is due for processing.
-     */
-    private function isDueForProcessing(ExpenseFrequency $frequency, Carbon $lastProcessed, Carbon $now): bool
-    {
-        return match ($frequency) {
-            ExpenseFrequency::DAILY   => $lastProcessed->lt($now->startOfDay()),
-            ExpenseFrequency::WEEKLY  => $lastProcessed->diffInDays($now) >= 7,
-            ExpenseFrequency::MONTHLY => $lastProcessed->diffInMonths($now) >= 1,
-            ExpenseFrequency::YEARLY  => $lastProcessed->diffInYears($now) >= 1
-        };
+        Log::info('Finished processing recurring expenses!');
     }
 }

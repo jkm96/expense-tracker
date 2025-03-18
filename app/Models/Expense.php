@@ -12,12 +12,13 @@ class Expense extends Model
     use HasFactory;
 
     protected $fillable = [
+        'user_id',
+        'recurring_expense_id',
         'name',
         'amount',
         'date',
         'category',
         'notes',
-        'user_id',
         'is_recurring'
     ];
 
@@ -32,7 +33,7 @@ class Expense extends Model
 
     public function recurringExpense()
     {
-        return $this->hasOne(RecurringExpense::class);
+        return $this->belongsTo(RecurringExpense::class, 'recurring_expense_id');
     }
 
     protected $casts = [

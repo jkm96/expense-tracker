@@ -6,6 +6,7 @@ use App\Models\Expense;
 use App\Models\RecurringExpense;
 use App\Utils\Enums\ExpenseCategory;
 use App\Utils\Enums\ExpenseFrequency;
+use App\Utils\Helpers\CategoryHelper;
 use App\Utils\Helpers\ExpenseHelper;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -31,9 +32,10 @@ class RecurringExpenseManager extends Component
     public $selectedExpense;
     public $showToggleModal = false;
     public $selectedExpenseId;
+
     public function mount()
     {
-        $this->start_date = Carbon::now()->toDateTimeString();
+        $this->start_date = Carbon::now()->format('Y-m-d\TH:i');
         $this->categories = ExpenseCategory::cases();
         $this->frequencies = ExpenseFrequency::cases();
         $this->loadRecurringExpenses();
@@ -86,7 +88,7 @@ class RecurringExpenseManager extends Component
 
             $expense->name = Str::title($this->name);
             $expense->amount = $this->amount;
-            if (empty($expense->notes)){
+            if (empty($expense->notes)) {
                 $expense->notes = ExpenseHelper::generateDefaultNote($this->category, $this->name);
             }
             $expense->update();
@@ -109,13 +111,18 @@ class RecurringExpenseManager extends Component
                 'notes' => ExpenseHelper::generateDefaultNote($this->category, $this->name)
             ]);
 
+            $nextProcessAt = ExpenseHelper::calculateNextProcessTime(
+                ExpenseFrequency::from($this->frequency),
+                Carbon::parse($this->start_date)
+            );
             RecurringExpense::create([
                 'expense_id' => $expense->id,
                 'user_id' => auth()->id(),
                 'start_date' => $this->start_date,
                 'frequency' => $this->frequency,
                 'is_active' => true,
-                'last_processed_at' => $this->start_date,
+                'last_processed_at' => null,
+                'next_process_at' => $nextProcessAt,
             ]);
 
             session()->flash('success', 'Recurring expense added successfully.');
@@ -142,6 +149,7 @@ class RecurringExpenseManager extends Component
     public function showToggleConfirmation($id)
     {
         $this->selectedExpenseId = $id;
+        $this->selectedExpense = RecurringExpense::with('expense')->findOrFail($id);
         $this->showToggleModal = true;
     }
 
@@ -151,7 +159,7 @@ class RecurringExpenseManager extends Component
         $expense->update(['is_active' => !$expense->is_active]);
 
         $status = $expense->is_active ? 'resumed' : 'stopped';
-        session()->flash('message', "Recurring expense has been {$status}.");
+        session()->flash('success', "Recurring expense has been {$status}.");
 
         $this->showToggleModal = false;
         $this->selectedExpenseId = null;
@@ -182,13 +190,13 @@ class RecurringExpenseManager extends Component
 
     public function showRecurringExpenseDetails($id)
     {
-        $this->selectedExpense = RecurringExpense::with('expense')->findOrFail($id);
+        $this->selectedExpense = RecurringExpense::with('expense','generatedExpenses')->findOrFail($id);
         $this->showDetailsModal = true;
     }
 
     public function resetFields()
     {
-        $this->start_date = Carbon::now()->format('Y-m-d');
+        $this->start_date = Carbon::now()->format('Y-m-d\TH:i');
         $this->reset(['name', 'amount', 'start_date', 'category', 'recurring_expense_id', 'showForm']);
     }
 
