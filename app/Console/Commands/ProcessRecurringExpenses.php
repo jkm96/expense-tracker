@@ -35,6 +35,8 @@ class ProcessRecurringExpenses extends Command
      */
     public function handle()
     {
+        Log::info('Started processing recurring expenses!');
+
         $now = Carbon::now();
 
         $recurringExpenses = RecurringExpense::with('expense')
@@ -63,7 +65,7 @@ class ProcessRecurringExpenses extends Command
             ]);
 
             $user = User::findOrFail($recurring->expense->user_id);
-            $message = "Your recurring expense: {$recurring->expense->name} has been processed successfully at: {$recurring->last_processed_at}";
+            $message = "Your recurring expense: {$recurring->expense->name} has been processed successfully at: {$recurring->last_processed_at->format('Y-m-d h:i A')}";
             $user->notify(new ExpenseReminderNotification($message, NotificationType::ALERT));
 
             Log::info("Processed: {$recurring->expense->name}");

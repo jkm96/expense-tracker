@@ -81,6 +81,11 @@ class RecurringExpenseManager extends Component
 
         $this->validate($rules);
 
+        $nextProcessAt = ExpenseHelper::calculateNextProcessTime(
+            ExpenseFrequency::from($this->frequency),
+            Carbon::parse($this->start_date)
+        );
+
         if ($this->recurring_expense_id) {
             // Update Existing Recurring Expense
             $recurringExpense = RecurringExpense::findOrFail($this->recurring_expense_id);
@@ -96,7 +101,7 @@ class RecurringExpenseManager extends Component
             $recurringExpense->update([
                 'start_date' => $this->start_date,
                 'frequency' => $this->frequency,
-                'last_processed_at' => $this->start_date,
+                'next_process_at' => $nextProcessAt,
             ]);
 
             session()->flash('success', 'Recurring expense updated successfully.');
@@ -111,17 +116,12 @@ class RecurringExpenseManager extends Component
                 'notes' => ExpenseHelper::generateDefaultNote($this->category, $this->name)
             ]);
 
-            $nextProcessAt = ExpenseHelper::calculateNextProcessTime(
-                ExpenseFrequency::from($this->frequency),
-                Carbon::parse($this->start_date)
-            );
             RecurringExpense::create([
                 'expense_id' => $expense->id,
                 'user_id' => auth()->id(),
                 'start_date' => $this->start_date,
                 'frequency' => $this->frequency,
                 'is_active' => true,
-                'last_processed_at' => null,
                 'next_process_at' => $nextProcessAt,
             ]);
 
