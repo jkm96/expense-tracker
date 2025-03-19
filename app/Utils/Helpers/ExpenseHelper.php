@@ -3,10 +3,24 @@
 namespace App\Utils\Helpers;
 
 use App\Utils\Enums\ExpenseCategory;
+use App\Utils\Enums\ExpenseFrequency;
+use Carbon\Carbon;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 
 class ExpenseHelper
 {
+    public static function calculateNextProcessTime(ExpenseFrequency $frequency, Carbon $lastProcessed): Carbon
+    {
+        return match ($frequency) {
+            ExpenseFrequency::DAILY => $lastProcessed->copy()->addDay(),
+            ExpenseFrequency::WEEKLY => $lastProcessed->copy()->addWeek(),
+            ExpenseFrequency::MONTHLY => $lastProcessed->copy()->addMonth(),
+            ExpenseFrequency::YEARLY => $lastProcessed->copy()->addYear(),
+            default => throw new InvalidArgumentException("Invalid frequency"),
+        };
+    }
+
     public static function generateDefaultNote(string $category, string $name): string
     {
         $formattedName = Str::title($name);

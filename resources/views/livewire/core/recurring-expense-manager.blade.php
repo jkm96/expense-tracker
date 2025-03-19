@@ -1,4 +1,4 @@
-<div class="mx-auto mt-5">
+<div class="mx-auto mt-2">
 
     @if (session()->has('success'))
         <div class="bg-green-500 text-white p-2 shadow-md rounded mb-2">
@@ -43,7 +43,7 @@
                     </div>
 
                     <div class="mb-4">
-                        <input type="date" wire:model="start_date" placeholder="Start date"
+                        <input type="datetime-local" wire:model="start_date" placeholder="Start date"
                                class="w-full p-2 bg-gray-700 border rounded focus:ring focus:ring-blue-300">
                         <p class="text-sm text-gray-400">Select the starting date for the recurring expense.</p>
                         @error('start_date') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
@@ -73,8 +73,9 @@
         </div>
     @endif
 
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-bold mb-2">Recurring Expenses</h2>
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
+        <h2 class="text-lg font-bold mb-2 sm:mb-0">Recurring Expenses</h2>
+
         <div class="flex items-center space-x-4">
             <!-- Category Filter -->
             <select wire:model.live="categoryFilter" wire:change="loadRecurringExpenses"
@@ -96,37 +97,51 @@
         </div>
     </div>
 
+
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         @forelse($recurringExpenses as $recurringExpense)
             <div class="p-2 mb-2 shadow-md rounded bg-gray-700">
                 <div class="flex justify-between mb-1">
                     <div class="flex items-center gap-x-1">
-                        <!-- ✅ Category Color Circle -->
-                        <span
-                            class="w-3 h-3 rounded-full {{ get_category_color($recurringExpense->expense->category->value) }}"></span>
+                        @if($recurringExpense->is_active)
+                            <span class="relative flex h-3 w-3">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ get_category_color($recurringExpense->expense->category)[0] }} opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-3 w-3 {{ get_category_color($recurringExpense->expense->category)[1] }}"></span>
+                            </span>
+                        @else
+                            <span
+                                class="w-3 h-3 rounded-full {{ get_category_color($recurringExpense->expense->category)[0] }}"></span>
+                        @endif
                         <h2 class="font-semibold">{{ $recurringExpense->expense->name }}</h2>
                     </div>
-                    <p class="text-gray-300 text-sm">
-                        <i class="fas fa-sync-alt text-green-400"></i>
-                        {{ ucfirst($recurringExpense->frequency->value) }}
-                    </p>
+                    <div class="flex items-center gap-x-1">
+                        <p class="text-gray-300 text-sm">
+                            <i class="fas fa-sync-alt text-green-400"></i>
+                            {{ ucfirst($recurringExpense->frequency->value) }}
+                        </p>
+                        |
+                        <p class="text-sm">
+                            <i class="fas fa-clock text-blue-400"></i>
+                            {{ $recurringExpense->next_process_at?->format('Y-m-d h:i A') }}
+                        </p>
+                    </div>
                 </div>
 
                 <hr class="mt-1 mb-1 border-gray-600">
 
                 <div class="flex items-center">
-                    <p class="text-md mt-1 mb-1 mr-1">
+                    <p class="text-sm mt-1 mb-1 mr-1">
                         <i class="fas fa-folder-open text-yellow-400"></i>
                         {{ ucfirst($recurringExpense->expense->category->value) }}
                     </p>
                     |
-                    <p class="text-md text-green-600 mt-1 mb-1 ml-1 mr-1">
+                    <p class="text-sm text-green-600 mt-1 mb-1 ml-1 mr-1">
                         KES {{ number_format($recurringExpense->expense->amount, 2) }}
                     </p>
                     |
-                    <p class="text-md mt-1 mb-1 mr-1 ml-1">
+                    <p class="text-sm mt-1 mb-1 mr-1 ml-1">
                         <i class="fas fa-calendar-alt text-orange-400"></i>
-                        {{ $recurringExpense->start_date }}
+                        {{ $recurringExpense->start_date->format('Y-m-d h:i A') }}
                     </p>
                 </div>
 
@@ -135,34 +150,20 @@
 
                 <!-- Actions -->
                 <div class="mt-2 text-sm flex justify-end">
+                    <button wire:click="showRecurringExpenseDetails({{ $recurringExpense->id }})"
+                            class="text-green-500 hover:underline">
+                        View
+                    </button>
+
                     <button wire:click="editRecurringExpense({{ $recurringExpense->id }})"
-                            class="text-blue-500 hover:underline">
+                            class="text-blue-500 ml-1 hover:underline">
                         Edit
                     </button>
 
-                    <!-- Confirmation Modal -->
-                    {{--                    @if($showDeleteModal)--}}
-                    {{--                        <div x-data="{ open: @entangle('showDeleteModal') }" x-show="open"--}}
-                    {{--                             class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">--}}
-
-                    {{--                            <!-- Modal Content -->--}}
-                    {{--                            <div class="bg-gray-700 rounded-lg shadow-lg w-96 p-6">--}}
-                    {{--                                <h2 class="text-lg font-bold">Delete Expense</h2>--}}
-                    {{--                                <p class="mt-4">Are you sure you want to delete this expense?--}}
-                    {{--                                    This action cannot be undone.</p>--}}
-                    {{--                                <div class="mt-6 flex justify-between space-x-4">--}}
-                    {{--                                    <button @click="open = false"--}}
-                    {{--                                            class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded">--}}
-                    {{--                                        Cancel--}}
-                    {{--                                    </button>--}}
-                    {{--                                    <button wire:click="confirmDelete"--}}
-                    {{--                                            class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded">--}}
-                    {{--                                        Delete--}}
-                    {{--                                    </button>--}}
-                    {{--                                </div>--}}
-                    {{--                            </div>--}}
-                    {{--                        </div>--}}
-                    {{--                    @endif--}}
+                    <button wire:click="showToggleConfirmation({{ $recurringExpense->id }})"
+                            class="ml-1 hover:underline {{ $recurringExpense->is_active ? 'text-orange-500' : 'text-green-500' }}">
+                        {{ $recurringExpense->is_active ? 'Stop' : 'Resume' }}
+                    </button>
 
                     <button
                         wire:click="showDeleteConfirmation({{ $recurringExpense->id }})"
@@ -170,6 +171,125 @@
                     >
                         Delete
                     </button>
+
+                    @if($showDetailsModal && $selectedExpense)
+                        <div x-data="{ open: @entangle('showDetailsModal') }" x-show="open"
+                             class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+
+                            <div class="bg-gray-700 rounded-lg shadow-lg w-[600px] p-2">
+                                <h2 class="text-lg font-bold mb-4">Recurring Expense Details</h2>
+
+                                <!-- Parent Expense Details -->
+                                <div class="bg-gray-800 p-4 rounded-lg shadow">
+                                    <h3 class="text-md font-semibold text-white">Parent Expense</h3>
+                                    <div class="mt-2 space-y-2 text-gray-300">
+                                        <p><strong>Name:</strong> {{ ucfirst($selectedExpense->expense->name) }}</p>
+                                        <p><strong>Category:</strong> {{ ucfirst($selectedExpense->expense->category->value) }}</p>
+                                        <p><strong>Amount:</strong> KES {{ number_format($selectedExpense->expense->amount, 2) }}</p>
+                                        <p><strong>Frequency:</strong> {{ $selectedExpense->frequency->name }}</p>
+                                        <p class="flex items-center"><strong class="mr-1">Status:</strong>
+                                            @if($selectedExpense->is_active)
+                                                <span class="relative flex h-3 w-3 mr-0.5">
+                                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ get_category_color($selectedExpense->expense->category)[0] }} opacity-75"></span>
+                                                    <span class="relative inline-flex rounded-full h-3 w-3 {{ get_category_color($selectedExpense->expense->category)[1] }}"></span>
+                                                </span>
+                                            @else
+                                                <span class="relative flex h-3 w-3 mr-0.5">
+                                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                                    <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                                                </span>
+                                            @endif
+                                            {{ $selectedExpense->is_active ? 'Active' : 'Inactive' }}
+                                        </p>
+                                        <p><strong>Start Date:</strong> {{ $selectedExpense->start_date->format('Y-m-d h:i A') }}</p>
+                                        <p><strong>Last Processed:</strong> {{ $selectedExpense->last_processed_at?->format('Y-m-d h:i A') }}</p>
+                                        <p><strong>Next Process At:</strong> {{ $selectedExpense->next_process_at?->format('Y-m-d h:i A') }}</p>
+                                        <p><strong>Note:</strong> {{ $selectedExpense->expense->notes }}</p>
+                                    </div>
+                                </div>
+
+                                <!-- Generated Expenses -->
+                                <div class="mt-6">
+                                    <h3 class="text-md font-semibold text-white mb-2">Generated Expenses</h3>
+                                    <div class="overflow-y-auto max-h-60 bg-gray-800 p-4 rounded-lg shadow">
+                                        <ul class="space-y-3">
+                                            @forelse($selectedExpense->generatedExpenses as $expense)
+                                                <li class="border-b border-gray-600 pb-2">
+                                                    <p><strong>Processed At:</strong> {{ $expense->created_at->format('Y-m-d h:i A') }}</p>
+                                                    <p><strong>Amount:</strong> KES {{ number_format($expense->amount, 2) }}</p>
+                                                </li>
+                                            @empty
+                                                <p class="text-gray-400">No generated expenses yet.</p>
+                                            @endforelse
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- Close Button -->
+                                <div class="mt-6 flex justify-end space-x-4">
+                                    <button @click="open = false"
+                                            class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded">
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if($showToggleModal && $selectedExpense)
+                        <div x-data="{ open: @entangle('showToggleModal') }" x-show="open"
+                             class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+
+                            <div class="bg-gray-700 rounded-lg shadow-lg w-96 p-6">
+                                <h2 class="text-lg font-bold">
+                                    {{ $selectedExpense->is_active ? 'Stop Recurring Expense' : 'Resume Recurring Expense' }}
+                                </h2>
+
+                                <p class="mt-4">
+                                    {{ $selectedExpense->is_active
+                                        ? 'Are you sure you want to stop this recurring expense? This action will deactivate it.'
+                                        : 'Are you sure you want to resume this recurring expense? This will reactivate it.' }}
+                                </p>
+
+                                <div class="mt-6 flex justify-between space-x-4">
+                                    <button @click="open = false"
+                                            class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded">
+                                        Cancel
+                                    </button>
+
+                                    <button wire:click="toggleRecurringExpense"
+                                            class="{{ $selectedExpense->is_active ? 'bg-orange-500 hover:bg-orange-600' : 'bg-green-500 hover:bg-green-600' }} text-white py-2 px-4 rounded">
+                                        {{ $selectedExpense->is_active ? 'Stop' : 'Resume' }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Confirm Deletion Modal -->
+                    @if($showDeleteModal)
+                        <div x-data="{ open: @entangle('showDeleteModal') }" x-show="open"
+                             class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+
+                            <!-- Modal Content -->
+                            <div class="bg-gray-700 rounded-lg shadow-lg w-96 p-6">
+                                <h2 class="text-lg font-bold">Delete Expense</h2>
+                                <p class="mt-4">Are you sure you want to delete this recurring expense?
+                                    This action cannot be undone.</p>
+                                <div class="mt-6 flex justify-between space-x-4">
+                                    <button @click="open = false"
+                                            class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded">
+                                        Cancel
+                                    </button>
+                                    <button wire:click="confirmDelete"
+                                            class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded">
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                 </div>
             </div>
         @empty

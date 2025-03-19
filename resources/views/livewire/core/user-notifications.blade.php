@@ -15,10 +15,14 @@
     </button>
 
     <!-- Side Modal -->
-    <div x-show="open" x-transition:enter="transform transition ease-in-out duration-300"
-         x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
+    <div x-show="open"
+         x-cloak
+         x-transition:enter="transform transition ease-in-out duration-300"
+         x-transition:enter-start="translate-x-full"
+         x-transition:enter-end="translate-x-0"
          x-transition:leave="transform transition ease-in-out duration-300"
-         x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="translate-x-full"
          class="fixed inset-y-0 right-0 w-80 bg-white dark:bg-gray-800 shadow-lg z-50 flex flex-col">
 
         <div class="flex justify-between items-center p-4 border-b dark:border-gray-700">
@@ -108,5 +112,5 @@
         </div>
     </div>
 
-    <div x-show="open" @click="open = false" class="fixed inset-0 bg-black bg-opacity-80 z-40"></div>
+    <div x-show="open" x-cloak @click="open = false" class="fixed inset-0 bg-black bg-opacity-80 z-40"></div>
 </div>

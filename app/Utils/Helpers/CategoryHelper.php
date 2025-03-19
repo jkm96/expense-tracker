@@ -2,20 +2,22 @@
 
 namespace App\Utils\Helpers;
 
+use App\Utils\Enums\ExpenseCategory;
+
 class CategoryHelper
 {
-    public static function getCategoryColor(string $category): string
+    public static function getCategoryColor(ExpenseCategory $category): array
     {
         $categoryColors = [
-            'food' => 'bg-green-400',        // #4ade80
-            'transport' => 'bg-blue-400',    // #60a5fa
-            'clothing' => 'bg-orange-400',   // #fb923c
-            'utilities' => 'bg-yellow-400',  // #facc15
-            'knowledge' => 'bg-red-400',     // #f87171
-            'lifestyle' => 'bg-gray-900',       // #0b0c0c
-            'other' => 'bg-gray-400'         // #9ca3af
+            ExpenseCategory::FOOD->value => ['bg-green-400', 'bg-green-500'],
+            ExpenseCategory::TRANSPORT->value => ['bg-blue-400', 'bg-blue-500'],
+            ExpenseCategory::CLOTHING->value => ['bg-orange-400', 'bg-orange-500'],
+            ExpenseCategory::UTILITIES->value => ['bg-yellow-400', 'bg-yellow-500'],
+            ExpenseCategory::KNOWLEDGE->value => ['bg-red-400', 'bg-red-500'],
+            ExpenseCategory::LIFESTYLE->value => ['bg-gray-900', 'bg-gray-800'],
+            ExpenseCategory::OTHER->value => ['bg-gray-400', 'bg-gray-500']
         ];
 
-        return $categoryColors[$category] ?? 'bg-gray-300';
+        return $categoryColors[$category->value] ?? ['bg-gray-300', 'bg-gray-400'];
     }
 }
