@@ -176,33 +176,56 @@
                         <div x-data="{ open: @entangle('showDetailsModal') }" x-show="open"
                              class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
 
-                            <div class="bg-gray-700 rounded-lg shadow-lg w-96 p-6">
-                                <h2 class="text-lg font-bold">Expense Details</h2>
+                            <div class="bg-gray-700 rounded-lg shadow-lg w-[600px] p-2">
+                                <h2 class="text-lg font-bold mb-4">Recurring Expense Details</h2>
 
-                                <div class="mt-4 space-y-2">
-                                    <p><strong>Name:</strong> {{ ucfirst($selectedExpense->expense->name) }}</p>
-                                    <p><strong>Category:</strong> {{ ucfirst($selectedExpense->expense->category->value) }}</p>
-                                    <p><strong>Amount:</strong> KES {{ number_format($selectedExpense->expense->amount, 2) }}</p>
-                                    <p><strong>Frequency:</strong> {{ $selectedExpense->frequency->name }}</p>
-                                    <p><strong>Start Date:</strong> {{ $selectedExpense->start_date->format('Y-m-d h:i A') }}</p>
-                                    <p><strong>Last Processed At:</strong> {{ $selectedExpense->last_processed_at?->format('Y-m-d h:i A') }}</p>
-                                    <p><strong>Next Process At:</strong> {{ $selectedExpense->next_process_at?->format('Y-m-d h:i A') }}</p>
-                                    <p class="flex items-center"><strong class="mr-1">Status:</strong>
-                                        @if($selectedExpense->is_active)
-                                            <span class="relative flex h-3 w-3 mr-0.5">
-                                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ get_category_color($selectedExpense->expense->category)[0] }} opacity-75"></span>
-                                                <span class="relative inline-flex rounded-full h-3 w-3 {{ get_category_color($selectedExpense->expense->category)[1] }}"></span>
-                                            </span>
-                                        @else
-                                            <span class="relative flex h-3 w-3 mr-0.5">
-                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                            <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                                            </span>
-                                        @endif
-                                        {{ $selectedExpense->is_active ? 'Active' : 'Inactive' }}</p>
-                                    <p><strong>Note:</strong> {{ $selectedExpense->expense->notes }}</p>
+                                <!-- Parent Expense Details -->
+                                <div class="bg-gray-800 p-4 rounded-lg shadow">
+                                    <h3 class="text-md font-semibold text-white">Parent Expense</h3>
+                                    <div class="mt-2 space-y-2 text-gray-300">
+                                        <p><strong>Name:</strong> {{ ucfirst($selectedExpense->expense->name) }}</p>
+                                        <p><strong>Category:</strong> {{ ucfirst($selectedExpense->expense->category->value) }}</p>
+                                        <p><strong>Amount:</strong> KES {{ number_format($selectedExpense->expense->amount, 2) }}</p>
+                                        <p><strong>Frequency:</strong> {{ $selectedExpense->frequency->name }}</p>
+                                        <p class="flex items-center"><strong class="mr-1">Status:</strong>
+                                            @if($selectedExpense->is_active)
+                                                <span class="relative flex h-3 w-3 mr-0.5">
+                                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ get_category_color($selectedExpense->expense->category)[0] }} opacity-75"></span>
+                                                    <span class="relative inline-flex rounded-full h-3 w-3 {{ get_category_color($selectedExpense->expense->category)[1] }}"></span>
+                                                </span>
+                                            @else
+                                                <span class="relative flex h-3 w-3 mr-0.5">
+                                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                                    <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                                                </span>
+                                            @endif
+                                            {{ $selectedExpense->is_active ? 'Active' : 'Inactive' }}
+                                        </p>
+                                        <p><strong>Start Date:</strong> {{ $selectedExpense->start_date->format('Y-m-d h:i A') }}</p>
+                                        <p><strong>Last Processed:</strong> {{ $selectedExpense->last_processed_at?->format('Y-m-d h:i A') }}</p>
+                                        <p><strong>Next Process At:</strong> {{ $selectedExpense->next_process_at?->format('Y-m-d h:i A') }}</p>
+                                        <p><strong>Note:</strong> {{ $selectedExpense->expense->notes }}</p>
+                                    </div>
                                 </div>
 
+                                <!-- Generated Expenses -->
+                                <div class="mt-6">
+                                    <h3 class="text-md font-semibold text-white mb-2">Generated Expenses</h3>
+                                    <div class="overflow-y-auto max-h-60 bg-gray-800 p-4 rounded-lg shadow">
+                                        <ul class="space-y-3">
+                                            @forelse($selectedExpense->generatedExpenses as $expense)
+                                                <li class="border-b border-gray-600 pb-2">
+                                                    <p><strong>Processed At:</strong> {{ $expense->created_at->format('Y-m-d h:i A') }}</p>
+                                                    <p><strong>Amount:</strong> KES {{ number_format($expense->amount, 2) }}</p>
+                                                </li>
+                                            @empty
+                                                <p class="text-gray-400">No generated expenses yet.</p>
+                                            @endforelse
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- Close Button -->
                                 <div class="mt-6 flex justify-end space-x-4">
                                     <button @click="open = false"
                                             class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded">
