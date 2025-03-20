@@ -18,8 +18,7 @@ class Expense extends Model
         'amount',
         'date',
         'category',
-        'notes',
-        'is_recurring'
+        'notes'
     ];
 
     /**
@@ -29,11 +28,6 @@ class Expense extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function recurringExpense()
-    {
-        return $this->belongsTo(RecurringExpense::class, 'recurring_expense_id');
     }
 
     protected $casts = [

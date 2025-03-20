@@ -15,12 +15,12 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $admin = User::where('email', 'jkm96dev@ecodirectory.io')->first();
+        $admin = User::where('email', 'jkmdev@expensetracker.io')->first();
 
         if (!$admin) {
             User::create([
                 'username' => 'jkm96dev',
-                'email' => 'jkm96dev@ecodirectory.io',
+                'email' => 'jkmdev@expensetracker.io',
                 'password' => Hash::make('jkm@2pac'),
                 'is_active' => 1,
                 'is_email_verified' => 1,

@@ -53,13 +53,10 @@ class RecurringExpenseManager extends Component
 
     public function loadRecurringExpenses()
     {
-        $query = RecurringExpense::with('expense')
-            ->where('user_id', auth()->id());
+        $query = RecurringExpense::where('user_id', auth()->id());
 
         if ($this->categoryFilter !== 'all') {
-            $query->whereHas('expense', function ($q) {
-                $q->where('category', $this->categoryFilter);
-            });
+            $query->where('category', $this->categoryFilter);
         }
 
         if ($this->frequencyFilter !== 'all') {
@@ -89,16 +86,12 @@ class RecurringExpenseManager extends Component
         if ($this->recurring_expense_id) {
             // Update Existing Recurring Expense
             $recurringExpense = RecurringExpense::findOrFail($this->recurring_expense_id);
-            $expense = $recurringExpense->expense;
-
-            $expense->name = Str::title($this->name);
-            $expense->amount = $this->amount;
-            if (empty($expense->notes)) {
-                $expense->notes = ExpenseHelper::generateDefaultNote($this->category, $this->name);
-            }
-            $expense->update();
 
             $recurringExpense->update([
+                'name' => Str::title($this->name),
+                'amount' => $this->amount,
+                'category' => $this->category,
+                'notes' => ExpenseHelper::generateDefaultNote($this->category, $this->name),
                 'start_date' => $this->start_date,
                 'frequency' => $this->frequency,
                 'next_process_at' => $nextProcessAt,
@@ -106,23 +99,16 @@ class RecurringExpenseManager extends Component
 
             session()->flash('success', 'Recurring expense updated successfully.');
         } else {
-            // Create New Expense
-            $expense = Expense::create([
+            RecurringExpense::create([
                 'user_id' => auth()->id(),
                 'name' => Str::title($this->name),
                 'amount' => $this->amount,
                 'category' => $this->category,
-                'date' => now(),
-                'notes' => ExpenseHelper::generateDefaultNote($this->category, $this->name)
-            ]);
-
-            RecurringExpense::create([
-                'expense_id' => $expense->id,
-                'user_id' => auth()->id(),
+                'notes' => ExpenseHelper::generateDefaultNote($this->category, $this->name),
                 'start_date' => $this->start_date,
                 'frequency' => $this->frequency,
-                'is_active' => true,
                 'next_process_at' => $nextProcessAt,
+                'is_active' => true,
             ]);
 
             session()->flash('success', 'Recurring expense added successfully.');
@@ -137,9 +123,9 @@ class RecurringExpenseManager extends Component
         $recurringExpense = RecurringExpense::findOrFail($id);
 
         $this->recurring_expense_id = $recurringExpense->id;
-        $this->name = $recurringExpense->expense->name;
-        $this->category = $recurringExpense->expense->category->value;
-        $this->amount = $recurringExpense->expense->amount;
+        $this->name = $recurringExpense->name;
+        $this->category = $recurringExpense->category->value;
+        $this->amount = $recurringExpense->amount;
         $this->start_date = Carbon::parse($recurringExpense->start_date)->toDateTimeString();
         $this->frequency = $recurringExpense->frequency->value;
 
@@ -190,7 +176,7 @@ class RecurringExpenseManager extends Component
 
     public function showRecurringExpenseDetails($id)
     {
-        $this->selectedExpense = RecurringExpense::with('expense','generatedExpenses')->findOrFail($id);
+        $this->selectedExpense = RecurringExpense::with('generatedExpenses')->findOrFail($id);
         $this->showDetailsModal = true;
     }
 

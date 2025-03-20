@@ -1,5 +1,6 @@
 <?php
 
+use App\Utils\Enums\ExpenseCategory;
 use App\Utils\Enums\ExpenseFrequency;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -14,9 +15,14 @@ return new class extends Migration
     {
         Schema::create('recurring_expenses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('expense_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->date('start_date');
+            $table->string('name');
+            $table->decimal('amount', 10, 2);
+            $table->enum('category', ExpenseCategory::values());
+            $table->text('notes')->nullable();
+            $table->dateTime('start_date');
+            $table->dateTime('last_processed_at')->nullable();
+            $table->dateTime('next_process_at')->nullable();
             $table->enum('frequency', ExpenseFrequency::values());
             $table->boolean('is_active')->default(true);
             $table->timestamps();

@@ -53,11 +53,7 @@ class ExpenseManager extends Component
 
     public function loadExpenses()
     {
-        $query = Expense::where('user_id', Auth::id())
-            ->whereDoesntHave('recurringExpense')
-            ->orWhereHas('recurringExpense', function ($query) {
-                $query->whereDate('start_date', '<=', now());
-            });
+        $query = Expense::where('user_id', Auth::id());
 
         if ($this->filter !== 'all') {
             $query->where('category', '=', ExpenseCategory::from($this->filter));

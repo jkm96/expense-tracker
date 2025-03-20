@@ -2,14 +2,18 @@
 
 namespace App\Models;
 
+use App\Utils\Enums\ExpenseCategory;
 use App\Utils\Enums\ExpenseFrequency;
 use Illuminate\Database\Eloquent\Model;
 
 class RecurringExpense extends Model
 {
     protected $fillable = [
-        'expense_id',
         'user_id',
+        'name',
+        'amount',
+        'category',
+        'notes',
         'start_date',
         'frequency',
         'is_active',
@@ -19,16 +23,12 @@ class RecurringExpense extends Model
 
     protected $casts = [
         'frequency' => ExpenseFrequency::class,
+        'category' => ExpenseCategory::class,
         'start_date' => 'datetime',
         'last_processed_at' => 'datetime',
         'next_process_at' => 'datetime',
         'is_active' => 'boolean',
     ];
-
-    public function expense()
-    {
-        return $this->belongsTo(Expense::class);
-    }
 
     public function generatedExpenses()
     {

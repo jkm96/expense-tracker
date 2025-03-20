@@ -39,21 +39,20 @@ class ProcessRecurringExpenses extends Command
 
         $now = Carbon::now();
 
-        $recurringExpenses = RecurringExpense::with('expense')
-            ->where('is_active', true)
+        $recurringExpenses = RecurringExpense::         where('is_active', true)
             ->where('next_process_at', '<=', $now)
             ->get();
 
         $recurringExpenses->each(function ($recurring) use ($now) {
-            Log::info("Processing: {$recurring->expense->name}");
+            Log::info("Processing: {$recurring->name}");
 
             Expense::create([
                 'user_id' => $recurring->user_id,
                 'recurring_expense_id' => $recurring->id,
-                'name' => $recurring->expense->name,
-                'amount' => $recurring->expense->amount,
-                'category' => $recurring->expense->category,
-                'notes' => $recurring->expense->notes,
+                'name' => $recurring->name,
+                'amount' => $recurring->amount,
+                'category' => $recurring->category,
+                'notes' => $recurring->notes,
                 'date' => $now->toDateString(),
             ]);
 
@@ -64,11 +63,11 @@ class ProcessRecurringExpenses extends Command
                 'next_process_at' => $nextProcessTime->toDateTimeString(),
             ]);
 
-            $user = User::findOrFail($recurring->expense->user_id);
-            $message = "Your recurring expense: {$recurring->expense->name} has been processed successfully at: {$recurring->last_processed_at->format('Y-m-d h:i A')}";
+            $user = User::findOrFail($recurring->user_id);
+            $message = "Your recurring expense: {$recurring->name} has been processed successfully at: {$recurring->last_processed_at->format('Y-m-d h:i A')}";
             $user->notify(new ExpenseReminderNotification($message, NotificationType::ALERT));
 
-            Log::info("Processed: {$recurring->expense->name}");
+            Log::info("Processed: {$recurring->name}");
         });
 
         Log::info('Finished processing recurring expenses!');
