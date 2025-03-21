@@ -139,7 +139,7 @@ class ExpenseManager extends Component
                     'notes' => !empty($this->notes) ? $this->notes : $defaultNote,
                 ]);
 
-                session()->flash('success', 'Expense updated successfully!');
+                $this->dispatch('global-toast', details: ['message' => 'Expense updated successfully!', 'type' => 'success']);
             }
         } else {
             // Create new expense
@@ -152,7 +152,7 @@ class ExpenseManager extends Component
                 'user_id' => Auth::id(),
             ]);
 
-            session()->flash('success', 'Expense added successfully!');
+            $this->dispatch('global-toast', ['message' => 'Expense added successfully!', 'type' => 'success']);
         }
 
         $this->showForm = false;
@@ -196,7 +196,7 @@ class ExpenseManager extends Component
         $expense = Expense::where('id', $this->expenseIdToDelete)->where('user_id', Auth::id())->first();
         if ($expense) {
             $expense->delete();
-            session()->flash('success', 'Expense deleted successfully!');
+            $this->dispatch('global-toast', details: ['message' => 'Expense deleted successfully!', 'type' => 'success']);
         }
 
         $this->showDeleteModal = false;

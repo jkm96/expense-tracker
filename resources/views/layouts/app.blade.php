@@ -50,6 +50,29 @@
 <!-- Livewire Scripts -->
 @livewireScripts
 
+<script>
+    document.addEventListener('livewire:init', () => {
+        Livewire.on('global-toast', (event) => {
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true
+            };
+            if (event.details.type === 'success'){
+                toastr.success(event.details.message);
+            }
+            if (event.details.type === 'error'){
+                toastr.error(event.details.message);
+            }
+            if (event.details.type === 'warning'){
+                toastr.warning(event.details.message);
+            }
+            if (event.details.type === 'info'){
+                toastr.info(event.details.message);
+            }
+        });
+    });
+</script>
+
 <script type="text/javascript">
     $(document).ready(function () {
         @if(Session::has('success'))

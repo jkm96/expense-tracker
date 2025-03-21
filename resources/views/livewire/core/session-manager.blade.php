@@ -1,7 +1,7 @@
 <div class="p-2">
     <div class="space-y-1 py-2">
         <div class="flex items-center justify-between">
-            <h2 class="text-lg font-bold flex items-center gap-2">
+            <h2 class="text-md font-bold flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-600" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -9,7 +9,7 @@
                 Active Sessions
             </h2>
             <span
-                class="inline-flex items-center gap-1 py-1 px-2 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
+                class="inline-flex items-center gap-1 py-0.5 px-2 rounded-full text-xs font-medium bg-green-400 text-gray-900">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"/>
@@ -21,25 +21,7 @@
     </div>
 
     <div class="">
-        @if(session()->has('success'))
-            <div class="bg-gray-700 border border-green-500 text-green-500 p-2 shadow-md rounded mb-2">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if(session()->has('info'))
-            <div class="bg-gray-700 border border-blue-500 text-blue-500 p-2 shadow-md rounded mb-2">
-                {{ session('info') }}
-            </div>
-        @endif
-
-        @if(session()->has('error'))
-            <div class="bg-gray-700 border border-red-500 text-red-500 p-2 shadow-md rounded mb-2">
-                {{ session('error') }}
-            </div>
-        @endif
-
-        <div class="overflow-hidden bg-gray-700">
+        <div class="overflow-hidden rounded-sm bg-gray-700">
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead>
@@ -80,13 +62,13 @@
                                     @endif
 
                                     <div>
-                                        <div class="font-medium">{{ $session->deviceName }}</div>
+                                        <div class="text-sm">{{ $session->deviceName }}</div>
                                         <div class="text-xs text-gray-400">{{ $session->browserName }}</div>
                                     </div>
                                 </div>
                             </td>
                             <td class="px-4 py-3">
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 text-sm">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500"
                                          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                          stroke-linecap="round" stroke-linejoin="round">
@@ -98,42 +80,16 @@
                                     {{ $session->ip_address }}
                                 </div>
                             </td>
-                            <td class="px-4 py-3 text-gray-300">
+                            <td class="px-4 py-3 text-sm text-gray-300">
                                 {{ \Carbon\Carbon::createFromTimestamp($session->last_activity)->diffForHumans() }}
                             </td>
                             <td class="px-4 py-3">
                                 @if($session->id === session()->getId())
-                                    <span
-                                        class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-green-50 text-green-700 border border-green-200">
-                                                Current Session
-                                            </span>
+                                    <span class="relative flex h-3 w-3">
+                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                                    </span>
                                 @else
-                                    <!-- Logout Confirmation Modal -->
-                                    @if($showLogoutModal)
-                                        <div x-data="{ open: @entangle('showLogoutModal') }" x-show="open"
-                                             class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
-
-                                            <!-- Modal Content -->
-                                            <div class="bg-gray-700 rounded-lg shadow-lg w-96 p-6">
-                                                <h2 class="text-lg font-bold">Confirm Session Logout</h2>
-                                                <p class="mt-4">
-                                                    Are you sure you want to log out this session? The user will need to
-                                                    login again to access their account.
-                                                </p>
-                                                <div class="mt-6 flex justify-between space-x-4">
-                                                    <button @click="open = false"
-                                                            class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded">
-                                                        Cancel
-                                                    </button>
-                                                    <button wire:click="logoutSession"
-                                                            class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded">
-                                                        Logout
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endif
-
                                     <button
                                         wire:click="confirmLogout('{{ $session->id }}')"
                                         class="inline-flex items-center gap-1 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-md transition-colors"
@@ -147,6 +103,32 @@
                                         </svg>
                                         Logout
                                     </button>
+
+                                    <!-- Logout Confirmation Modal -->
+                                    @if($showLogoutModal)
+                                        <div x-data="{ open: @entangle('showLogoutModal') }" x-show="open"
+                                             class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+
+                                            <!-- Modal Content -->
+                                            <div class="bg-gray-700 rounded-lg shadow-lg w-96 p-4">
+                                                <h2 class="text-md font-bold mb-4">Confirm Session Logout</h2>
+                                                <p class="text-sm">
+                                                    Are you sure you want to log out this session? The user will need to
+                                                    login again to access their account.
+                                                </p>
+                                                <div class="mt-4 flex justify-between space-x-4">
+                                                    <button @click="open = false"
+                                                            class="bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm py-1 px-2 rounded">
+                                                        Cancel
+                                                    </button>
+                                                    <button wire:click="logoutSession"
+                                                            class="bg-red-600 hover:bg-red-700 text-white text-sm py-1 px-2 rounded">
+                                                        Logout
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
                                 @endif
                             </td>
                         </tr>
@@ -164,7 +146,7 @@
 
         <div class="mt-4 space-y-4">
             <div class="flex items-center">
-                <h3 class="text-lg font-semibold">Logout from Other Devices</h3>
+                <h3 class="text-md font-semibold">Logout from Other Devices</h3>
             </div>
 
             <div class="flex flex-col sm:flex-row gap-2 items-stretch max-w-xl">
@@ -172,12 +154,12 @@
                     type="password"
                     wire:model.defer="password"
                     placeholder="Enter your password to confirm ..."
-                    class="sm:w-1/2 w-full p-2 bg-gray-700 border rounded focus:ring focus:ring-blue-300"
+                    class="sm:w-1/2 w-full text-sm p-1 bg-gray-700 border rounded focus:ring focus:ring-blue-300"
                 />
 
                 <button
                     wire:click="confirmLogoutOtherDevices"
-                    class="inline-flex items-center justify-center gap-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md transition-colors"
+                    class="inline-flex items-center justify-center gap-1 px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded-md transition-colors"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -200,16 +182,18 @@
                  class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
 
                 <!-- Modal Content -->
-                <div class="bg-gray-700 rounded-lg shadow-lg w-96 p-6">
-                    <h2 class="text-lg font-bold">Confirm Logout Other Devices</h2>
-                    <p class="mb-4">Are you sure you want to log out from all other devices?</p>
-                    <div class="mt-6 flex justify-between space-x-4">
+                <div class="bg-gray-700 rounded-md shadow-lg w-96 p-4">
+                    <h2 class="text-md font-bold mb-2">Confirm Logout Other Devices</h2>
+
+                    <p class="text-sm">Are you sure you want to log out from all other devices?</p>
+
+                    <div class="mt-4 flex justify-between space-x-4">
                         <button @click="open = false"
-                                class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded">
+                                class="bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm py-1 px-2 rounded">
                             Cancel
                         </button>
                         <button wire:click="logoutOtherDevices"
-                                class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded">
+                                class="bg-red-600 hover:bg-red-700 text-white text-sm py-1 px-2 rounded">
                             Logout
                         </button>
                     </div>

@@ -112,7 +112,7 @@ class RecurringExpenseManager extends Component
                 'next_process_at' => $nextProcessAt,
             ]);
 
-            session()->flash('success', 'Recurring expense updated successfully.');
+            $this->dispatch('global-toast', details: ['message' => 'Recurring expense updated successfully!', 'type' => 'success']);
         } else {
             RecurringExpense::create([
                 'user_id' => auth()->id(),
@@ -126,7 +126,7 @@ class RecurringExpenseManager extends Component
                 'is_active' => true,
             ]);
 
-            session()->flash('success', 'Recurring expense added successfully.');
+            $this->dispatch('global-toast', details: ['message' => 'Recurring expense added successfully!', 'type' => 'success']);
         }
 
         $this->showForm = false;
@@ -164,7 +164,7 @@ class RecurringExpenseManager extends Component
         $expense->update(['is_active' => !$expense->is_active]);
 
         $status = $expense->is_active ? 'resumed' : 'stopped';
-        session()->flash('success', "Recurring expense has been {$status}.");
+        $this->dispatch('global-toast', details: ['message' => "Recurring expense has been {$status}.", 'type' => 'success']);
 
         $this->showToggleModal = false;
         $this->selectedExpenseId = null;
@@ -183,7 +183,7 @@ class RecurringExpenseManager extends Component
         $expense = RecurringExpense::where('id', $this->selectedExpenseId)->first();
         if ($expense) {
             $expense->delete();
-            session()->flash('success', 'Recurring expense deleted successfully!');
+            $this->dispatch('global-toast', details: ['message' => 'Recurring expense deleted successfully!', 'type' => 'success']);
         }
 
         $this->showDeleteModal = false;

@@ -1,11 +1,4 @@
 <div class="mx-auto mt-5">
-
-    @if (session()->has('success'))
-        <div class="bg-green-500 text-white p-2 shadow-md rounded mb-2">
-            {{ session('success') }}
-        </div>
-    @endif
-
     <!-- Floating Add Button -->
     <button wire:click="toggleForm"
             class="fixed bottom-16 right-4 bg-green-400 hover:bg-green-700 text-white w-14 h-14 flex items-center justify-center rounded-full shadow-lg transition">

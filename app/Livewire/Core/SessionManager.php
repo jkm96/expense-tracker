@@ -64,14 +64,15 @@ class SessionManager extends Component
             $this->getActiveSessions();
             $this->sessionIdToLogout = null;
             $this->showLogoutModal = false;
-            session()->flash('success', 'Logged out device successfully!');
+
+            $this->dispatch('global-toast', details: ['message' => 'Logged out device successfully!', 'type' => 'success']);
         }
     }
 
     public function confirmLogoutOtherDevices()
     {
         if (!$this->password) {
-            session()->flash('error', 'Please enter your password.');
+            $this->dispatch('global-toast', details: ['message' => 'Please enter your password!', 'type' => 'error']);
             return;
         }
         $this->showLogoutOtherDevicesModal = true;
@@ -81,7 +82,7 @@ class SessionManager extends Component
     {
         if (!Auth::validate(['email' => auth()->user()->email, 'password' => $this->password])) {
             $this->showLogoutOtherDevicesModal = false;
-            session()->flash('error', 'Incorrect password.');
+            $this->dispatch('global-toast', details: ['message' => 'Incorrect password!', 'type' => 'error']);
             return;
         }
 
@@ -93,6 +94,7 @@ class SessionManager extends Component
 
         if ($otherSessions->isEmpty()) {
             session()->flash('info', 'No other active sessions found.');
+            $this->dispatch('global-toast', details: ['message' => 'No other active sessions found!', 'type' => 'info']);
             return;
         }
 
@@ -118,7 +120,7 @@ class SessionManager extends Component
         $this->password = '';
         $this->showLogoutOtherDevicesModal = false;
         $this->getActiveSessions();
-        session()->flash('success', 'Logged out from other devices successfully!');
+        $this->dispatch('global-toast', details: ['message' => 'Logged out from other devices successfully!', 'type' => 'info']);
     }
 
     public function render()

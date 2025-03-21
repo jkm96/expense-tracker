@@ -50,18 +50,21 @@ class UserNotifications extends Component
     {
         Auth::user()->unreadNotifications->markAsRead();
         $this->loadUnreadCount();
+        $this->dispatch('global-toast', details: ['message' => 'Marked all notifications as read!', 'type' => 'success']);
     }
 
     public function deleteNotification($notificationId)
     {
         Auth::user()->notifications()->where('id', $notificationId)->delete();
         $this->loadUnreadCount();
+        $this->dispatch('global-toast', details: ['message' => 'Deleted notification!', 'type' => 'success']);
     }
 
     public function deleteAllNotifications()
     {
         Auth::user()->notifications()->delete();
         $this->loadUnreadCount();
+        $this->dispatch('global-toast', details: ['message' => 'Deleted all notifications!', 'type' => 'success']);
     }
 
     public function render()

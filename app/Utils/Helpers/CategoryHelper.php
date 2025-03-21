@@ -14,7 +14,7 @@ class CategoryHelper
             ExpenseCategory::CLOTHING->value => ['bg-orange-400', 'bg-orange-500'],
             ExpenseCategory::UTILITIES->value => ['bg-yellow-400', 'bg-yellow-500'],
             ExpenseCategory::KNOWLEDGE->value => ['bg-red-400', 'bg-red-500'],
-            ExpenseCategory::LIFESTYLE->value => ['bg-gray-900', 'bg-gray-800'],
+            ExpenseCategory::LIFESTYLE->value => ['bg-gray-800', 'bg-gray-900'],
             ExpenseCategory::OTHER->value => ['bg-gray-400', 'bg-gray-500']
         ];
 
