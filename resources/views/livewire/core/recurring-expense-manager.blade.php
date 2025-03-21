@@ -14,19 +14,19 @@
                 <form wire:submit.prevent="upsertRecurringExpense" class="space-y-3">
                     <div class="mb-4">
                         <input type="text" wire:model="name" placeholder="Expense Name"
-                               class="w-full p-2 bg-gray-700 border rounded focus:ring focus:ring-blue-300">
+                               class="w-full p-2 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
                         @error('name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
 
                     <div class="mb-4">
                         <input type="number" wire:model="amount" placeholder="Amount"
-                               class="w-full p-2 bg-gray-700 border rounded focus:ring focus:ring-blue-300">
+                               class="w-full p-2 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
                         @error('amount') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
 
                     <div class="mb-4">
                         <select wire:model="category"
-                                class="w-full p-2 bg-gray-700 border rounded focus:ring focus:ring-blue-300">
+                                class="w-full p-2 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
                             <option value="">Select Category</option>
                             @foreach($categories as $category)
                                 <option value="{{ $category->value }}">{{ ucfirst($category->value) }}</option>
@@ -37,13 +37,13 @@
 
                     <div class="mb-4">
                         <input type="datetime-local" wire:model="start_date" placeholder="Start date"
-                               class="w-full p-2 bg-gray-700 border rounded focus:ring focus:ring-blue-300">
+                               class="w-full p-2 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
                         <p class="text-sm text-gray-400">Select the starting date for the recurring expense.</p>
                         @error('start_date') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
 
                     <select id="frequency" wire:model="frequency" required
-                            class="w-full p-2 bg-gray-700 border rounded focus:ring focus:ring-blue-300">
+                            class="w-full p-2 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
                         <option value="">Select Frequency</option>
                         @foreach($frequencies as $freq)
                             <option value="{{ $freq->value }}">{{ ucfirst($freq->value) }}</option>

@@ -25,14 +25,14 @@
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead>
-                    <tr class="">
-                        <th class="px-4 py-3 text-left font-medium">Device</th>
-                        <th class="px-4 py-3 text-left font-medium">IP Address</th>
-                        <th class="px-4 py-3 text-left font-medium">Last Active</th>
-                        <th class="px-4 py-3 text-left font-medium">Action</th>
+                    <tr class="text-sm">
+                        <th class="px-4 py-3 text-left">Device</th>
+                        <th class="px-4 py-3 text-left">IP Address</th>
+                        <th class="px-4 py-3 text-left">Last Active</th>
+                        <th class="px-4 py-3 text-left">Action</th>
                     </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="text-sm">
                     @forelse($sessions as $session)
                         <tr class="border-t border-gray-600 hover:bg-gray-500">
                             <td class="px-4 py-3">
