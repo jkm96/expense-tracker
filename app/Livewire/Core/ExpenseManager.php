@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -27,15 +28,10 @@ class ExpenseManager extends Component
     public $categories = [];
     #[Url]
     public $filter = 'all';
+    public $showDetailsModal = false;
+    public $selectedExpense;
     public $showDeleteModal = false;
     public $expenseIdToDelete;
-
-    public function loadMore()
-    {
-        $this->page++;
-        $this->loadExpenses();
-    }
-
     public function mount()
     {
         $this->date = Carbon::now()->format('Y-m-d');
@@ -43,6 +39,27 @@ class ExpenseManager extends Component
         $this->page = 1;
         $this->categories = ExpenseCategory::cases();
         $this->loadExpenses();
+    }
+
+    public function loadMore()
+    {
+        $this->page++;
+        $this->loadExpenses();
+    }
+
+    #[On('toggleForm')]
+    public function toggleForm()
+    {
+        $this->showForm = !$this->showForm;
+        $this->dispatch('upsert-form-updated', details:  ['showForm'=>$this->showForm,'expenseId'=>null]);
+    }
+
+    #[On('closeModal')]
+    public function closeModal()
+    {
+        $this->showForm = false;
+        $this->dispatch('upsert-form-updated', details:  ['showForm'=>$this->showForm,'expenseId'=>null]);
+        $this->resetFields();
     }
 
     public function updatedFilter()
@@ -143,9 +160,10 @@ class ExpenseManager extends Component
         $this->loadExpenses();
     }
 
-    public function editExpense($id)
+    #[On('editExpense')]
+    public function editExpense($expenseId)
     {
-        $expense = Expense::where('id', $id)->where('user_id', Auth::id())->first();
+        $expense = Expense::where('id', $expenseId)->where('user_id', Auth::id())->first();
 
         if ($expense) {
             $this->expense_id = $expense->id;
@@ -154,8 +172,15 @@ class ExpenseManager extends Component
             $this->date = Carbon::parse($expense->date)->format('Y-m-d');
             $this->category = $expense->category->value;
             $this->notes = $expense->notes;
-            $this->showForm = true;
+            $this->showForm = !$this->showForm;
+            $this->dispatch('upsert-form-updated', details:  ['showForm'=>$this->showForm,'expenseId'=>$expenseId]);
         }
+    }
+
+    public function showExpenseDetails($id)
+    {
+        $this->selectedExpense = Expense::findOrFail($id);
+        $this->showDetailsModal = true;
     }
 
     public function showDeleteConfirmation($id)
@@ -181,7 +206,7 @@ class ExpenseManager extends Component
 
     public function resetFields()
     {
-        $this->reset(['name', 'amount', 'date', 'category', 'notes', 'expense_id', 'showForm','filter']);
+        $this->reset(['name', 'amount', 'date', 'category', 'notes', 'expense_id', 'showForm', 'filter']);
         $this->date = Carbon::now()->format('Y-m-d');
     }
 }

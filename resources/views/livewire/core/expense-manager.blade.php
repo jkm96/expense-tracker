@@ -7,7 +7,7 @@
     @endif
 
     <!-- Floating Add Button -->
-    <button wire:click="$toggle('showForm')"
+    <button wire:click="toggleForm"
             class="fixed bottom-16 right-4 bg-green-400 hover:bg-green-700 text-white w-14 h-14 flex items-center justify-center rounded-full shadow-lg transition">
         <i class="fas fa-plus text-xl"></i>
     </button>
@@ -15,7 +15,7 @@
     <!-- Expense Form (Modal Style) -->
     @if ($showForm)
         <div class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
-            <div class="bg-gray-700 p-6 rounded-lg shadow-lg w-96">
+            <div class="bg-gray-700 p-3 rounded-md shadow-lg w-96">
                 <h2 class="text-lg font-bold mb-4">{{ $expense_id ? 'Edit Expense' : 'Add Expense' }}</h2>
 
                 <form wire:submit.prevent="addExpense" class="space-y-3">
@@ -36,7 +36,7 @@
                               class="w-full p-2 bg-gray-700 border rounded focus:ring focus:ring-blue-300"></textarea>
 
                     <div class="flex justify-between">
-                        <button type="button" wire:click="resetFields"
+                        <button type="button" wire:click="closeModal"
                                 class="bg-red-600 text-white px-2 py-1 rounded shadow hover:bg-red-500 transition">
                             Cancel
                         </button>
@@ -114,11 +114,56 @@
 
                         <!-- Actions -->
                         <div class="mt-2 text-sm flex justify-end">
+                            <button wire:click="showExpenseDetails({{ $expense->id }})"
+                                    class="text-green-500 hover:underline mr-1">
+                                View
+                            </button>
+
                             <button wire:click="editExpense({{ $expense->id }})" class="text-blue-500 hover:underline">
                                 Edit
                             </button>
 
-                            <!-- Confirmation Modal -->
+                            <button
+                                wire:click="showDeleteConfirmation({{ $expense->id }})"
+                                class="ml-1 hover:underline text-red-600"
+                            >
+                                Delete
+                            </button>
+
+                            @if($showDetailsModal && $selectedExpense)
+                                <div x-data="{ open: @entangle('showDetailsModal') }" x-show="open"
+                                     class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+
+                                    <div class="bg-gray-700 rounded-md shadow-lg w-96 p-2">
+                                        <h2 class="text-lg font-bold mb-2">Expense Details</h2>
+
+                                        <div class="mt-2 space-y-2 text-gray-300">
+                                            <p><strong>Name:</strong> {{ ucfirst($selectedExpense->name) }}</p>
+                                            <p>
+                                                <strong>Category:</strong> {{ ucfirst($selectedExpense->category->value) }}
+                                            </p>
+                                            <p><strong>Amount:</strong>
+                                                KES {{ number_format($selectedExpense->amount, 2) }}</p>
+                                            <p><strong>Creation
+                                                    Date:</strong> {{ $selectedExpense->created_at->format('Y-m-d h:i A') }}
+                                            </p>
+                                            <p><strong>Modified
+                                                    Date:</strong> {{ $selectedExpense->updated_at?->format('Y-m-d h:i A') }}
+                                            </p>
+                                            <p><strong>Note:</strong> {{ $selectedExpense->notes }}</p>
+                                        </div>
+
+                                        <!-- Close Button -->
+                                        <div class="mt-2 flex justify-end space-x-4">
+                                            <button @click="open = false"
+                                                    class="bg-red-600 hover:bg-red-500 py-2 px-4 rounded">
+                                                Close
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
                             @if($showDeleteModal)
                                 <div x-data="{ open: @entangle('showDeleteModal') }" x-show="open"
                                      class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
@@ -141,13 +186,6 @@
                                     </div>
                                 </div>
                             @endif
-
-                            <button
-                                wire:click="showDeleteConfirmation({{ $expense->id }})"
-                                class="ml-1 hover:underline text-red-600"
-                            >
-                                Delete
-                            </button>
                         </div>
                     </div>
                 @endforeach
@@ -170,4 +208,35 @@
             <button wire:click="loadMore" class="px-2 py-1.5 bg-green-400 text-white rounded">Load More</button>
         @endif
     </div>
+
+    @script
+    <script>
+        $(document).ready(function () {
+            let modalStateDetails = JSON.parse(localStorage.getItem('showExpenseForm'));
+
+            console.info('showExpenseForm', modalStateDetails);
+
+            if (modalStateDetails && modalStateDetails.showForm === true) {
+                if (modalStateDetails.expenseId) {
+                    console.info('expenseId', modalStateDetails.expenseId);
+                    $wire.dispatch('editExpense', {expenseId:modalStateDetails.expenseId});
+                } else {
+                    // Trigger add form
+                    $wire.dispatch('toggleForm');
+                }
+            }
+        });
+
+        $wire.on('upsert-form-updated', (event) => {
+            console.info("Event received", event.details);
+            localStorage.setItem('showExpenseForm', JSON.stringify(event.details));
+        });
+
+        $wire.on('closeModal', (event) => {
+            console.info("Event received", event.details);
+            localStorage.removeItem('showExpenseForm');
+        });
+    </script>
+    @endscript
 </div>
+

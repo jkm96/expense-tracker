@@ -15,7 +15,7 @@
     <!-- Expense Form (Modal Style) -->
     @if ($showForm)
         <div class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
-            <div class="bg-gray-700 p-6 rounded-lg shadow-lg w-96">
+            <div class="bg-gray-700 p-3 rounded-lg shadow-lg w-96">
                 <h2 class="text-lg font-bold mb-4">{{ $recurring_expense_id ? 'Edit Recurring Expense' : 'Add Recurring Expense' }}</h2>
 
                 <form wire:submit.prevent="upsertRecurringExpense" class="space-y-3">
@@ -177,11 +177,11 @@
                              class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
 
                             <div class="bg-gray-700 rounded-lg shadow-lg w-[600px] p-2">
-                                <h2 class="text-lg font-bold mb-4">Recurring Expense Details</h2>
+                                <h2 class="text-lg font-bold mb-2">Recurring Expense Details</h2>
 
-                                <!-- Parent Expense Details -->
+                                <h3 class="text-md font-semibold text-white mb-2">Parent Expense</h3>
+
                                 <div class="bg-gray-800 p-4 rounded-lg shadow">
-                                    <h3 class="text-md font-semibold text-white">Parent Expense</h3>
                                     <div class="mt-2 space-y-2 text-gray-300">
                                         <p><strong>Name:</strong> {{ ucfirst($selectedExpense->name) }}</p>
                                         <p><strong>Category:</strong> {{ ucfirst($selectedExpense->category->value) }}</p>
@@ -209,7 +209,7 @@
                                 </div>
 
                                 <!-- Generated Expenses -->
-                                <div class="mt-6">
+                                <div class="mt-2">
                                     <h3 class="text-md font-semibold text-white mb-2">Generated Expenses</h3>
                                     <div class="overflow-y-auto max-h-60 bg-gray-800 p-4 rounded-lg shadow">
                                         <ul class="space-y-3">
@@ -226,9 +226,9 @@
                                 </div>
 
                                 <!-- Close Button -->
-                                <div class="mt-6 flex justify-end space-x-4">
+                                <div class="mt-2 flex justify-end space-x-4">
                                     <button @click="open = false"
-                                            class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded">
+                                            class="bg-red-600 hover:bg-red-500 py-2 px-4 rounded">
                                         Close
                                     </button>
                                 </div>

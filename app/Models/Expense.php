@@ -32,6 +32,8 @@ class Expense extends Model
 
     protected $casts = [
         'date' => 'date',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
         'amount' => 'decimal:2',
         'category' => ExpenseCategory::class,
     ];
