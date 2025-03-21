@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
@@ -39,6 +40,20 @@ class RecurringExpenseManager extends Component
         $this->categories = ExpenseCategory::cases();
         $this->frequencies = ExpenseFrequency::cases();
         $this->loadRecurringExpenses();
+    }
+
+    #[On('toggleForm')]
+    public function toggleForm()
+    {
+        $this->showForm = !$this->showForm;
+        $this->dispatch('upsert-form-updated', details:  ['showForm'=>$this->showForm,'recurringExpenseId'=>null]);
+    }
+
+    public function closeModal()
+    {
+        $this->showForm = false;
+        $this->dispatch('upsert-form-updated', details:  ['showForm'=>$this->showForm,'recurringExpenseId'=>null]);
+        $this->resetFields();
     }
 
     public function updatedFilter()
@@ -114,13 +129,16 @@ class RecurringExpenseManager extends Component
             session()->flash('success', 'Recurring expense added successfully.');
         }
 
+        $this->showForm = false;
+        $this->dispatch('upsert-form-updated', details:  ['showForm'=>$this->showForm,'recurringExpenseId'=>null]);
         $this->resetFields();
         $this->loadRecurringExpenses();
     }
 
-    public function editRecurringExpense($id)
+    #[On('editExpense')]
+    public function editRecurringExpense($recurringExpenseId)
     {
-        $recurringExpense = RecurringExpense::findOrFail($id);
+        $recurringExpense = RecurringExpense::findOrFail($recurringExpenseId);
 
         $this->recurring_expense_id = $recurringExpense->id;
         $this->name = $recurringExpense->name;
@@ -129,7 +147,8 @@ class RecurringExpenseManager extends Component
         $this->start_date = Carbon::parse($recurringExpense->start_date)->toDateTimeString();
         $this->frequency = $recurringExpense->frequency->value;
 
-        $this->showForm = true;
+        $this->showForm = !$this->showForm;
+        $this->dispatch('upsert-form-updated', details:  ['showForm'=>$this->showForm,'recurringExpenseId'=>$recurringExpenseId]);
     }
 
     public function showToggleConfirmation($id)

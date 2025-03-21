@@ -7,7 +7,7 @@
     @endif
 
     <!-- Floating Add Button -->
-    <button wire:click="$toggle('showForm')"
+    <button wire:click="toggleForm"
             class="fixed bottom-16 right-4 bg-green-400 hover:bg-green-700 text-white w-14 h-14 flex items-center justify-center rounded-full shadow-lg transition">
         <i class="fas fa-plus text-xl"></i>
     </button>
@@ -58,7 +58,7 @@
                     </select>
 
                     <div class="flex justify-between">
-                        <button type="button" wire:click="resetFields"
+                        <button type="button" wire:click="closeModal"
                                 class="bg-red-600 text-white px-2 py-1 rounded shadow hover:bg-red-500 transition">
                             Cancel
                         </button>
@@ -296,4 +296,23 @@
             <p>No recurring expenses found</p>
         @endforelse
     </div>
+
+        @script
+        <script>
+            $(document).ready(function () {
+                let modalStateDetails = JSON.parse(localStorage.getItem('showRExpenseForm'));
+                if (modalStateDetails && modalStateDetails.showForm === true) {
+                    if (modalStateDetails.recurringExpenseId) {
+                        $wire.dispatch('editExpense', {recurringExpenseId:modalStateDetails.recurringExpenseId});
+                    } else {
+                        $wire.dispatch('toggleForm');
+                    }
+                }
+            });
+
+            $wire.on('upsert-form-updated', (event) => {
+                localStorage.setItem('showRExpenseForm', JSON.stringify(event.details));
+            });
+        </script>
+        @endscript
 </div>

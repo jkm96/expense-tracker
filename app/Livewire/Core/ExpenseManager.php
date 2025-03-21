@@ -54,7 +54,6 @@ class ExpenseManager extends Component
         $this->dispatch('upsert-form-updated', details:  ['showForm'=>$this->showForm,'expenseId'=>null]);
     }
 
-    #[On('closeModal')]
     public function closeModal()
     {
         $this->showForm = false;
@@ -156,6 +155,8 @@ class ExpenseManager extends Component
             session()->flash('success', 'Expense added successfully!');
         }
 
+        $this->showForm = false;
+        $this->dispatch('upsert-form-updated', details:  ['showForm'=>$this->showForm,'expenseId'=>null]);
         $this->resetFields();
         $this->loadExpenses();
     }
@@ -172,6 +173,7 @@ class ExpenseManager extends Component
             $this->date = Carbon::parse($expense->date)->format('Y-m-d');
             $this->category = $expense->category->value;
             $this->notes = $expense->notes;
+
             $this->showForm = !$this->showForm;
             $this->dispatch('upsert-form-updated', details:  ['showForm'=>$this->showForm,'expenseId'=>$expenseId]);
         }

@@ -213,28 +213,17 @@
     <script>
         $(document).ready(function () {
             let modalStateDetails = JSON.parse(localStorage.getItem('showExpenseForm'));
-
-            console.info('showExpenseForm', modalStateDetails);
-
             if (modalStateDetails && modalStateDetails.showForm === true) {
                 if (modalStateDetails.expenseId) {
-                    console.info('expenseId', modalStateDetails.expenseId);
                     $wire.dispatch('editExpense', {expenseId:modalStateDetails.expenseId});
                 } else {
-                    // Trigger add form
                     $wire.dispatch('toggleForm');
                 }
             }
         });
 
         $wire.on('upsert-form-updated', (event) => {
-            console.info("Event received", event.details);
             localStorage.setItem('showExpenseForm', JSON.stringify(event.details));
-        });
-
-        $wire.on('closeModal', (event) => {
-            console.info("Event received", event.details);
-            localStorage.removeItem('showExpenseForm');
         });
     </script>
     @endscript
