@@ -3,7 +3,10 @@
 namespace App\Livewire\Core;
 
 use App\Models\Expense;
+use App\Notifications\ExpenseReminderNotification;
+use App\Utils\Enums\AppEventListener;
 use App\Utils\Enums\ExpenseCategory;
+use App\Utils\Enums\NotificationType;
 use App\Utils\Helpers\ExpenseHelper;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -47,17 +50,17 @@ class ExpenseManager extends Component
         $this->loadExpenses();
     }
 
-    #[On('toggleForm')]
+    #[On('toggle-form')]
     public function toggleForm()
     {
         $this->showForm = !$this->showForm;
-        $this->dispatch('upsert-form-updated', details:  ['showForm'=>$this->showForm,'expenseId'=>null]);
+        $this->dispatch(AppEventListener::EXPENSE_FORM->value, details:  ['showForm'=>$this->showForm,'expenseId'=>null]);
     }
 
     public function closeModal()
     {
         $this->showForm = false;
-        $this->dispatch('upsert-form-updated', details:  ['showForm'=>$this->showForm,'expenseId'=>null]);
+        $this->dispatch(AppEventListener::EXPENSE_FORM->value, details:  ['showForm'=>$this->showForm,'expenseId'=>null]);
         $this->resetFields();
     }
 
@@ -139,11 +142,11 @@ class ExpenseManager extends Component
                     'notes' => !empty($this->notes) ? $this->notes : $defaultNote,
                 ]);
 
-                $this->dispatch('global-toast', details: ['message' => 'Expense updated successfully!', 'type' => 'success']);
+                $this->dispatch(AppEventListener::GLOBAL_TOAST->value, details: ['message' => 'Expense updated successfully!', 'type' => 'success']);
             }
         } else {
             // Create new expense
-            Expense::create([
+            $expense = Expense::create([
                 'name' => Str::title($this->name),
                 'amount' => $this->amount,
                 'date' => $this->date,
@@ -152,16 +155,20 @@ class ExpenseManager extends Component
                 'user_id' => Auth::id(),
             ]);
 
-            $this->dispatch('global-toast', ['message' => 'Expense added successfully!', 'type' => 'success']);
+            $message = "A new expense {$expense->name} added on {$expense->created_at->format('Y-m-d h:i A')}";
+            Auth::user()->notify(new ExpenseReminderNotification($message, NotificationType::INFO));
+            $this->dispatch(AppEventListener::NOTIFICATION_SENT->value);
+
+            $this->dispatch(AppEventListener::GLOBAL_TOAST->value, details: ['message' => 'Expense added successfully!', 'type' => 'success']);
         }
 
         $this->showForm = false;
-        $this->dispatch('upsert-form-updated', details:  ['showForm'=>$this->showForm,'expenseId'=>null]);
+        $this->dispatch(AppEventListener::EXPENSE_FORM->value, details:  ['showForm'=>$this->showForm,'expenseId'=>null]);
         $this->resetFields();
         $this->loadExpenses();
     }
 
-    #[On('editExpense')]
+    #[On('edit-expense')]
     public function editExpense($expenseId)
     {
         $expense = Expense::where('id', $expenseId)->where('user_id', Auth::id())->first();
@@ -175,7 +182,7 @@ class ExpenseManager extends Component
             $this->notes = $expense->notes;
 
             $this->showForm = !$this->showForm;
-            $this->dispatch('upsert-form-updated', details:  ['showForm'=>$this->showForm,'expenseId'=>$expenseId]);
+            $this->dispatch(AppEventListener::EXPENSE_FORM->value, details:  ['showForm'=>$this->showForm,'expenseId'=>$expenseId]);
         }
     }
 
@@ -196,7 +203,7 @@ class ExpenseManager extends Component
         $expense = Expense::where('id', $this->expenseIdToDelete)->where('user_id', Auth::id())->first();
         if ($expense) {
             $expense->delete();
-            $this->dispatch('global-toast', details: ['message' => 'Expense deleted successfully!', 'type' => 'success']);
+            $this->dispatch(AppEventListener::GLOBAL_TOAST->value, details: ['message' => 'Expense deleted successfully!', 'type' => 'success']);
         }
 
         $this->showDeleteModal = false;

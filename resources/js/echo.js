@@ -21,6 +21,6 @@ const userId = document.head.querySelector('meta[name="user-id"]').content;
 window.Echo.private(`user.${userId}`)
     .listen('.expense.reminder', (data) => {
         console.log('New Expense Notification:', data);
-        Livewire.dispatch('notificationReceived');
+        Livewire.dispatch('notification-received');
     });
 

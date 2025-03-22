@@ -293,18 +293,18 @@
         @script
         <script>
             $(document).ready(function () {
-                let modalStateDetails = JSON.parse(localStorage.getItem('showRExpenseForm'));
+                let modalStateDetails = JSON.parse(localStorage.getItem('showRecurringForm'));
                 if (modalStateDetails && modalStateDetails.showForm === true) {
                     if (modalStateDetails.recurringExpenseId) {
-                        $wire.dispatch('editExpense', {recurringExpenseId:modalStateDetails.recurringExpenseId});
+                        $wire.dispatch('edit-recurring-expense', {recurringExpenseId:modalStateDetails.recurringExpenseId});
                     } else {
-                        $wire.dispatch('toggleForm');
+                        $wire.dispatch('toggle-form');
                     }
                 }
             });
 
-            $wire.on('upsert-form-updated', (event) => {
-                localStorage.setItem('showRExpenseForm', JSON.stringify(event.details));
+            $wire.on('recurring-form-updated', (event) => {
+                localStorage.setItem('showRecurringForm', JSON.stringify(event.details));
             });
         </script>
         @endscript

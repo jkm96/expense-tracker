@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Core;
 
+use App\Utils\Enums\AppEventListener;
 use App\Utils\Enums\NotificationType;
 use App\Utils\Helpers\DateHelper;
 use Illuminate\Support\Facades\Auth;
@@ -14,7 +15,7 @@ class UserNotifications extends Component
     protected $queryString = [];
     public $unreadCount = 0;
 
-    protected $listeners = ['notificationReceived' => 'loadUnreadCount'];
+    protected $listeners = [AppEventListener::NOTIFICATION_SENT->value => 'loadUnreadCount'];
 
     public function mount()
     {
@@ -24,6 +25,7 @@ class UserNotifications extends Component
     public function loadUnreadCount()
     {
         $this->unreadCount = Auth::user()->unreadNotifications()->count();
+        $this->dispatch('$refresh');
     }
 
     public function goToPreviousPage()
@@ -50,21 +52,21 @@ class UserNotifications extends Component
     {
         Auth::user()->unreadNotifications->markAsRead();
         $this->loadUnreadCount();
-        $this->dispatch('global-toast', details: ['message' => 'Marked all notifications as read!', 'type' => 'success']);
+        $this->dispatch(AppEventListener::GLOBAL_TOAST->value, details: ['message' => 'Marked all notifications as read!', 'type' => 'success']);
     }
 
     public function deleteNotification($notificationId)
     {
         Auth::user()->notifications()->where('id', $notificationId)->delete();
         $this->loadUnreadCount();
-        $this->dispatch('global-toast', details: ['message' => 'Deleted notification!', 'type' => 'success']);
+        $this->dispatch(AppEventListener::GLOBAL_TOAST->value, details: ['message' => 'Deleted notification!', 'type' => 'success']);
     }
 
     public function deleteAllNotifications()
     {
         Auth::user()->notifications()->delete();
         $this->loadUnreadCount();
-        $this->dispatch('global-toast', details: ['message' => 'Deleted all notifications!', 'type' => 'success']);
+        $this->dispatch(AppEventListener::GLOBAL_TOAST->value, details: ['message' => 'Deleted all notifications!', 'type' => 'success']);
     }
 
     public function render()

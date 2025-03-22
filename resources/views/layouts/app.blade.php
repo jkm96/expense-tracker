@@ -52,7 +52,11 @@
 
 <script>
     document.addEventListener('livewire:init', () => {
+        Livewire.on('notification-sent', () => {
+            console.log('Notification received event triggered!');
+        });
         Livewire.on('global-toast', (event) => {
+            console.info('event',event)
             toastr.options = {
                 "closeButton": true,
                 "progressBar": true

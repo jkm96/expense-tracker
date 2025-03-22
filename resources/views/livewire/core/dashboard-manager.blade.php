@@ -7,8 +7,8 @@
         <div class="bg-gray-700 shadow rounded p-4 flex items-center gap-3">
             <i class="fas fa-calendar-alt text-orange-500 text-2xl"></i>
             <div>
-                <p class="text-sm text-gray-400">This Month ({{ $currentMonth }})</p>
-                <h2 class="text-xl font-bold">KES {{ number_format($monthlyTotal, 2) }}</h2>
+                <p class="text-xs text-gray-400">This Month ({{ $currentMonth }})</p>
+                <h2 class="text-md font-bold">KES {{ number_format($monthlyTotal, 2) }}</h2>
             </div>
         </div>
 
@@ -16,8 +16,8 @@
         <div class="bg-gray-700 shadow rounded p-4 flex items-center gap-3">
             <i class="fas fa-chart-pie text-blue-500 text-2xl"></i>
             <div>
-                <p class="text-sm text-gray-400">Top Category</p>
-                <h2 class="text-xl font-bold">
+                <p class="text-xs text-gray-400">Top Category</p>
+                <h2 class="text-md font-bold">
                     @if($topCategory != null)
                         {{ ucfirst($topCategory->value) }} -
                         KES {{ number_format($topCategoryTotal, 2) }}
@@ -32,8 +32,8 @@
         <div class="bg-gray-700 shadow rounded p-4 flex items-center gap-3">
             <i class="fas fa-calendar text-green-500 text-2xl"></i>
             <div>
-                <p class="text-sm text-gray-400">This Year</p>
-                <h2 class="text-xl font-bold">KES {{ number_format($yearlyTotal, 2) }}</h2>
+                <p class="text-xs text-gray-400">This Year</p>
+                <h2 class="text-md font-bold">KES {{ number_format($yearlyTotal, 2) }}</h2>
             </div>
         </div>
 
@@ -41,8 +41,8 @@
         <div class="bg-gray-700 shadow rounded p-4 flex items-center gap-3">
             <i class="fas fa-wallet text-red-500 text-2xl"></i>
             <div>
-                <p class="text-sm text-gray-400">Total Expenses</p>
-                <h2 class="text-xl font-bold">KES {{ number_format($totalExpenses, 2) }}</h2>
+                <p class="text-xs text-gray-400">Total Expenses</p>
+                <h2 class="text-md font-bold">KES {{ number_format($totalExpenses, 2) }}</h2>
             </div>
         </div>
     </div>

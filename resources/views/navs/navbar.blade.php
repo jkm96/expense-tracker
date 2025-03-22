@@ -22,31 +22,31 @@
                     <!-- Profile Button -->
                     <button @click="open = !open" class="flex items-center space-x-2">
                         <img src="{{ Auth::user()->profile_image ?? asset('images/default-avatar.png') }}"
-                             alt="Profile" class="w-10 h-10 rounded-full border">
+                             alt="Profile" class="w-7 h-7 rounded-full border">
                     </button>
 
                     <!-- Dropdown Menu -->
                     <div x-show="open" @click.away="open = false"
-                         class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-lg py-2 z-50"
+                         class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-lg py-1 z-50"
                          x-cloak>
 
                         <a href="{{ route('user.dashboard') }}"
-                           class="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700">
+                           class="block px-4 py-1 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700">
                             Dashboard
                         </a>
 
                         <a href="{{ route('expense.manage') }}"
-                           class="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700">
+                           class="block px-4 py-1 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700">
                             Expenses
                         </a>
 
                         <a href="{{ route('recurring.expense.manage') }}"
-                           class="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700">
+                           class="block px-4 py-1 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700">
                             Recurring Expenses
                         </a>
 
                         <a href="{{ route('settings.manage') }}"
-                           class="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700">
+                           class="block px-4 py-1 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700">
                             Settings
                         </a>
 

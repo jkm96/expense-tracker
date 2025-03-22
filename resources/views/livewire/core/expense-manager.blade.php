@@ -229,14 +229,14 @@
             let modalStateDetails = JSON.parse(localStorage.getItem('showExpenseForm'));
             if (modalStateDetails && modalStateDetails.showForm === true) {
                 if (modalStateDetails.expenseId) {
-                    $wire.dispatch('editExpense', {expenseId: modalStateDetails.expenseId});
+                    $wire.dispatch('edit-expense', {expenseId: modalStateDetails.expenseId});
                 } else {
-                    $wire.dispatch('toggleForm');
+                    $wire.dispatch('toggle-form');
                 }
             }
         });
 
-        $wire.on('upsert-form-updated', (event) => {
+        $wire.on('expense-form-updated', (event) => {
             localStorage.setItem('showExpenseForm', JSON.stringify(event.details));
         });
     </script>

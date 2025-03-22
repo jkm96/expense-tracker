@@ -4,6 +4,7 @@ namespace App\Livewire\Core;
 
 use App\Models\Expense;
 use App\Models\RecurringExpense;
+use App\Utils\Enums\AppEventListener;
 use App\Utils\Enums\ExpenseCategory;
 use App\Utils\Enums\ExpenseFrequency;
 use App\Utils\Helpers\CategoryHelper;
@@ -42,17 +43,17 @@ class RecurringExpenseManager extends Component
         $this->loadRecurringExpenses();
     }
 
-    #[On('toggleForm')]
+    #[On('toggle-form')]
     public function toggleForm()
     {
         $this->showForm = !$this->showForm;
-        $this->dispatch('upsert-form-updated', details:  ['showForm'=>$this->showForm,'recurringExpenseId'=>null]);
+        $this->dispatch(AppEventListener::RECURRING_FORM->value, details:  ['showForm'=>$this->showForm,'recurringExpenseId'=>null]);
     }
 
     public function closeModal()
     {
         $this->showForm = false;
-        $this->dispatch('upsert-form-updated', details:  ['showForm'=>$this->showForm,'recurringExpenseId'=>null]);
+        $this->dispatch(AppEventListener::RECURRING_FORM->value, details:  ['showForm'=>$this->showForm,'recurringExpenseId'=>null]);
         $this->resetFields();
     }
 
@@ -112,7 +113,7 @@ class RecurringExpenseManager extends Component
                 'next_process_at' => $nextProcessAt,
             ]);
 
-            $this->dispatch('global-toast', details: ['message' => 'Recurring expense updated successfully!', 'type' => 'success']);
+            $this->dispatch(AppEventListener::GLOBAL_TOAST->value, details: ['message' => 'Recurring expense updated successfully!', 'type' => 'success']);
         } else {
             RecurringExpense::create([
                 'user_id' => auth()->id(),
@@ -126,16 +127,16 @@ class RecurringExpenseManager extends Component
                 'is_active' => true,
             ]);
 
-            $this->dispatch('global-toast', details: ['message' => 'Recurring expense added successfully!', 'type' => 'success']);
+            $this->dispatch(AppEventListener::GLOBAL_TOAST->value, details: ['message' => 'Recurring expense added successfully!', 'type' => 'success']);
         }
 
         $this->showForm = false;
-        $this->dispatch('upsert-form-updated', details:  ['showForm'=>$this->showForm,'recurringExpenseId'=>null]);
+        $this->dispatch(AppEventListener::RECURRING_FORM->value, details:  ['showForm'=>$this->showForm,'recurringExpenseId'=>null]);
         $this->resetFields();
         $this->loadRecurringExpenses();
     }
 
-    #[On('editExpense')]
+    #[On('edit-recurring-expense')]
     public function editRecurringExpense($recurringExpenseId)
     {
         $recurringExpense = RecurringExpense::findOrFail($recurringExpenseId);
@@ -148,7 +149,7 @@ class RecurringExpenseManager extends Component
         $this->frequency = $recurringExpense->frequency->value;
 
         $this->showForm = !$this->showForm;
-        $this->dispatch('upsert-form-updated', details:  ['showForm'=>$this->showForm,'recurringExpenseId'=>$recurringExpenseId]);
+        $this->dispatch(AppEventListener::RECURRING_FORM->value, details:  ['showForm'=>$this->showForm,'recurringExpenseId'=>$recurringExpenseId]);
     }
 
     public function showToggleConfirmation($id)
@@ -164,7 +165,7 @@ class RecurringExpenseManager extends Component
         $expense->update(['is_active' => !$expense->is_active]);
 
         $status = $expense->is_active ? 'resumed' : 'stopped';
-        $this->dispatch('global-toast', details: ['message' => "Recurring expense has been {$status}.", 'type' => 'success']);
+        $this->dispatch(AppEventListener::GLOBAL_TOAST->value, details: ['message' => "Recurring expense has been {$status}.", 'type' => 'success']);
 
         $this->showToggleModal = false;
         $this->selectedExpenseId = null;
@@ -183,7 +184,7 @@ class RecurringExpenseManager extends Component
         $expense = RecurringExpense::where('id', $this->selectedExpenseId)->first();
         if ($expense) {
             $expense->delete();
-            $this->dispatch('global-toast', details: ['message' => 'Recurring expense deleted successfully!', 'type' => 'success']);
+            $this->dispatch(AppEventListener::GLOBAL_TOAST->value, details: ['message' => 'Recurring expense deleted successfully!', 'type' => 'success']);
         }
 
         $this->showDeleteModal = false;
