@@ -51,13 +51,13 @@
                     </select>
 
                     <div class="flex justify-between">
-                        <button type="button" wire:click="closeModal"
-                                class="bg-red-600 text-white px-2 py-1 rounded shadow hover:bg-red-500 transition">
+                        <button type="button" wire:click="closeModal('form-modal')"
+                                class="bg-red-600 text-white text-sm px-2 py-1 rounded shadow hover:bg-red-500 transition">
                             Cancel
                         </button>
 
                         <button type="submit"
-                                class="bg-green-500 text-white px-2 py-1 rounded shadow hover:bg-green-600 transition">
+                                class="bg-green-500 text-white text-sm px-2 py-1 rounded shadow hover:bg-green-600 transition">
                             {{ $recurring_expense_id ? 'Update' : 'Add' }}
                         </button>
                     </div>
@@ -67,12 +67,13 @@
     @endif
 
     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
-        <h2 class="text-lg font-bold mb-2 sm:mb-0">Recurring Expenses</h2>
+        <h2 class="text-md font-bold mb-2 sm:mb-0">Recurring Expenses</h2>
 
         <div class="flex items-center space-x-4">
             <!-- Category Filter -->
             <select wire:model.live="categoryFilter" wire:change="loadRecurringExpenses"
-                    class="bg-gray-800 border rounded-full px-2 py-1">
+                    class="w-full px-1.5 py-0.5 bg-gray-800 text-sm border rounded-full  border-gray-500 focus:outline-none
+                              focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
                 <option value="all">All Categories</option>
                 @foreach($categories as $category)
                     <option value="{{ $category->value }}">{{ ucfirst($category->value) }}</option>
@@ -81,7 +82,8 @@
 
             <!-- Frequency Filter -->
             <select wire:model.live="frequencyFilter" wire:change="loadRecurringExpenses"
-                    class="bg-gray-800 border rounded-full px-2 py-1">
+                    class="w-full px-1.5 py-0.5 bg-gray-800 text-sm border rounded-full  border-gray-500 focus:outline-none
+                              focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
                 <option value="all">All Frequencies</option>
                 @foreach($frequencies as $freq)
                     <option value="{{ $freq->value }}">{{ ucfirst($freq->value) }}</option>
@@ -89,7 +91,6 @@
             </select>
         </div>
     </div>
-
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         @forelse($recurringExpenses as $recurringExpense)
@@ -165,17 +166,15 @@
                         Delete
                     </button>
 
-                    @if($showDetailsModal && $selectedExpense)
+                    @if($showDetailsModal && !empty($selectedExpense))
                         <div x-data="{ open: @entangle('showDetailsModal') }" x-show="open"
                              class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
 
                             <div class="bg-gray-700 rounded-lg shadow-lg w-[600px] p-2">
                                 <h2 class="text-lg font-bold mb-2">Recurring Expense Details</h2>
 
-                                <h3 class="text-md font-semibold text-white mb-2">Parent Expense</h3>
-
-                                <div class="bg-gray-800 p-4 rounded-lg shadow">
-                                    <div class="mt-2 space-y-2 text-gray-300">
+                                <div class="bg-gray-800 p-2 rounded-sm shadow">
+                                    <div class="space-y-2 text-gray-300">
                                         <p><strong>Name:</strong> {{ ucfirst($selectedExpense->name) }}</p>
                                         <p><strong>Category:</strong> {{ ucfirst($selectedExpense->category->value) }}</p>
                                         <p><strong>Amount:</strong> KES {{ number_format($selectedExpense->amount, 2) }}</p>
@@ -204,7 +203,7 @@
                                 <!-- Generated Expenses -->
                                 <div class="mt-2">
                                     <h3 class="text-md font-semibold text-white mb-2">Generated Expenses</h3>
-                                    <div class="overflow-y-auto max-h-60 bg-gray-800 p-4 rounded-lg shadow">
+                                    <div class="overflow-y-auto max-h-60 bg-gray-800 p-2 rounded-sm shadow">
                                         <ul class="space-y-3">
                                             @forelse($selectedExpense->generatedExpenses as $expense)
                                                 <li class="border-b border-gray-600 pb-2">
@@ -220,8 +219,8 @@
 
                                 <!-- Close Button -->
                                 <div class="mt-2 flex justify-end space-x-4">
-                                    <button @click="open = false"
-                                            class="bg-red-600 hover:bg-red-500 py-2 px-4 rounded">
+                                    <button wire:click="closeModal('view-modal')"
+                                            class="bg-red-600 hover:bg-red-500 text-sm px-2 py-1 rounded">
                                         Close
                                     </button>
                                 </div>
@@ -293,18 +292,29 @@
         @script
         <script>
             $(document).ready(function () {
-                let modalStateDetails = JSON.parse(localStorage.getItem('showRecurringForm'));
-                if (modalStateDetails && modalStateDetails.showForm === true) {
-                    if (modalStateDetails.recurringExpenseId) {
-                        $wire.dispatch('edit-recurring-expense', {recurringExpenseId:modalStateDetails.recurringExpenseId});
+                let recurringFormState = JSON.parse(localStorage.getItem('showRecurringForm'));
+                if (recurringFormState && recurringFormState.showForm === true) {
+                    if (recurringFormState.recurringExpenseId) {
+                        $wire.dispatch('edit-recurring-expense', {recurringExpenseId:recurringFormState.recurringExpenseId});
                     } else {
                         $wire.dispatch('toggle-form');
+                    }
+                }
+
+                let recurringViewState = JSON.parse(localStorage.getItem('showRecurringDetails'));
+                if (recurringViewState && recurringViewState.showModal === true) {
+                    if (recurringViewState.recurringExpenseId) {
+                        $wire.dispatch('show-recurring-details', {recurringExpenseId:recurringViewState.recurringExpenseId});
                     }
                 }
             });
 
             $wire.on('recurring-form-updated', (event) => {
                 localStorage.setItem('showRecurringForm', JSON.stringify(event.details));
+            });
+
+            $wire.on('show-recurring-details', (event) => {
+                localStorage.setItem('showRecurringDetails', JSON.stringify(event.details));
             });
         </script>
         @endscript

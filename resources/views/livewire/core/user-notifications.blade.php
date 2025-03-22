@@ -75,6 +75,8 @@
                 @empty
                     <p class="px-4 py-6 text-sm text-gray-600 text-center">No new notifications.</p>
                 @endforelse
+            @else
+                <p class="px-4 py-6 text-sm text-gray-600 text-center">No new notifications.</p>
             @endif
 
             @if(count($notifications) > 0)
@@ -94,7 +96,8 @@
                         @endif
 
                         @if($notifications->hasMorePages())
-                            <button @click="$wire.goToNextPage()" x-on:click.stop class="text-green-500 text-sm hover:underline">
+                            <button @click="$wire.goToNextPage()" x-on:click.stop
+                                    class="text-green-500 text-sm hover:underline">
                                 Next
                             </button>
                         @else
@@ -106,16 +109,16 @@
 
         </div>
 
-        <div class="border-t dark:border-gray-700 p-2 flex justify-between">
-            @if(count($notifications) > 0)
+        @if(count($notifications) > 0)
+            <div class="border-t dark:border-gray-700 p-2 flex justify-between">
                 <button wire:click="markAllAsRead" class="text-sm text-green-500 hover:underline">
                     Mark All as Read
                 </button>
                 <button wire:click="deleteAllNotifications" class="text-sm text-red-500 hover:underline">
                     Delete All
                 </button>
-            @endif
-        </div>
+            </div>
+        @endif
     </div>
 
     <div x-show="open" x-cloak @click="open = false" class="fixed inset-0 bg-black bg-opacity-80 z-40"></div>

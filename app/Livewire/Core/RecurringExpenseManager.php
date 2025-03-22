@@ -47,13 +47,22 @@ class RecurringExpenseManager extends Component
     public function toggleForm()
     {
         $this->showForm = !$this->showForm;
-        $this->dispatch(AppEventListener::RECURRING_FORM->value, details:  ['showForm'=>$this->showForm,'recurringExpenseId'=>null]);
+        $this->dispatch(AppEventListener::RECURRING_FORM->value, details: ['showForm' => $this->showForm, 'recurringExpenseId' => null]);
     }
 
-    public function closeModal()
+    public function closeModal($action)
     {
-        $this->showForm = false;
-        $this->dispatch(AppEventListener::RECURRING_FORM->value, details:  ['showForm'=>$this->showForm,'recurringExpenseId'=>null]);
+        switch ($action) {
+            case 'form-modal':
+                $this->showForm = false;
+                $this->dispatch(AppEventListener::RECURRING_FORM->value, details: ['showForm' => $this->showForm, 'recurringExpenseId' => null]);
+                break;
+            case 'view-modal':
+                $this->showDetailsModal = false;
+                $this->dispatch(AppEventListener::VIEW_RECURRING_MODAL->value, details: ['showModal' => $this->showDetailsModal, 'recurringExpenseId' => null]);
+                break;
+        }
+
         $this->resetFields();
     }
 
@@ -131,7 +140,7 @@ class RecurringExpenseManager extends Component
         }
 
         $this->showForm = false;
-        $this->dispatch(AppEventListener::RECURRING_FORM->value, details:  ['showForm'=>$this->showForm,'recurringExpenseId'=>null]);
+        $this->dispatch(AppEventListener::RECURRING_FORM->value, details: ['showForm' => $this->showForm, 'recurringExpenseId' => null]);
         $this->resetFields();
         $this->loadRecurringExpenses();
     }
@@ -149,7 +158,7 @@ class RecurringExpenseManager extends Component
         $this->frequency = $recurringExpense->frequency->value;
 
         $this->showForm = !$this->showForm;
-        $this->dispatch(AppEventListener::RECURRING_FORM->value, details:  ['showForm'=>$this->showForm,'recurringExpenseId'=>$recurringExpenseId]);
+        $this->dispatch(AppEventListener::RECURRING_FORM->value, details: ['showForm' => $this->showForm, 'recurringExpenseId' => $recurringExpenseId]);
     }
 
     public function showToggleConfirmation($id)
@@ -194,10 +203,14 @@ class RecurringExpenseManager extends Component
         $this->loadRecurringExpenses();
     }
 
-    public function showRecurringExpenseDetails($id)
+    #[On('show-recurring-details')]
+    public function showRecurringExpenseDetails($recurringExpenseId=null)
     {
-        $this->selectedExpense = RecurringExpense::with('generatedExpenses')->findOrFail($id);
-        $this->showDetailsModal = true;
+        if (!empty($recurringExpenseId)) {
+            $this->selectedExpense = RecurringExpense::with('generatedExpenses')->findOrFail($recurringExpenseId);
+            $this->showDetailsModal = true;
+            $this->dispatch(AppEventListener::VIEW_RECURRING_MODAL->value, details: ['showModal' => $this->showDetailsModal, 'recurringExpenseId' => $recurringExpenseId]);
+        }
     }
 
     public function resetFields()

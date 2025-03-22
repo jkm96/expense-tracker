@@ -43,12 +43,13 @@
 
                     <div class="mb-4">
                     <textarea wire:model="notes" placeholder="Notes"
-                              class="w-full p-2 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50"></textarea>
+                              class="w-full p-2 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none
+                              focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50"></textarea>
                         @error('notes') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
 
                     <div class="flex justify-between">
-                        <button type="button" wire:click="closeModal"
+                        <button type="button" wire:click="closeModal('form-modal')"
                                 class="bg-red-600 text-white text-sm py-1 px-2 rounded shadow hover:bg-red-500 transition">
                             Cancel
                         </button>
@@ -68,7 +69,8 @@
             <h2 class="text-md font-bold mb-2">Current Expenses</h2>
             <div class="flex items-center">
                 <select wire:model.live="filter" wire:change="loadExpenses"
-                        class="bg-gray-800 text-sm border rounded-full px-1.5 py-0.5">
+                        class="w-full px-1.5 py-0.5 bg-gray-800 text-sm border rounded-full  border-gray-500 focus:outline-none
+                              focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
                     <option value="all">All</option>
                     @foreach($categories as $category)
                         <option value="{{ $category->value }}">{{ ucfirst($category->value) }}</option>
@@ -144,9 +146,9 @@
 
                             @if($showDetailsModal && $selectedExpense)
                                 <div x-data="{ open: @entangle('showDetailsModal') }" x-show="open"
-                                     class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+                                     class="fixed inset-0 bg-transparent bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50">
 
-                                    <div class="bg-gray-700 rounded-md shadow-lg w-96 p-2">
+                                    <div class="bg-gray-700 border border-gray-800 rounded-md shadow-lg w-96 p-2">
                                         <h2 class="text-lg font-bold mb-2">Expense Details</h2>
 
                                         <div class="mt-2 space-y-2 text-gray-300">
@@ -167,7 +169,7 @@
 
                                         <!-- Close Button -->
                                         <div class="mt-2 flex justify-end space-x-4">
-                                            <button @click="open = false"
+                                            <button wire:click="closeModal('view-modal')"
                                                     class="bg-red-600 hover:bg-red-500 text-sm py-1 px-2 rounded">
                                                 Close
                                             </button>
@@ -234,10 +236,21 @@
                     $wire.dispatch('toggle-form');
                 }
             }
+
+            let expenseViewState = JSON.parse(localStorage.getItem('showExpenseDetails'));
+            if (expenseViewState && expenseViewState.showModal === true) {
+                if (expenseViewState.expenseId) {
+                    $wire.dispatch('show-expense-details', {expenseId:expenseViewState.expenseId});
+                }
+            }
         });
 
         $wire.on('expense-form-updated', (event) => {
             localStorage.setItem('showExpenseForm', JSON.stringify(event.details));
+        });
+
+        $wire.on('show-expense-details', (event) => {
+            localStorage.setItem('showExpenseDetails', JSON.stringify(event.details));
         });
     </script>
     @endscript

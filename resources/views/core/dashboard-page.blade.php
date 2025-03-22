@@ -33,7 +33,7 @@
                        min="2000" max="2099" step="1">
             </div>
 
-            <button id="fetchData" class="bg-green-400 text-black px-2 py-0.5 rounded w-full sm:w-auto">Filter</button>
+            <button id="fetchData" class="bg-green-400 text-white px-2 py-0.5 rounded w-full sm:w-auto">Filter</button>
         </div>
 
         <div id="chartContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 mb-10">

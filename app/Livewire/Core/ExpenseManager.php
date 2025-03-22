@@ -35,6 +35,7 @@ class ExpenseManager extends Component
     public $selectedExpense;
     public $showDeleteModal = false;
     public $expenseIdToDelete;
+
     public function mount()
     {
         $this->date = Carbon::now()->format('Y-m-d');
@@ -54,13 +55,22 @@ class ExpenseManager extends Component
     public function toggleForm()
     {
         $this->showForm = !$this->showForm;
-        $this->dispatch(AppEventListener::EXPENSE_FORM->value, details:  ['showForm'=>$this->showForm,'expenseId'=>null]);
+        $this->dispatch(AppEventListener::EXPENSE_FORM->value, details: ['showForm' => $this->showForm, 'expenseId' => null]);
     }
 
-    public function closeModal()
+    public function closeModal($action)
     {
-        $this->showForm = false;
-        $this->dispatch(AppEventListener::EXPENSE_FORM->value, details:  ['showForm'=>$this->showForm,'expenseId'=>null]);
+        switch ($action) {
+            case 'form-modal':
+                $this->showForm = false;
+                $this->dispatch(AppEventListener::EXPENSE_FORM->value, details: ['showForm' => $this->showForm, 'expenseId' => null]);
+                break;
+            case 'view-modal':
+                $this->showDetailsModal = false;
+                $this->dispatch(AppEventListener::VIEW_EXPENSE_MODAL->value, details: ['showModal' => $this->showDetailsModal, 'expenseId' => null]);
+                break;
+        }
+
         $this->resetFields();
     }
 
@@ -163,7 +173,7 @@ class ExpenseManager extends Component
         }
 
         $this->showForm = false;
-        $this->dispatch(AppEventListener::EXPENSE_FORM->value, details:  ['showForm'=>$this->showForm,'expenseId'=>null]);
+        $this->dispatch(AppEventListener::EXPENSE_FORM->value, details: ['showForm' => $this->showForm, 'expenseId' => null]);
         $this->resetFields();
         $this->loadExpenses();
     }
@@ -171,25 +181,31 @@ class ExpenseManager extends Component
     #[On('edit-expense')]
     public function editExpense($expenseId)
     {
-        $expense = Expense::where('id', $expenseId)->where('user_id', Auth::id())->first();
+       if (!empty($expenseId)){
+           $expense = Expense::where('id', $expenseId)->where('user_id', Auth::id())->first();
 
-        if ($expense) {
-            $this->expense_id = $expense->id;
-            $this->name = $expense->name;
-            $this->amount = $expense->amount;
-            $this->date = Carbon::parse($expense->date)->format('Y-m-d');
-            $this->category = $expense->category->value;
-            $this->notes = $expense->notes;
+           if ($expense) {
+               $this->expense_id = $expense->id;
+               $this->name = $expense->name;
+               $this->amount = $expense->amount;
+               $this->date = Carbon::parse($expense->date)->format('Y-m-d');
+               $this->category = $expense->category->value;
+               $this->notes = $expense->notes;
 
-            $this->showForm = !$this->showForm;
-            $this->dispatch(AppEventListener::EXPENSE_FORM->value, details:  ['showForm'=>$this->showForm,'expenseId'=>$expenseId]);
-        }
+               $this->showForm = !$this->showForm;
+               $this->dispatch(AppEventListener::EXPENSE_FORM->value, details: ['showForm' => $this->showForm, 'expenseId' => $expenseId]);
+           }
+       }
     }
 
-    public function showExpenseDetails($id)
+    #[On('show-expense-details')]
+    public function showExpenseDetails($expenseId=null)
     {
-        $this->selectedExpense = Expense::findOrFail($id);
-        $this->showDetailsModal = true;
+        if (!empty($expenseId)) {
+            $this->selectedExpense = Expense::findOrFail($expenseId);
+            $this->showDetailsModal = true;
+            $this->dispatch(AppEventListener::VIEW_EXPENSE_MODAL->value, details: ['showModal' => $this->showDetailsModal, 'expenseId' => $expenseId]);
+        }
     }
 
     public function showDeleteConfirmation($id)
