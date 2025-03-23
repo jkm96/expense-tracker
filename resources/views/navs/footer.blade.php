@@ -1,13 +1,13 @@
 <footer id="footer" class="bg-gray-900 text-white p-2 md:px-0">
     <nav class="text-center items-center text-sm">
-        <a href="{{ route('home') }}" class="text-gray-300 hover:text-white text-sm">Home</a> |
+        <a href="{{ route('home') }}" class="text-gray-300 hover:text-white hover:underline text-sm">Home</a> |
         @auth
-            <a href="{{ route('user.dashboard') }}" class="text-gray-300 hover:text-white text-sm">Dashboard</a> |
-            <a href="{{ route('expense.manage') }}" class="text-gray-300 hover:text-white text-sm">Expenses</a> |
-            <a href="{{ route('recurring.expense.manage') }}" class="text-gray-300 hover:text-white text-sm">Recurring Expenses</a>
+            <a href="{{ route('user.dashboard') }}" class="text-gray-300 hover:text-white hover:underline text-sm">Dashboard</a> |
+            <a href="{{ route('expense.manage') }}" class="text-gray-300 hover:text-white hover:underline text-sm">Expenses</a> |
+            <a href="{{ route('recurring.expense.manage') }}" class="text-gray-300 hover:text-white hover:underline text-sm">Recurring Expenses</a>
         @else
-            <a href="{{ route('login.user') }}" class="text-gray-300 hover:text-white text-sm">Login</a> |
-            <a href="{{ route('register.user') }}" class="text-gray-300 hover:text-white text-sm">Sign Up</a>
+            <a href="{{ route('login.user') }}" class="text-gray-300 hover:text-white hover:underline text-sm">Login</a> |
+            <a href="{{ route('register.user') }}" class="text-gray-300 hover:text-white hover:underline text-sm">Sign Up</a>
         @endauth
     </nav>
 

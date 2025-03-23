@@ -24,7 +24,28 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
+    public function forgot_password()
+    {
+        return view('auth.forgot-password');
+    }
+
+    public function reset_password(Request $request)
+    {
+        $token = trim($request->query('token'));
+        $email = trim($request->query('email'));
+        return view('auth.reset-password',[
+            'token' => $token,
+            'email' => $email
+        ]);
+    }
+
     public function verify(Request $request)
+    {
+        $token = $request->query('token');
+        return $this->_authService->verifyUserEmail($token);
+    }
+
+    public function resend_verification(Request $request)
     {
         $token = $request->query('token');
         return $this->_authService->verifyUserEmail($token);

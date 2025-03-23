@@ -4,6 +4,8 @@ namespace App\Livewire\Auth;
 
 use App\Models\User;
 use App\Models\UserVerification;
+use App\Utils\Constants\AppEmailType;
+use App\Utils\Constants\AppEventListener;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
@@ -45,25 +47,18 @@ class RegisterUser extends Component
             'token' => $token
         ]);
 
-//        $details = [
-//            'type' => EmailTypes::USER_VERIFICATION->name,
-//            'recipientEmail' => trim($this->email),
-//            'username' => trim($this->username),
-//            'verificationUrl' => trim($verificationUrl),
-//        ];
-//
+        $details = [
+            'type' => AppEmailType::USER_VERIFICATION,
+            'recipientEmail' => trim($this->email),
+            'username' => trim($this->username),
+            'verificationUrl' => trim($verificationUrl),
+        ];
+
 //        DispatchEmailNotificationsJob::dispatch($details);
 
-        // Flash a success message and reset form fields
-        session()->flash('message', 'Account created successfully!');
-        $this->reset();
+        $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Account created successfully!', 'type' => 'success']);
+        $this->reset(['username','email','password','password_confirmation']);
 
         $this->isCreated = true;
-    }
-
-    public function resetForm()
-    {
-        $this->reset(['username', 'email', 'password', 'password_confirmation']);
-        $this->isCreated = false;  // Reset the success message
     }
 }

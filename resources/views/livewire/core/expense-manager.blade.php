@@ -32,7 +32,8 @@
 
                     <div class="mb-4">
                         <select wire:model="category"
-                                class="w-full p-2 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
+                                class="w-full p-2 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none
+                                focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
                             <option value="">Select Category</option>
                             @foreach($categories as $category)
                                 <option value="{{ $category->value }}">{{ ucfirst($category->value) }}</option>

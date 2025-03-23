@@ -3,7 +3,7 @@
 namespace App\Livewire\Core;
 
 use App\Notifications\ExpenseReminderNotification;
-use App\Utils\Enums\AppEventListener;
+use App\Utils\Constants\AppEventListener;
 use App\Utils\Enums\NotificationType;
 use App\Utils\Helpers\SessionHelper;
 use Carbon\Carbon;
@@ -60,9 +60,9 @@ class SessionManager extends Component
                 DB::table('sessions')->where('id', $this->sessionIdToLogout)->delete();
 
                 Auth::user()->notify(new ExpenseReminderNotification($message, NotificationType::ALERT));
-                $this->dispatch(AppEventListener::NOTIFICATION_SENT->value);
+                $this->dispatch(AppEventListener::NOTIFICATION_SENT);
 
-                $this->dispatch(AppEventListener::GLOBAL_TOAST->value, details: ['message' => 'Device logged out successfully!', 'type' => 'success']);
+                $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Device logged out successfully!', 'type' => 'success']);
             }
 
             $this->getActiveSessions();
@@ -74,7 +74,7 @@ class SessionManager extends Component
     public function confirmLogoutOtherDevices()
     {
         if (!$this->password) {
-            $this->dispatch(AppEventListener::GLOBAL_TOAST->value, details: ['message' => 'Please enter your password!', 'type' => 'error']);
+            $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Please enter your password!', 'type' => 'error']);
             return;
         }
         $this->showLogoutOtherDevicesModal = true;
@@ -84,7 +84,7 @@ class SessionManager extends Component
     {
         if (!Auth::validate(['email' => auth()->user()->email, 'password' => $this->password])) {
             $this->showLogoutOtherDevicesModal = false;
-            $this->dispatch(AppEventListener::GLOBAL_TOAST->value, details: ['message' => 'Incorrect password!', 'type' => 'error']);
+            $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Incorrect password!', 'type' => 'error']);
             return;
         }
 
@@ -95,7 +95,7 @@ class SessionManager extends Component
             ->get();
 
         if ($otherSessions->isEmpty()) {
-            $this->dispatch(AppEventListener::GLOBAL_TOAST->value, details: ['message' => 'No other active sessions found!', 'type' => 'info']);
+            $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'No other active sessions found!', 'type' => 'info']);
             return;
         }
 
@@ -117,12 +117,12 @@ class SessionManager extends Component
         $message = "You have logged out from the following devices:\n" . $sessionDetails;
 
         Auth::user()->notify(new ExpenseReminderNotification($message, NotificationType::ALERT));
-        $this->dispatch(AppEventListener::NOTIFICATION_SENT->value);
+        $this->dispatch(AppEventListener::NOTIFICATION_SENT);
 
         $this->password = '';
         $this->showLogoutOtherDevicesModal = false;
         $this->getActiveSessions();
-        $this->dispatch(AppEventListener::GLOBAL_TOAST->value, details: ['message' => 'Other devices logged out successfully!', 'type' => 'info']);
+        $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Other devices logged out successfully!', 'type' => 'info']);
     }
 
     public function render()

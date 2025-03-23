@@ -39,7 +39,7 @@ class ProcessRecurringExpenses extends Command
 
         $now = Carbon::now();
 
-        $recurringExpenses = RecurringExpense::         where('is_active', true)
+        $recurringExpenses = RecurringExpense::where('is_active', true)
             ->where('next_process_at', '<=', $now)
             ->get();
 

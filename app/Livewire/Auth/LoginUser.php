@@ -2,12 +2,8 @@
 
 namespace App\Livewire\Auth;
 
-use App\Notifications\ExpenseReminderNotification;
-use App\Utils\Enums\NotificationType;
-use App\Utils\Helpers\SessionHelper;
-use Carbon\Carbon;
+use App\Utils\Constants\AppEventListener;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class LoginUser extends Component
@@ -29,13 +25,13 @@ class LoginUser extends Component
 
         if (Auth::attempt($credentials)) {
             session()->regenerate();
-            session()->flash('success', 'Welcome, ' . $this->identifier);
+            $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Welcome, ' . $this->identifier, 'type' => 'success']);
 
             return redirect()->route('user.dashboard');
         }
 
-        $this->addError('identifier', 'Invalid credentials. Please try again.');
-        session()->flash('error', "Invalid credentials");
+        $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Invalid credentials!', 'type' => 'error']);
+        $this->reset(['identifier', 'password']);
 
         return redirect()->back();
     }

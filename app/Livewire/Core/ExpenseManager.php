@@ -4,7 +4,7 @@ namespace App\Livewire\Core;
 
 use App\Models\Expense;
 use App\Notifications\ExpenseReminderNotification;
-use App\Utils\Enums\AppEventListener;
+use App\Utils\Constants\AppEventListener;
 use App\Utils\Enums\ExpenseCategory;
 use App\Utils\Enums\NotificationType;
 use App\Utils\Helpers\ExpenseHelper;
@@ -55,7 +55,7 @@ class ExpenseManager extends Component
     public function toggleForm()
     {
         $this->showForm = !$this->showForm;
-        $this->dispatch(AppEventListener::EXPENSE_FORM->value, details: ['showForm' => $this->showForm, 'expenseId' => null]);
+        $this->dispatch(AppEventListener::EXPENSE_FORM, details: ['showForm' => $this->showForm, 'expenseId' => null]);
     }
 
     public function closeModal($action)
@@ -63,11 +63,11 @@ class ExpenseManager extends Component
         switch ($action) {
             case 'form-modal':
                 $this->showForm = false;
-                $this->dispatch(AppEventListener::EXPENSE_FORM->value, details: ['showForm' => $this->showForm, 'expenseId' => null]);
+                $this->dispatch(AppEventListener::EXPENSE_FORM, details: ['showForm' => $this->showForm, 'expenseId' => null]);
                 break;
             case 'view-modal':
                 $this->showDetailsModal = false;
-                $this->dispatch(AppEventListener::VIEW_EXPENSE_MODAL->value, details: ['showModal' => $this->showDetailsModal, 'expenseId' => null]);
+                $this->dispatch(AppEventListener::VIEW_EXPENSE_MODAL, details: ['showModal' => $this->showDetailsModal, 'expenseId' => null]);
                 break;
         }
 
@@ -152,7 +152,7 @@ class ExpenseManager extends Component
                     'notes' => !empty($this->notes) ? $this->notes : $defaultNote,
                 ]);
 
-                $this->dispatch(AppEventListener::GLOBAL_TOAST->value, details: ['message' => 'Expense updated successfully!', 'type' => 'success']);
+                $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Expense updated successfully!', 'type' => 'success']);
             }
         } else {
             // Create new expense
@@ -167,13 +167,13 @@ class ExpenseManager extends Component
 
             $message = "A new expense {$expense->name} added on {$expense->created_at->format('Y-m-d h:i A')}";
             Auth::user()->notify(new ExpenseReminderNotification($message, NotificationType::INFO));
-            $this->dispatch(AppEventListener::NOTIFICATION_SENT->value);
+            $this->dispatch(AppEventListener::NOTIFICATION_SENT);
 
-            $this->dispatch(AppEventListener::GLOBAL_TOAST->value, details: ['message' => 'Expense added successfully!', 'type' => 'success']);
+            $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Expense added successfully!', 'type' => 'success']);
         }
 
         $this->showForm = false;
-        $this->dispatch(AppEventListener::EXPENSE_FORM->value, details: ['showForm' => $this->showForm, 'expenseId' => null]);
+        $this->dispatch(AppEventListener::EXPENSE_FORM, details: ['showForm' => $this->showForm, 'expenseId' => null]);
         $this->resetFields();
         $this->loadExpenses();
     }
@@ -193,7 +193,7 @@ class ExpenseManager extends Component
                $this->notes = $expense->notes;
 
                $this->showForm = !$this->showForm;
-               $this->dispatch(AppEventListener::EXPENSE_FORM->value, details: ['showForm' => $this->showForm, 'expenseId' => $expenseId]);
+               $this->dispatch(AppEventListener::EXPENSE_FORM, details: ['showForm' => $this->showForm, 'expenseId' => $expenseId]);
            }
        }
     }
@@ -204,7 +204,7 @@ class ExpenseManager extends Component
         if (!empty($expenseId)) {
             $this->selectedExpense = Expense::findOrFail($expenseId);
             $this->showDetailsModal = true;
-            $this->dispatch(AppEventListener::VIEW_EXPENSE_MODAL->value, details: ['showModal' => $this->showDetailsModal, 'expenseId' => $expenseId]);
+            $this->dispatch(AppEventListener::VIEW_EXPENSE_MODAL, details: ['showModal' => $this->showDetailsModal, 'expenseId' => $expenseId]);
         }
     }
 
@@ -219,7 +219,7 @@ class ExpenseManager extends Component
         $expense = Expense::where('id', $this->expenseIdToDelete)->where('user_id', Auth::id())->first();
         if ($expense) {
             $expense->delete();
-            $this->dispatch(AppEventListener::GLOBAL_TOAST->value, details: ['message' => 'Expense deleted successfully!', 'type' => 'success']);
+            $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Expense deleted successfully!', 'type' => 'success']);
         }
 
         $this->showDeleteModal = false;
