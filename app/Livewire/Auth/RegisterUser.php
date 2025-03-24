@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Auth;
 
+use App\Jobs\DispatchEmailNotificationsJob;
 use App\Models\User;
 use App\Models\UserVerification;
 use App\Utils\Constants\AppEmailType;
@@ -41,7 +42,7 @@ class RegisterUser extends Component
 
         //send email verification message
         $token = Str::random(100);
-        $verificationUrl = env('APP_URL') . route('email.verification', ['token' => $token], false);
+        $verificationUrl = route('email.verification', ['token' => $token]);
         UserVerification::create([
             'user_id' => $user->id,
             'token' => $token
@@ -54,7 +55,7 @@ class RegisterUser extends Component
             'verificationUrl' => trim($verificationUrl),
         ];
 
-//        DispatchEmailNotificationsJob::dispatch($details);
+        DispatchEmailNotificationsJob::dispatch($details);
 
         $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Account created successfully!', 'type' => 'success']);
         $this->reset(['username','email','password','password_confirmation']);

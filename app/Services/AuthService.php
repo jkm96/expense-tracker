@@ -30,11 +30,11 @@ class AuthService
                 $userVerify->user->email_verified_at = Carbon::now();
                 $userVerify->user->save();
             }
-            $message = "Email has been verified.";
-            return redirect()->route('login.user')->with('error',$message);
-        }
-        session()->flash('message', $message);
+            $message = "Email verified successfully.";
 
-        return redirect()->route('login.user')->with('success',$message);
+            return redirect()->route('login.user')->with('success',$message);
+        }
+
+        return redirect()->route('login.user')->with('error',$message);
     }
 }

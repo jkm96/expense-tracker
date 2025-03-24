@@ -2,13 +2,13 @@
 
 namespace App\Livewire\Auth;
 
+use App\Jobs\DispatchEmailNotificationsJob;
 use App\Models\User;
 use App\Utils\Constants\AppEmailType;
 use App\Utils\Constants\AppEventListener;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Livewire\Component;
 
@@ -26,7 +26,7 @@ class ForgotPassword extends Component
         $userExists = User::where('email', $userEmail)->first();
 
         $message = 'A password reset link has been sent to your email';
-        if ($userExists == null){
+        if ($userExists == null) {
             $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => $message, 'type' => 'success']);
             $this->reset(['email']);
 
@@ -42,16 +42,16 @@ class ForgotPassword extends Component
             ]
         );
 
-        $resetPassUrl = route('reset.password', ['email' => $userEmail,'token' => $token]);
+        $resetPassUrl = route('reset.password', ['email' => $userEmail, 'token' => $token]);
         Log::info($resetPassUrl);
         $details = [
-            'type' => AppEmailType::FORGOT_PASSWORD,
+            'type' => AppEmailType::USER_FORGOT_PASSWORD,
             'recipientEmail' => trim($userEmail),
             'username' => trim($userExists->username),
             'resetPassUrl' => trim($resetPassUrl),
         ];
 
-        //        DispatchEmailNotificationsJob::dispatch($details);
+        DispatchEmailNotificationsJob::dispatch($details);
 
         $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => $message, 'type' => 'success']);
         $this->reset(['email']);

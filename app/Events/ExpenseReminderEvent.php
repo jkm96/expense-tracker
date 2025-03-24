@@ -3,7 +3,6 @@
 namespace App\Events;
 
 use App\Utils\Enums\NotificationType;
-use App\Utils\Helpers\DateHelper;
 use Carbon\Carbon;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;

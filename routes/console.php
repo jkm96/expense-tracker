@@ -7,5 +7,5 @@ Schedule::command('app:notify-missing-expenses')
     ->runInBackground();
 
 Schedule::command('app:process-recurring-expenses')
-    ->everyThirtyMinutes()
+    ->everyTwoMinutes()
     ->runInBackground();

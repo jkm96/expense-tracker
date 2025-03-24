@@ -6,13 +6,12 @@ use App\Models\Expense;
 use App\Models\RecurringExpense;
 use App\Models\User;
 use App\Notifications\ExpenseReminderNotification;
-use App\Utils\Enums\ExpenseFrequency;
+use App\Utils\Constants\AppEventListener;
 use App\Utils\Enums\NotificationType;
 use App\Utils\Helpers\ExpenseHelper;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
-use InvalidArgumentException;
 
 class ProcessRecurringExpenses extends Command
 {

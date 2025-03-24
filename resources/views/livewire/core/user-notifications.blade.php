@@ -29,7 +29,7 @@
             <h2 class="text-md font-semibold text-gray-800 dark:text-gray-300 flex items-center">
                 Notifications
                 @if($unreadCount > 0)
-                    <span class="ml-2 px-1 py-0.5 text-xs font-semibold text-white bg-green-500 rounded-full">
+                    <span class="ml-1 px-1.5 py-0.5 text-xs font-semibold text-white bg-green-500 rounded-full">
                         {{ $unreadCount }}
                     </span>
                 @endif

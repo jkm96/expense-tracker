@@ -6,6 +6,7 @@ use App\Utils\Constants\AppEventListener;
 use App\Utils\Enums\NotificationType;
 use App\Utils\Helpers\DateHelper;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -15,13 +16,14 @@ class UserNotifications extends Component
     protected $queryString = [];
     public $unreadCount = 0;
 
-    protected $listeners = [AppEventListener::NOTIFICATION_SENT => 'loadUnreadCount'];
+    protected $listeners = ['notification-sent' => 'loadUnreadCount'];
 
     public function mount()
     {
         $this->loadUnreadCount();
     }
 
+    #[On('notification-sent')]
     public function loadUnreadCount()
     {
         $this->unreadCount = Auth::user()->unreadNotifications()->count();
