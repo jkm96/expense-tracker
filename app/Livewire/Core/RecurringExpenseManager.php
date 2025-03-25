@@ -3,11 +3,14 @@
 namespace App\Livewire\Core;
 
 use App\Models\RecurringExpense;
+use App\Notifications\ExpenseReminderNotification;
 use App\Utils\Constants\AppEventListener;
 use App\Utils\Enums\ExpenseCategory;
 use App\Utils\Enums\ExpenseFrequency;
+use App\Utils\Enums\NotificationType;
 use App\Utils\Helpers\ExpenseHelper;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
@@ -121,7 +124,7 @@ class RecurringExpenseManager extends Component
 
             $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Recurring expense updated successfully!', 'type' => 'success']);
         } else {
-            RecurringExpense::create([
+            $recurringExpense = RecurringExpense::create([
                 'user_id' => auth()->id(),
                 'name' => Str::title($this->name),
                 'amount' => $this->amount,
@@ -132,6 +135,10 @@ class RecurringExpenseManager extends Component
                 'next_process_at' => $nextProcessAt,
                 'is_active' => true,
             ]);
+
+            $message = "A new recurring expense {$recurringExpense->name} added on {$recurringExpense->created_at->format('Y-m-d h:i A')}";
+            Auth::user()->notify(new ExpenseReminderNotification($message, NotificationType::INFO));
+            $this->dispatch(AppEventListener::NOTIFICATION_SENT);
 
             $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Recurring expense added successfully!', 'type' => 'success']);
         }

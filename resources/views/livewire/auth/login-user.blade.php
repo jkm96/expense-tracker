@@ -22,13 +22,13 @@
                 @error('password') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
             </div>
 
-            <!-- Submit Button -->
             <div class="mt-2 text-center">
-                <button type="submit" class="w-full bg-green-400 text-black text-sm py-1.5 px-2 rounded-md">
-                    Login
-                    <div wire:loading>
-                        <svg class="animate-spin h-5 w-5 text-white mx-auto">...</svg>
-                    </div>
+                <button type="submit"
+                        class="w-full bg-green-400 text-black text-sm py-1.5 px-2 rounded-md flex items-center justify-center gap-2">
+                    <span wire:loading.remove>Login</span>
+                    <span wire:loading>
+                       Loading...
+                    </span>
                 </button>
             </div>
 

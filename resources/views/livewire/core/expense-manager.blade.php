@@ -87,9 +87,9 @@
             <!-- Total Amount for the Group -->
             <p class="text-green-600 text-xs mb-1">Spent: KES {{ number_format($totals[$group], 2) }}</p>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                 @foreach($groupedExpenses as $expense)
-                    <div class="p-2 mb-2 shadow-md rounded bg-gray-700">
+                    <div class="p-2 shadow-md rounded bg-gray-700 hover:bg-gray-600">
                         <div class="flex justify-between mb-1">
                             <div class="flex items-center gap-x-1">
                                 <!-- ✅ Category Color Circle -->

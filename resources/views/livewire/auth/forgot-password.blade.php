@@ -12,18 +12,17 @@
                 @error('email') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
             </div>
 
-            <!-- Submit Button -->
             <div class="mt-2 text-center">
-                <button type="submit" class="w-full bg-green-400 text-black text-sm py-1.5 px-2 rounded-md">
-                    Send Reset Link
-                    <div wire:loading>
-                        <svg class="animate-spin h-5 w-5 text-white mx-auto">...</svg>
-                    </div>
+                <button type="submit"
+                        class="w-full bg-green-400 text-black text-sm py-1.5 px-2 rounded-md flex items-center justify-center gap-2">
+                    <span wire:loading.remove>Send Reset Link</span>
+                    <span wire:loading>
+                       Loading...
+                    </span>
                 </button>
             </div>
         </form>
 
-        <!-- Back to Login -->
         <div class="mt-2 text-center">
             <p class="text-xs text-white">
                 Remembered your password?
