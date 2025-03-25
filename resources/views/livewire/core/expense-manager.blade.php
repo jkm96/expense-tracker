@@ -7,8 +7,8 @@
 
     <!-- Expense Form (Modal Style) -->
     @if ($showForm)
-        <div class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
-            <div class="bg-gray-700 p-3 rounded-md shadow-lg w-96">
+        <div wire:click.self="closeModal('form-modal')" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+            <div class="bg-gray-700 rounded-md shadow-lg w-96 p-3 md:mr-0 md:ml-0 mr-1 ml-1">
                 <h2 class="text-lg font-bold mb-4">{{ $expense_id ? 'Edit Expense' : 'Add Expense' }}</h2>
 
                 <form wire:submit.prevent="addExpense" class="space-y-3">
@@ -144,65 +144,6 @@
                             >
                                 Delete
                             </button>
-
-                            @if($showDetailsModal && $selectedExpense)
-                                <div x-data="{ open: @entangle('showDetailsModal') }" x-show="open"
-                                     class="fixed inset-0 bg-transparent bg-opacity-10 backdrop-blur-sm flex items-center justify-center z-50">
-
-                                    <div class="bg-gray-700 border border-gray-800 rounded-md shadow-lg w-96 p-2">
-                                        <h2 class="text-lg font-bold mb-2">Expense Details</h2>
-
-                                        <div class="mt-2 space-y-2 text-gray-300">
-                                            <p><strong>Name:</strong> {{ ucfirst($selectedExpense->name) }}</p>
-                                            <p>
-                                                <strong>Category:</strong> {{ ucfirst($selectedExpense->category->value) }}
-                                            </p>
-                                            <p><strong>Amount:</strong>
-                                                KES {{ number_format($selectedExpense->amount, 2) }}</p>
-                                            <p><strong>Creation
-                                                    Date:</strong> {{ $selectedExpense->created_at->format('Y-m-d h:i A') }}
-                                            </p>
-                                            <p><strong>Last
-                                                    Modified:</strong> {{ $selectedExpense->updated_at?->format('Y-m-d h:i A') }}
-                                            </p>
-                                            <p><strong>Note:</strong> {{ $selectedExpense->notes }}</p>
-                                        </div>
-
-                                        <!-- Close Button -->
-                                        <div class="mt-2 flex justify-end space-x-4">
-                                            <button wire:click="closeModal('view-modal')"
-                                                    class="bg-red-600 hover:bg-red-500 text-sm py-1 px-2 rounded">
-                                                Close
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
-
-                            @if($showDeleteModal)
-                                <div x-data="{ open: @entangle('showDeleteModal') }" x-show="open"
-                                     class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
-
-                                    <!-- Modal Content -->
-                                    <div class="bg-gray-700 rounded-md shadow-lg w-96 p-4">
-                                        <h2 class="text-md font-bold mb-4">Delete Expense</h2>
-
-                                        <p class="text-sm">Are you sure you want to delete this expense?
-                                            This action cannot be undone.</p>
-
-                                        <div class="mt-4 flex justify-between space-x-4">
-                                            <button @click="open = false"
-                                                    class="bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm py-1 px-2 rounded">
-                                                Cancel
-                                            </button>
-                                            <button wire:click="confirmDelete"
-                                                    class="bg-red-600 hover:bg-red-700 text-white text-sm py-1 px-2 rounded">
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endif
                         </div>
                     </div>
                 @endforeach
@@ -217,6 +158,66 @@
             <p>No expenses found</p>
         @endforelse
 
+        @if($showDetailsModal && $selectedExpense)
+            <div x-data="{ open: @entangle('showDetailsModal') }"
+                 x-show="open"
+                 x-transition.opacity
+                 class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+
+                <div @click.outside="open = false" class="bg-gray-700 rounded-md shadow-lg w-96 p-3 md:mr-0 md:ml-0 mr-1 ml-1">
+                    <h2 class="text-md font-bold mb-2">Expense Details</h2>
+
+                    <div class="mt-2 space-y-1 text-gray-300 text-sm">
+                        <p><strong>Name:</strong> {{ ucfirst($selectedExpense->name) }}</p>
+                        <p>
+                            <strong>Category:</strong> {{ ucfirst($selectedExpense->category->value) }}
+                        </p>
+                        <p><strong>Amount:</strong>
+                            KES {{ number_format($selectedExpense->amount, 2) }}</p>
+                        <p><strong>Creation
+                                Date:</strong> {{ $selectedExpense->created_at->format('Y-m-d h:i A') }}
+                        </p>
+                        <p><strong>Last
+                                Modified:</strong> {{ $selectedExpense->updated_at?->format('Y-m-d h:i A') }}
+                        </p>
+                        <p><strong>Note:</strong> {{ $selectedExpense->notes }}</p>
+                    </div>
+
+                    <div class="mt-2 flex justify-end space-x-4">
+                        <button wire:click="closeModal('view-modal')"
+                                class="bg-red-600 hover:bg-red-500 text-sm py-1 px-2 rounded">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if($showDeleteModal)
+            <div x-data="{ open: @entangle('showDeleteModal') }"
+                 x-show="open"
+                 x-transition.opacity
+                 class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+
+                <div @click.outside="open = false" class="bg-gray-700 rounded-md shadow-lg w-96 p-3 md:mr-0 md:ml-0 mr-1 ml-1">
+                    <h2 class="text-md font-bold mb-4">Delete Expense</h2>
+
+                    <p class="text-sm">Are you sure you want to delete this expense?
+                        This action cannot be undone.</p>
+
+                    <div class="mt-4 flex justify-between space-x-4">
+                        <button @click="open = false"
+                                class="bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm py-1 px-2 rounded">
+                            Cancel
+                        </button>
+                        <button wire:click="confirmDelete"
+                                class="bg-red-600 hover:bg-red-700 text-white text-sm py-1 px-2 rounded">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 
     <!-- Pagination Links -->
@@ -241,7 +242,7 @@
             let expenseViewState = JSON.parse(localStorage.getItem('showExpenseDetails'));
             if (expenseViewState && expenseViewState.showModal === true) {
                 if (expenseViewState.expenseId) {
-                    $wire.dispatch('show-expense-details', {expenseId:expenseViewState.expenseId});
+                    $wire.dispatch('show-expense-details', {expenseId: expenseViewState.expenseId});
                 }
             }
         });

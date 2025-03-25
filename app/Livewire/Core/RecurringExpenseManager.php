@@ -168,7 +168,7 @@ class RecurringExpenseManager extends Component
     public function showToggleConfirmation($id)
     {
         $this->selectedExpenseId = $id;
-        $this->selectedExpense = RecurringExpense::with('expense')->findOrFail($id);
+        $this->selectedExpense = RecurringExpense::with('generatedExpenses')->findOrFail($id);
         $this->showToggleModal = true;
     }
 
