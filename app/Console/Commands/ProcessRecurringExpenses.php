@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Events\ExpenseReminderEvent;
 use App\Models\Expense;
 use App\Models\RecurringExpense;
 use App\Models\User;
@@ -34,7 +35,9 @@ class ProcessRecurringExpenses extends Command
      */
     public function handle()
     {
-        Log::info('Started processing recurring expenses!');
+        $logger = Log::channel('commandlog');
+
+        $logger->info('Started processing recurring expenses!');
 
         $now = Carbon::now();
 
@@ -42,8 +45,8 @@ class ProcessRecurringExpenses extends Command
             ->where('next_process_at', '<=', $now)
             ->get();
 
-        $recurringExpenses->each(function ($recurring) use ($now) {
-            Log::info("Processing: {$recurring->name}");
+        $recurringExpenses->each(function ($recurring) use ($now,$logger) {
+            $logger->info("Processing: {$recurring->name}");
 
             Expense::create([
                 'user_id' => $recurring->user_id,
@@ -66,9 +69,12 @@ class ProcessRecurringExpenses extends Command
             $message = "Your recurring expense: {$recurring->name} has been processed successfully at: {$recurring->last_processed_at->format('Y-m-d h:i A')}";
             $user->notify(new ExpenseReminderNotification($message, NotificationType::ALERT));
 
-            Log::info("Processed: {$recurring->name}");
+            //send realtime event
+            event(new ExpenseReminderEvent($user->id, $message,NotificationType::REMINDER));
+
+            $logger->info("Processed: {$recurring->name}");
         });
 
-        Log::info('Finished processing recurring expenses!');
+        $logger->info('Finished processing recurring expenses!');
     }
 }

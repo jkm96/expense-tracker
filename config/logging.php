@@ -51,6 +51,11 @@ return [
     */
 
     'channels' => [
+        'commandlog' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/commands.log'),
+            'level' => 'info',
+        ],
 
         'stack' => [
             'driver' => 'stack',

@@ -31,7 +31,9 @@ class ExpenseReminderCommand extends Command
      */
     public function handle()
     {
-        Log::info('Started expense check!');
+        $logger = Log::channel('commandlog');
+
+        $logger->info('Started expense check!');
 
         $threshold = Carbon::now()->subDays(1);
 
@@ -40,7 +42,7 @@ class ExpenseReminderCommand extends Command
         })->get();
 
         foreach ($users as $user) {
-            $message = "Hello {$user->name}, do not forget to log your expenses!";
+            $message = "Hello {$user->name}, just a polite reminder. Remember to log your expenses!";
 
             // Send and save the notification
             $user->notify(new ExpenseReminderNotification($message, NotificationType::REMINDER));
@@ -48,9 +50,9 @@ class ExpenseReminderCommand extends Command
             //send realtime event
             event(new ExpenseReminderEvent($user->id, $message,NotificationType::REMINDER));
 
-            Log::info("Notification sent to: {$user->email}");
+            $logger->info("Notification sent to: {$user->email}");
         }
 
-        Log::info('Expense check completed!');
+        $logger->info('Expense check completed!');
     }
 }
