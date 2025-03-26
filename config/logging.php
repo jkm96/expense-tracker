@@ -52,7 +52,7 @@ return [
 
     'channels' => [
         'commandlog' => [
-            'driver' => 'single',
+            'driver' => 'daily',
             'path' => storage_path('logs/commands.log'),
             'level' => 'info',
         ],

@@ -174,10 +174,10 @@
         @endforelse
 
         @if($showDetailsModal && !empty($selectedExpense))
-            <div x-data="{ open: @entangle('showDetailsModal') }" x-show="open"
+            <div wire:click.self="closeModal('view-modal')" x-data="{ open: @entangle('showDetailsModal') }" x-show="open"
                  class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
 
-                <div @click.outside="open = false" class="bg-gray-700 rounded-md shadow-lg w-[600px] p-3 md:mr-0 md:ml-0 mr-1 ml-1">
+                <div class="bg-gray-700 rounded-md shadow-lg w-[600px] p-3 md:mr-0 md:ml-0 mr-1 ml-1">
                     <h2 class="text-md font-bold mb-2">Recurring Expense Details</h2>
 
                     <div class="bg-gray-800 p-2 rounded-sm shadow text-sm">
