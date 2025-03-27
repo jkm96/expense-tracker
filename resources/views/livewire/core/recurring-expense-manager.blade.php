@@ -7,8 +7,9 @@
 
     <!-- Expense Form (Modal Style) -->
     @if ($showForm)
-        <div wire:click.self="closeModal('form-modal')" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
-            <div class="bg-gray-700 rounded-lg shadow-lg w-96 p-3 md:mr-0 md:ml-0 mr-1 ml-1">
+        <div wire:click.self="closeModal('form-modal')"
+             class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+            <div class="max-h-[400px] overflow-y-auto bg-gray-700 rounded-lg shadow-lg w-96 p-3 md:mr-0 md:ml-0 mr-1 ml-1">
                 <h2 class="text-lg font-bold mb-4">{{ $recurring_expense_id ? 'Edit Recurring Expense' : 'Add Recurring Expense' }}</h2>
 
                 <form wire:submit.prevent="upsertRecurringExpense" class="space-y-3">
@@ -38,17 +39,60 @@
                     <div class="mb-4">
                         <input type="datetime-local" wire:model="start_date" placeholder="Start date"
                                class="w-full p-2 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
-                        <p class="text-sm text-gray-400">Select the starting date for the recurring expense.</p>
+                        <p class="text-xs text-gray-400">Select the starting date for the recurring expense.</p>
                         @error('start_date') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
 
-                    <select id="frequency" wire:model="frequency" required
-                            class="w-full p-2 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
-                        <option value="">Select Frequency</option>
-                        @foreach($frequencies as $freq)
-                            <option value="{{ $freq->value }}">{{ ucfirst($freq->value) }}</option>
-                        @endforeach
-                    </select>
+                    <div class="mb-2">
+                        <select id="frequency" wire:model.live="frequency" required
+                                class="w-full p-2 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
+                            <option value="">Select Frequency</option>
+                            @foreach($frequencies as $freq)
+                                <option value="{{ $freq->value }}">{{ ucfirst($freq->value) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Show when Daily is selected -->
+                    @if($frequency == 'daily')
+                        <div class="mb-2">
+                            <label class="text-xs text-gray-400">Select Days:</label>
+                            <div class="grid grid-cols-7 gap-1">
+                                @foreach($shortDaysOfWeek as $key => $day)
+                                    <label class="flex items-center space-x-2">
+                                        <input type="checkbox" wire:model="days" value="{{ $key }}">
+                                        <span class="text-sm">{{ $day }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            @error('days') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
+                    @endif
+
+                    <!-- Show when Weekly is selected -->
+                    @if($frequency === 'weekly')
+                        <div class="mb-2">
+                            <label class="text-sm text-gray-400">Select Day:</label>
+                            <select wire:model="dayOfWeek"
+                                    class="w-full p-2 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
+                                <option value="">Select a Day</option>
+                                @foreach($fullDaysOfWeek as $key => $day)
+                                    <option value="{{ $key }}">{{ $day }}</option>
+                                @endforeach
+                            </select>
+                            @error('dayOfWeek') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
+                    @endif
+
+                    <!-- Show when Monthly is selected -->
+                    @if($frequency === 'monthly')
+                        <div class="mb-2">
+                            <label class="text-xs text-gray-400">Select Date:</label>
+                            <input type="datetime-local" wire:model="dayOfMonth" placeholder="Select date"
+                                   class="w-full p-2 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
+                            @error('dayOfMonth') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
+                    @endif
 
                     <div class="flex justify-between">
                         <button type="button" wire:click="closeModal('form-modal')"
@@ -174,7 +218,8 @@
         @endforelse
 
         @if($showDetailsModal && !empty($selectedExpense))
-            <div wire:click.self="closeModal('view-modal')" x-data="{ open: @entangle('showDetailsModal') }" x-show="open"
+            <div wire:click.self="closeModal('view-modal')" x-data="{ open: @entangle('showDetailsModal') }"
+                 x-show="open"
                  class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
 
                 <div class="bg-gray-700 rounded-md shadow-lg w-[600px] p-3 md:mr-0 md:ml-0 mr-1 ml-1">
@@ -248,7 +293,8 @@
             <div x-data="{ open: @entangle('showToggleModal') }" x-show="open"
                  class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
 
-                <div @click.outside="open = false" class="bg-gray-700 rounded-md shadow-lg w-96 p-3 md:mr-0 md:ml-0 mr-1 ml-1">
+                <div @click.outside="open = false"
+                     class="bg-gray-700 rounded-md shadow-lg w-96 p-3 md:mr-0 md:ml-0 mr-1 ml-1">
                     <h2 class="text-md font-bold">
                         {{ $selectedExpense->is_active ? 'Stop Recurring Expense' : 'Resume Recurring Expense' }}
                     </h2>
@@ -279,7 +325,8 @@
                  class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
 
                 <!-- Modal Content -->
-                <div @click.outside="open = false" class="bg-gray-700 rounded-md shadow-lg w-96 p-3 md:mr-0 md:ml-0 mr-1 ml-1">
+                <div @click.outside="open = false"
+                     class="bg-gray-700 rounded-md shadow-lg w-96 p-3 md:mr-0 md:ml-0 mr-1 ml-1">
                     <h2 class="text-md font-bold">Delete Expense</h2>
 
                     <p class="mt-2 text-sm">Are you sure you want to delete this recurring expense?

@@ -16,6 +16,7 @@ class RecurringExpense extends Model
         'notes',
         'start_date',
         'frequency',
+        'schedule_config',
         'is_active',
         'last_processed_at',
         'next_process_at',
@@ -23,6 +24,7 @@ class RecurringExpense extends Model
 
     protected $casts = [
         'frequency' => ExpenseFrequency::class,
+        'schedule_config' => 'array',
         'category' => ExpenseCategory::class,
         'start_date' => 'datetime',
         'last_processed_at' => 'datetime',

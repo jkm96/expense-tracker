@@ -11,6 +11,7 @@ use App\Utils\Constants\AppEventListener;
 use App\Utils\Enums\NotificationType;
 use App\Utils\Helpers\ExpenseHelper;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -46,33 +47,40 @@ class ProcessRecurringExpenses extends Command
             ->get();
 
         $recurringExpenses->each(function ($recurring) use ($now,$logger) {
-            $logger->info("Processing: {$recurring->name}");
+            try {
+                $logger->info("Processing: {$recurring->name}");
 
-            Expense::create([
-                'user_id' => $recurring->user_id,
-                'recurring_expense_id' => $recurring->id,
-                'name' => $recurring->name,
-                'amount' => $recurring->amount,
-                'category' => $recurring->category,
-                'notes' => $recurring->notes,
-                'date' => $now->toDateString(),
-            ]);
+                Expense::create([
+                    'user_id' => $recurring->user_id,
+                    'recurring_expense_id' => $recurring->id,
+                    'name' => $recurring->name,
+                    'amount' => $recurring->amount,
+                    'category' => $recurring->category,
+                    'notes' => $recurring->notes,
+                    'date' => $now->toDateString(),
+                ]);
 
-            $nextProcessTime = ExpenseHelper::calculateNextProcessTime($recurring->frequency, $now);
+                $scheduleConfig = json_decode($recurring->schedule_config, true) ?? [];
+                $nextProcessTime = ExpenseHelper::calculateNextProcessTime($recurring->frequency, $now, $scheduleConfig);
 
-            $recurring->update([
-                'last_processed_at' => $now->toDateTimeString(),
-                'next_process_at' => $nextProcessTime->toDateTimeString(),
-            ]);
+                $recurring->update([
+                    'last_processed_at' => $now->toDateTimeString(),
+                    'next_process_at' => $nextProcessTime->toDateTimeString(),
+                ]);
 
-            $user = User::findOrFail($recurring->user_id);
-            $message = "Your recurring expense: {$recurring->name} has been processed successfully at: {$recurring->last_processed_at->format('Y-m-d h:i A')}";
-            $user->notify(new ExpenseReminderNotification($message, NotificationType::ALERT));
+                $user = User::findOrFail($recurring->user_id);
+                if ($user) {
+                    $message = "Your recurring expense: {$recurring->name} has been processed successfully at: {$now->format('Y-m-d h:i A')}";
+                    $user->notify(new ExpenseReminderNotification($message, NotificationType::ALERT));
 
-            //send realtime event
-            event(new ExpenseReminderEvent($user->id, $message,NotificationType::REMINDER));
+                    // Send real-time event
+                    event(new ExpenseReminderEvent($user->id, $message, NotificationType::REMINDER));
+                }
 
-            $logger->info("Processed: {$recurring->name}");
+                $logger->info("Processed: {$recurring->name}");
+            } catch (Exception $e) {
+                $logger->error("Failed to process {$recurring->name}: " . $e->getMessage());
+            }
         });
 
         $logger->info('Finished processing recurring expenses!');

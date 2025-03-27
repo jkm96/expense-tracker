@@ -29,11 +29,34 @@ class RecurringExpenseManager extends Component
     public $showForm = false;
     public $name, $amount, $category, $start_date, $recurring_expense_id;
     public $frequency;
+    public array $days = [];
+    public ?string $dayOfWeek = null;
+    public ?int $dayOfMonth = null;
     public $showDeleteModal = false;
     public $showDetailsModal = false;
     public $selectedExpense;
     public $showToggleModal = false;
     public $selectedExpenseId;
+
+    public $shortDaysOfWeek = [
+        'sun' => 'Sun',
+        'mon' => 'Mon',
+        'tue' => 'Tue',
+        'wed' => 'Wed',
+        'thur' => 'Thur',
+        'fri' => 'Fri',
+        'sat' => 'Sat',
+    ];
+
+    public $fullDaysOfWeek = [
+        'sunday' => 'Sunday',
+        'monday' => 'Monday',
+        'tuesday' => 'Tuesday',
+        'wednesday' => 'Wednesday',
+        'thursday' => 'Thursday',
+        'friday' => 'Friday',
+        'saturday' => 'Saturday',
+    ];
 
     public function mount()
     {
@@ -47,7 +70,10 @@ class RecurringExpenseManager extends Component
     public function toggleForm()
     {
         $this->showForm = !$this->showForm;
-        $this->dispatch(AppEventListener::RECURRING_FORM, details: ['showForm' => $this->showForm, 'recurringExpenseId' => null]);
+        $this->dispatch(AppEventListener::RECURRING_FORM, details: [
+            'showForm' => $this->showForm,
+            'recurringExpenseId' => null
+        ]);
     }
 
     public function closeModal($action)
@@ -55,11 +81,17 @@ class RecurringExpenseManager extends Component
         switch ($action) {
             case 'form-modal':
                 $this->showForm = false;
-                $this->dispatch(AppEventListener::RECURRING_FORM, details: ['showForm' => $this->showForm, 'recurringExpenseId' => null]);
+                $this->dispatch(AppEventListener::RECURRING_FORM, details: [
+                    'showForm' => $this->showForm,
+                    'recurringExpenseId' => null
+                ]);
                 break;
             case 'view-modal':
                 $this->showDetailsModal = false;
-                $this->dispatch(AppEventListener::VIEW_RECURRING_MODAL, details: ['showModal' => $this->showDetailsModal, 'recurringExpenseId' => null]);
+                $this->dispatch(AppEventListener::VIEW_RECURRING_MODAL, details: [
+                    'showModal' => $this->showDetailsModal,
+                    'recurringExpenseId' => null
+                ]);
                 break;
         }
 
@@ -99,9 +131,22 @@ class RecurringExpenseManager extends Component
             'start_date' => 'required|date',
             'category' => ['required', Rule::in(ExpenseCategory::cases())],
             'frequency' => ['required', Rule::in(ExpenseFrequency::cases())],
+            'days' => $this->frequency === ExpenseFrequency::DAILY->value ? 'required|array|min:1' : 'nullable',
+            'dayOfWeek' => $this->frequency === ExpenseFrequency::WEEKLY->value ? 'required|string|in:sunday,monday,tuesday,wednesday,thursday,friday,saturday' : 'nullable',
+            'dayOfMonth' => $this->frequency === ExpenseFrequency::MONTHLY->value ? 'required|integer|min:1|max:31' : 'nullable',
         ];
 
         $this->validate($rules);
+
+        $fullDays = collect($this->days)->map(function ($shortDay) {
+            return $this->mapShortToFullDay($shortDay);
+        })->toArray();
+
+        $scheduleConfig = json_encode([
+            'days' => $this->frequency === ExpenseFrequency::DAILY->value ? $fullDays : null,
+            'dayOfWeek' => $this->frequency === ExpenseFrequency::WEEKLY->value ? $this->dayOfWeek : null,
+            'dayOfMonth' => $this->frequency === ExpenseFrequency::MONTHLY->value ? $this->dayOfMonth : null,
+        ]);
 
         $nextProcessAt = ExpenseHelper::calculateNextProcessTime(
             ExpenseFrequency::from($this->frequency),
@@ -119,10 +164,14 @@ class RecurringExpenseManager extends Component
                 'notes' => ExpenseHelper::generateDefaultNote($this->category, $this->name),
                 'start_date' => $this->start_date,
                 'frequency' => $this->frequency,
+                'schedule_config' => $scheduleConfig,
                 'next_process_at' => $nextProcessAt,
             ]);
 
-            $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Recurring expense updated successfully!', 'type' => 'success']);
+            $this->dispatch(AppEventListener::GLOBAL_TOAST, details: [
+                'message' => 'Recurring expense updated successfully!',
+                'type' => 'success'
+            ]);
         } else {
             $recurringExpense = RecurringExpense::create([
                 'user_id' => auth()->id(),
@@ -132,6 +181,7 @@ class RecurringExpenseManager extends Component
                 'notes' => ExpenseHelper::generateDefaultNote($this->category, $this->name),
                 'start_date' => $this->start_date,
                 'frequency' => $this->frequency,
+                'schedule_config' => $scheduleConfig,
                 'next_process_at' => $nextProcessAt,
                 'is_active' => true,
             ]);
@@ -140,13 +190,49 @@ class RecurringExpenseManager extends Component
             Auth::user()->notify(new ExpenseReminderNotification($message, NotificationType::INFO));
             $this->dispatch(AppEventListener::NOTIFICATION_SENT);
 
-            $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Recurring expense added successfully!', 'type' => 'success']);
+            $this->dispatch(AppEventListener::GLOBAL_TOAST, details: [
+                'message' => 'Recurring expense added successfully!',
+                'type' => 'success'
+            ]);
         }
 
         $this->showForm = false;
-        $this->dispatch(AppEventListener::RECURRING_FORM, details: ['showForm' => $this->showForm, 'recurringExpenseId' => null]);
+        $this->dispatch(AppEventListener::RECURRING_FORM, details: [
+            'showForm' => $this->showForm,
+            'recurringExpenseId' => null
+        ]);
         $this->resetFields();
         $this->loadRecurringExpenses();
+    }
+
+    private function mapShortToFullDay($shortDay): string
+    {
+        $map = [
+            'sun' => 'Sunday',
+            'mon' => 'Monday',
+            'tue' => 'Tuesday',
+            'wed' => 'Wednesday',
+            'thur' => 'Thursday',
+            'fri' => 'Friday',
+            'sat' => 'Saturday',
+        ];
+
+        return $map[$shortDay] ?? $shortDay;
+    }
+
+    private function mapFullToShortDay($fullDay)
+    {
+        $map = [
+            'Sunday' => 'sun',
+            'Monday' => 'mon',
+            'Tuesday' => 'tue',
+            'Wednesday' => 'wed',
+            'Thursday' => 'thur',
+            'Friday' => 'fri',
+            'Saturday' => 'sat',
+        ];
+
+        return $map[$fullDay] ?? $fullDay;
     }
 
     #[On('edit-recurring-expense')]
@@ -161,8 +247,33 @@ class RecurringExpenseManager extends Component
         $this->start_date = Carbon::parse($recurringExpense->start_date)->toDateTimeString();
         $this->frequency = $recurringExpense->frequency->value;
 
+        switch ($this->frequency) {
+            case ExpenseFrequency::DAILY->value:
+                $this->days = collect(json_decode($recurringExpense->days))->map(function ($day) {
+                    return $this->mapFullToShortDay($day);
+                })->toArray();
+                break;
+
+            case ExpenseFrequency::WEEKLY->value:
+                $this->dayOfWeek = strtolower($recurringExpense->day_of_week);
+                break;
+
+            case ExpenseFrequency::MONTHLY->value:
+                $this->dayOfMonth = $recurringExpense->day_of_month;
+                break;
+
+            default:
+                $this->days = [];
+                $this->dayOfWeek = null;
+                $this->dayOfMonth = null;
+                break;
+        }
+
         $this->showForm = !$this->showForm;
-        $this->dispatch(AppEventListener::RECURRING_FORM, details: ['showForm' => $this->showForm, 'recurringExpenseId' => $recurringExpenseId]);
+        $this->dispatch(AppEventListener::RECURRING_FORM, details: [
+            'showForm' => $this->showForm,
+            'recurringExpenseId' => $recurringExpenseId
+        ]);
     }
 
     public function showToggleConfirmation($id)
@@ -178,7 +289,10 @@ class RecurringExpenseManager extends Component
         $expense->update(['is_active' => !$expense->is_active]);
 
         $status = $expense->is_active ? 'resumed' : 'stopped';
-        $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => "Recurring expense has been {$status}.", 'type' => 'success']);
+        $this->dispatch(AppEventListener::GLOBAL_TOAST, details: [
+            'message' => "Recurring expense has been {$status}.",
+            'type' => 'success'
+        ]);
 
         $this->showToggleModal = false;
         $this->selectedExpenseId = null;
@@ -197,7 +311,10 @@ class RecurringExpenseManager extends Component
         $expense = RecurringExpense::where('id', $this->selectedExpenseId)->first();
         if ($expense) {
             $expense->delete();
-            $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Recurring expense deleted successfully!', 'type' => 'success']);
+            $this->dispatch(AppEventListener::GLOBAL_TOAST, details: [
+                'message' => 'Recurring expense deleted successfully!',
+                'type' => 'success'
+            ]);
         }
 
         $this->showDeleteModal = false;
@@ -208,12 +325,15 @@ class RecurringExpenseManager extends Component
     }
 
     #[On('show-recurring-details')]
-    public function showRecurringExpenseDetails($recurringExpenseId=null)
+    public function showRecurringExpenseDetails($recurringExpenseId = null)
     {
         if (!empty($recurringExpenseId)) {
             $this->selectedExpense = RecurringExpense::with('generatedExpenses')->findOrFail($recurringExpenseId);
             $this->showDetailsModal = true;
-            $this->dispatch(AppEventListener::VIEW_RECURRING_MODAL, details: ['showModal' => $this->showDetailsModal, 'recurringExpenseId' => $recurringExpenseId]);
+            $this->dispatch(AppEventListener::VIEW_RECURRING_MODAL, details: [
+                'showModal' => $this->showDetailsModal,
+                'recurringExpenseId' => $recurringExpenseId
+            ]);
         }
     }
 
