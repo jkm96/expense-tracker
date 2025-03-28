@@ -31,31 +31,21 @@ class RecurringExpenseManager extends Component
     public $frequency;
     public array $days = [];
     public ?string $dayOfWeek = null;
-    public ?int $dayOfMonth = null;
+    public $dayOfMonth = null;
     public $showDeleteModal = false;
     public $showDetailsModal = false;
     public $selectedExpense;
     public $showToggleModal = false;
     public $selectedExpenseId;
 
-    public $shortDaysOfWeek = [
-        'sun' => 'Sun',
-        'mon' => 'Mon',
-        'tue' => 'Tue',
-        'wed' => 'Wed',
-        'thur' => 'Thur',
-        'fri' => 'Fri',
-        'sat' => 'Sat',
-    ];
-
-    public $fullDaysOfWeek = [
-        'sunday' => 'Sunday',
-        'monday' => 'Monday',
-        'tuesday' => 'Tuesday',
-        'wednesday' => 'Wednesday',
-        'thursday' => 'Thursday',
-        'friday' => 'Friday',
-        'saturday' => 'Saturday',
+    public $daysOfWeek = [
+        'sun' => 'Sunday',
+        'mon' => 'Monday',
+        'tue' => 'Tuesday',
+        'wed' => 'Wednesday',
+        'thur' => 'Thursday',
+        'fri' => 'Friday',
+        'sat' => 'Saturday',
     ];
 
     public function mount()
@@ -69,6 +59,9 @@ class RecurringExpenseManager extends Component
     #[On('toggle-form')]
     public function toggleForm()
     {
+        if (!isset($this->start_date)){
+            $this->start_date = Carbon::now()->format('Y-m-d\TH:i');
+        }
         $this->showForm = !$this->showForm;
         $this->dispatch(AppEventListener::RECURRING_FORM, details: [
             'showForm' => $this->showForm,
@@ -133,7 +126,7 @@ class RecurringExpenseManager extends Component
             'frequency' => ['required', Rule::in(ExpenseFrequency::cases())],
             'days' => $this->frequency === ExpenseFrequency::DAILY->value ? 'required|array|min:1' : 'nullable',
             'dayOfWeek' => $this->frequency === ExpenseFrequency::WEEKLY->value ? 'required|string|in:sunday,monday,tuesday,wednesday,thursday,friday,saturday' : 'nullable',
-            'dayOfMonth' => $this->frequency === ExpenseFrequency::MONTHLY->value ? 'required|integer|min:1|max:31' : 'nullable',
+            'dayOfMonth' => $this->frequency === ExpenseFrequency::MONTHLY->value ? 'required|date' : 'nullable',
         ];
 
         $this->validate($rules);
@@ -144,8 +137,8 @@ class RecurringExpenseManager extends Component
 
         $scheduleConfig = json_encode([
             'days' => $this->frequency === ExpenseFrequency::DAILY->value ? $fullDays : null,
-            'dayOfWeek' => $this->frequency === ExpenseFrequency::WEEKLY->value ? $this->dayOfWeek : null,
-            'dayOfMonth' => $this->frequency === ExpenseFrequency::MONTHLY->value ? $this->dayOfMonth : null,
+            'day_of_week' => $this->frequency === ExpenseFrequency::WEEKLY->value ? $this->dayOfWeek : null,
+            'day_of_month' => $this->frequency === ExpenseFrequency::MONTHLY->value ? $this->dayOfMonth : null,
         ]);
 
         $nextProcessAt = ExpenseHelper::calculateNextProcessTime(
@@ -207,32 +200,12 @@ class RecurringExpenseManager extends Component
 
     private function mapShortToFullDay($shortDay): string
     {
-        $map = [
-            'sun' => 'Sunday',
-            'mon' => 'Monday',
-            'tue' => 'Tuesday',
-            'wed' => 'Wednesday',
-            'thur' => 'Thursday',
-            'fri' => 'Friday',
-            'sat' => 'Saturday',
-        ];
-
-        return $map[$shortDay] ?? $shortDay;
+        return $this->daysOfWeek[$shortDay] ?? ucfirst($shortDay);
     }
 
-    private function mapFullToShortDay($fullDay)
+    private function mapFullToShortDay($fullDay): string
     {
-        $map = [
-            'Sunday' => 'sun',
-            'Monday' => 'mon',
-            'Tuesday' => 'tue',
-            'Wednesday' => 'wed',
-            'Thursday' => 'thur',
-            'Friday' => 'fri',
-            'Saturday' => 'sat',
-        ];
-
-        return $map[$fullDay] ?? $fullDay;
+        return array_search($fullDay, $this->daysOfWeek) ?? strtolower(substr($fullDay, 0, 3));
     }
 
     #[On('edit-recurring-expense')]
@@ -247,19 +220,20 @@ class RecurringExpenseManager extends Component
         $this->start_date = Carbon::parse($recurringExpense->start_date)->toDateTimeString();
         $this->frequency = $recurringExpense->frequency->value;
 
+        $scheduleConfig = json_decode($recurringExpense->schedule_config, true);
         switch ($this->frequency) {
             case ExpenseFrequency::DAILY->value:
-                $this->days = collect(json_decode($recurringExpense->days))->map(function ($day) {
+                $this->days = collect($scheduleConfig['days'])->map(function ($day) {
                     return $this->mapFullToShortDay($day);
                 })->toArray();
                 break;
 
             case ExpenseFrequency::WEEKLY->value:
-                $this->dayOfWeek = strtolower($recurringExpense->day_of_week);
+                $this->dayOfWeek = strtolower($scheduleConfig['day_of_week'] ?? '');
                 break;
 
             case ExpenseFrequency::MONTHLY->value:
-                $this->dayOfMonth = $recurringExpense->day_of_month;
+                $this->dayOfMonth = $scheduleConfig['day_of_month'] ?? '';
                 break;
 
             default:

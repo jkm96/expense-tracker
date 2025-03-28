@@ -16,7 +16,6 @@ class ExpenseHelper
             ExpenseFrequency::DAILY => self::getNextDailyProcessTime($lastProcessed, $scheduleConfig),
             ExpenseFrequency::WEEKLY => self::getNextWeeklyProcessTime($lastProcessed, $scheduleConfig),
             ExpenseFrequency::MONTHLY => self::getNextMonthlyProcessTime($lastProcessed, $scheduleConfig),
-            ExpenseFrequency::YEARLY => $lastProcessed->copy()->addYear(),
             default => throw new InvalidArgumentException("Invalid frequency"),
         };
     }

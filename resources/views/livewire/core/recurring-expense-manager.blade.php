@@ -57,11 +57,11 @@
                     @if($frequency == 'daily')
                         <div class="mb-2">
                             <label class="text-xs text-gray-400">Select Days:</label>
-                            <div class="grid grid-cols-7 gap-1">
-                                @foreach($shortDaysOfWeek as $key => $day)
-                                    <label class="flex items-center space-x-2">
-                                        <input type="checkbox" wire:model="days" value="{{ $key }}">
-                                        <span class="text-sm">{{ $day }}</span>
+                            <div class="grid grid-cols-7 gap-2 justify-center">
+                                @foreach($daysOfWeek as $key => $day)
+                                    <label class="flex flex-col items-center space-y-1">
+                                        <input type="checkbox" wire:model="days" value="{{ $key }}" class="rounded-full w-3 h-3 text-blue-500 border-gray-400 focus:ring-2 focus:ring-blue-300">
+                                        <span class="text-xs">{{ ucfirst($key) }}</span>
                                     </label>
                                 @endforeach
                             </div>
@@ -72,12 +72,12 @@
                     <!-- Show when Weekly is selected -->
                     @if($frequency === 'weekly')
                         <div class="mb-2">
-                            <label class="text-sm text-gray-400">Select Day:</label>
+                            <label class="text-xs text-gray-400">Select Day:</label>
                             <select wire:model="dayOfWeek"
                                     class="w-full p-2 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
                                 <option value="">Select a Day</option>
-                                @foreach($fullDaysOfWeek as $key => $day)
-                                    <option value="{{ $key }}">{{ $day }}</option>
+                                @foreach($daysOfWeek as $key => $day)
+                                    <option value="{{ strtolower($day) }}">{{ $day }}</option>
                                 @endforeach
                             </select>
                             @error('dayOfWeek') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
@@ -257,6 +257,7 @@
                             <p><strong>Next Process
                                     At:</strong> {{ $selectedExpense->next_process_at?->format('Y-m-d h:i A') }}</p>
                             <p><strong>Note:</strong> {{ $selectedExpense->notes }}</p>
+                            <p><strong>Execution Day(s):</strong> {{ $selectedExpense->execution_days }}</p>
                         </div>
                     </div>
 
