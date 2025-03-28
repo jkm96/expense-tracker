@@ -221,26 +221,28 @@ class RecurringExpenseManager extends Component
         $this->frequency = $recurringExpense->frequency->value;
 
         $scheduleConfig = json_decode($recurringExpense->schedule_config, true);
-        switch ($this->frequency) {
-            case ExpenseFrequency::DAILY->value:
-                $this->days = collect($scheduleConfig['days'])->map(function ($day) {
-                    return $this->mapFullToShortDay($day);
-                })->toArray();
-                break;
+        if ($scheduleConfig != null){
+            switch ($this->frequency) {
+                case ExpenseFrequency::DAILY->value:
+                    $this->days = collect($scheduleConfig['days'])->map(function ($day) {
+                        return $this->mapFullToShortDay($day);
+                    })->toArray();
+                    break;
 
-            case ExpenseFrequency::WEEKLY->value:
-                $this->dayOfWeek = strtolower($scheduleConfig['day_of_week'] ?? '');
-                break;
+                case ExpenseFrequency::WEEKLY->value:
+                    $this->dayOfWeek = strtolower($scheduleConfig['day_of_week'] ?? '');
+                    break;
 
-            case ExpenseFrequency::MONTHLY->value:
-                $this->dayOfMonth = $scheduleConfig['day_of_month'] ?? '';
-                break;
+                case ExpenseFrequency::MONTHLY->value:
+                    $this->dayOfMonth = $scheduleConfig['day_of_month'] ?? '';
+                    break;
 
-            default:
-                $this->days = [];
-                $this->dayOfWeek = null;
-                $this->dayOfMonth = null;
-                break;
+                default:
+                    $this->days = [];
+                    $this->dayOfWeek = null;
+                    $this->dayOfMonth = null;
+                    break;
+            }
         }
 
         $this->showForm = !$this->showForm;
