@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Models\Expense;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -48,7 +49,7 @@ class ExpensesExport implements FromCollection, WithHeadings, WithMapping
             $row->date->format('D, jS M Y'),
             $row->category,
             $row->notes,
-            $row->created_at->format('D, jS M Y h:i A'),
+            Carbon::parse($row->created_at)->format('D, jS M Y h:i A'),
         ];
     }
 }
