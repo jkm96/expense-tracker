@@ -48,7 +48,7 @@ class ExpensesExport implements FromCollection, WithHeadings, WithMapping
             $row->date->format('D, jS M Y'),
             $row->category,
             $row->notes,
-            $row->creatd_ta->format('D, jS M Y h:i A'),
+            $row->created_at->format('D, jS M Y h:i A'),
         ];
     }
 }
