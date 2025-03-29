@@ -7,7 +7,8 @@
 
     <!-- Expense Form (Modal Style) -->
     @if ($showForm)
-        <div wire:click.self="closeModal('form-modal')" class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+        <div wire:click.self="closeModal('form-modal')"
+             class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
             <div class="bg-gray-700 rounded-md shadow-lg w-96 p-3 md:mr-0 md:ml-0 mr-1 ml-1">
                 <h2 class="text-lg font-bold mb-4">{{ $expense_id ? 'Edit Expense' : 'Add Expense' }}</h2>
 
@@ -70,15 +71,75 @@
             <h2 class="text-md font-bold mb-2">Current Expenses</h2>
             <div class="flex items-center">
                 <select wire:model.live="filter" wire:change="loadExpenses"
-                        class="w-full px-1.5 py-0.5 bg-gray-800 text-sm border rounded-full  border-gray-500 focus:outline-none
+                        class="w-full px-1.5 py-0.5 bg-gray-800 text-sm border rounded  border-gray-500 focus:outline-none
                               focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
                     <option value="all">All</option>
                     @foreach($categories as $category)
                         <option value="{{ $category->value }}">{{ ucfirst($category->value) }}</option>
                     @endforeach
                 </select>
+                <button wire:click="toggleExportModal"
+                        class="bg-green-400 hover:bg-red-700 text-white text-sm px-1.5 py-0.5 rounded ml-1">
+                    Export
+                </button>
             </div>
         </div>
+
+        @if($showExportModal)
+            <div x-show="open"
+                 x-transition.opacity
+                 class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+
+                <div @click.outside="toggleExportModal"
+                     class="bg-gray-700 rounded-md shadow-lg w-96 p-3 md:mr-0 md:ml-0 mr-1 ml-1">
+                    <h2 class="text-md font-bold mb-4">Export Expenses</h2>
+
+                    <div class="flex flex-row gap-4">
+                        <div class="mb-4 w-1/2">
+                            <label class="text-sm">Start date:</label>
+                            <input type="date" wire:model="exportFields.startDate"
+                                   class="w-full p-1 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
+                            @error('exportFields.startDate') <span
+                                class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div class="mb-4 w-1/2">
+                            <label class="text-sm">End date:</label>
+                            <input type="date" wire:model="exportFields.endDate"
+                                   class="w-full p-1 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
+                            @error('exportFields.endDate') <span
+                                class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="text-sm">Category:</label>
+                        <select wire:model="exportFields.category"
+                                class="w-full p-1 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none
+                                focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
+                            <option value="">Select Category</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->value }}">{{ ucfirst($category->value) }}</option>
+                            @endforeach
+                        </select>
+                        @error('exportFields.category') <span
+                            class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="mt-4 flex justify-between space-x-4">
+                        <button wire:click="toggleExportModal"
+                                class="bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm px-1.5 py-0.5 rounded">
+                            Cancel
+                        </button>
+                        <button wire:click="exportExpenses"
+                                class="bg-green-400 hover:bg-red-700 text-white text-sm px-1.5 py-0.5 rounded">
+                            Export
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        @endif
 
         <!-- Expense Cards -->
         @forelse($expenses as $group => $groupedExpenses)
@@ -164,7 +225,8 @@
                  x-transition.opacity
                  class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
 
-                <div @click.outside="open = false" class="bg-gray-700 rounded-md shadow-lg w-96 p-3 md:mr-0 md:ml-0 mr-1 ml-1">
+                <div @click.outside="open = false"
+                     class="bg-gray-700 rounded-md shadow-lg w-96 p-3 md:mr-0 md:ml-0 mr-1 ml-1">
                     <h2 class="text-md font-bold mb-2">Expense Details</h2>
 
                     <div class="mt-2 space-y-1 text-gray-300 text-sm">
@@ -199,7 +261,8 @@
                  x-transition.opacity
                  class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
 
-                <div @click.outside="open = false" class="bg-gray-700 rounded-md shadow-lg w-96 p-3 md:mr-0 md:ml-0 mr-1 ml-1">
+                <div @click.outside="open = false"
+                     class="bg-gray-700 rounded-md shadow-lg w-96 p-3 md:mr-0 md:ml-0 mr-1 ml-1">
                     <h2 class="text-md font-bold mb-4">Delete Expense</h2>
 
                     <p class="text-sm">Are you sure you want to delete this expense?
@@ -207,11 +270,11 @@
 
                     <div class="mt-4 flex justify-between space-x-4">
                         <button @click="open = false"
-                                class="bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm py-1 px-2 rounded">
+                                class="bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm px-1.5 py-0.5 rounded">
                             Cancel
                         </button>
                         <button wire:click="confirmDelete"
-                                class="bg-red-600 hover:bg-red-700 text-white text-sm py-1 px-2 rounded">
+                                class="bg-red-600 hover:bg-red-700 text-white text-sm px-1.5 py-0.5 rounded">
                             Delete
                         </button>
                     </div>

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Core;
 
+use App\Exports\ExpensesExport;
 use App\Models\Expense;
 use App\Notifications\ExpenseReminderNotification;
 use App\Utils\Constants\AppEventListener;
@@ -16,6 +17,7 @@ use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ExpenseManager extends Component
 {
@@ -34,6 +36,8 @@ class ExpenseManager extends Component
     public $showDetailsModal = false;
     public $selectedExpense;
     public $showDeleteModal = false;
+    public $exportFields = ['startDate' => null, 'endDate' => null, 'category' => null];
+    public $showExportModal = false;
     public $expenseIdToDelete;
 
     public function mount()
@@ -55,7 +59,10 @@ class ExpenseManager extends Component
     public function toggleForm()
     {
         $this->showForm = !$this->showForm;
-        $this->dispatch(AppEventListener::EXPENSE_FORM, details: ['showForm' => $this->showForm, 'expenseId' => null]);
+        $this->dispatch(AppEventListener::EXPENSE_FORM, details: [
+            'showForm' => $this->showForm,
+            'expenseId' => null
+        ]);
     }
 
     public function closeModal($action)
@@ -63,11 +70,17 @@ class ExpenseManager extends Component
         switch ($action) {
             case 'form-modal':
                 $this->showForm = false;
-                $this->dispatch(AppEventListener::EXPENSE_FORM, details: ['showForm' => $this->showForm, 'expenseId' => null]);
+                $this->dispatch(AppEventListener::EXPENSE_FORM, details: [
+                    'showForm' => $this->showForm,
+                    'expenseId' => null
+                ]);
                 break;
             case 'view-modal':
                 $this->showDetailsModal = false;
-                $this->dispatch(AppEventListener::VIEW_EXPENSE_MODAL, details: ['showModal' => $this->showDetailsModal, 'expenseId' => null]);
+                $this->dispatch(AppEventListener::VIEW_EXPENSE_MODAL, details: [
+                    'showModal' => $this->showDetailsModal,
+                    'expenseId' => null
+                ]);
                 break;
         }
 
@@ -181,30 +194,36 @@ class ExpenseManager extends Component
     #[On('edit-expense')]
     public function editExpense($expenseId)
     {
-       if (!empty($expenseId)){
-           $expense = Expense::where('id', $expenseId)->where('user_id', Auth::id())->first();
+        if (!empty($expenseId)) {
+            $expense = Expense::where('id', $expenseId)->where('user_id', Auth::id())->first();
 
-           if ($expense) {
-               $this->expense_id = $expense->id;
-               $this->name = $expense->name;
-               $this->amount = $expense->amount;
-               $this->date = Carbon::parse($expense->date)->format('Y-m-d');
-               $this->category = $expense->category->value;
-               $this->notes = $expense->notes;
+            if ($expense) {
+                $this->expense_id = $expense->id;
+                $this->name = $expense->name;
+                $this->amount = $expense->amount;
+                $this->date = Carbon::parse($expense->date)->format('Y-m-d');
+                $this->category = $expense->category->value;
+                $this->notes = $expense->notes;
 
-               $this->showForm = !$this->showForm;
-               $this->dispatch(AppEventListener::EXPENSE_FORM, details: ['showForm' => $this->showForm, 'expenseId' => $expenseId]);
-           }
-       }
+                $this->showForm = !$this->showForm;
+                $this->dispatch(AppEventListener::EXPENSE_FORM, details: [
+                    'showForm' => $this->showForm,
+                    'expenseId' => $expenseId
+                ]);
+            }
+        }
     }
 
     #[On('show-expense-details')]
-    public function showExpenseDetails($expenseId=null)
+    public function showExpenseDetails($expenseId = null)
     {
         if (!empty($expenseId)) {
             $this->selectedExpense = Expense::findOrFail($expenseId);
             $this->showDetailsModal = true;
-            $this->dispatch(AppEventListener::VIEW_EXPENSE_MODAL, details: ['showModal' => $this->showDetailsModal, 'expenseId' => $expenseId]);
+            $this->dispatch(AppEventListener::VIEW_EXPENSE_MODAL, details: [
+                'showModal' => $this->showDetailsModal,
+                'expenseId' => $expenseId
+            ]);
         }
     }
 
@@ -219,7 +238,10 @@ class ExpenseManager extends Component
         $expense = Expense::where('id', $this->expenseIdToDelete)->where('user_id', Auth::id())->first();
         if ($expense) {
             $expense->delete();
-            $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Expense deleted successfully!', 'type' => 'success']);
+            $this->dispatch(AppEventListener::GLOBAL_TOAST, details: [
+                'message' => 'Expense deleted successfully!',
+                'type' => 'success'
+            ]);
         }
 
         $this->showDeleteModal = false;
@@ -227,6 +249,35 @@ class ExpenseManager extends Component
 
         $this->resetPage();
         $this->loadExpenses();
+    }
+
+    public function toggleExportModal()
+    {
+        $this->showExportModal = !$this->showExportModal;
+    }
+
+    public function exportExpenses()
+    {
+        $this->validate([
+            'exportFields.startDate' => 'required|date',
+            'exportFields.endDate' => 'required|date|after_or_equal:exportFields.startDate',
+        ]);
+
+        $fileName = 'expenses_' . Carbon::now()->format('Ymd_His') . '.xlsx';
+
+
+        $this->dispatch(AppEventListener::GLOBAL_TOAST, details: [
+            'message' => 'Expense exported successfully!',
+            'type' => 'success'
+        ]);
+
+//        $this->reset('exportFields');
+
+        return Excel::download(new ExpensesExport(
+            $this->exportFields['startDate'],
+            $this->exportFields['endDate'],
+            $this->exportFields['category']
+        ), $fileName);
     }
 
     public function resetFields()
