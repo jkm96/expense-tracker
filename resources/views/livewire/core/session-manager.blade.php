@@ -34,7 +34,7 @@
                     </thead>
                     <tbody class="text-sm">
                     @forelse($sessions as $session)
-                        <tr class="border-t border-gray-600 hover:bg-gray-500">
+                        <tr class="border-t border-gray-600 hover:bg-gray-600">
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-2">
                                     @if($session->deviceType === 'mobile')

@@ -152,17 +152,17 @@
                             <span
                                 class="w-3 h-3 rounded-full {{ get_category_color($recurringExpense->category)[0] }}"></span>
                         @endif
-                        <h2 class="font-semibold">{{ $recurringExpense->name }}</h2>
+                        <h2 class="font-semibold text-md">{{ $recurringExpense->name }}</h2>
                     </div>
                     <div class="flex items-center gap-x-1">
-                        <p class="text-gray-300 text-sm">
+                        <p class="text-gray-300 text-xs">
                             <i class="fas fa-sync-alt text-green-400"></i>
                             {{ ucfirst($recurringExpense->frequency->value) }}
                         </p>
                         |
-                        <p class="text-sm">
+                        <p class="text-xs">
                             <i class="fas fa-clock text-blue-400"></i>
-                            {{ $recurringExpense->next_process_at?->format('Y-m-d h:i A') }}
+                            {{ $recurringExpense->next_process_at?->format('jS M Y h:i A') }}
                         </p>
                     </div>
                 </div>
@@ -170,18 +170,18 @@
                 <hr class="mt-1 mb-1 border-gray-600">
 
                 <div class="flex items-center">
-                    <p class="text-sm mt-1 mb-1 mr-1">
+                    <p class="text-xs mt-1 mb-1 mr-1">
                         <i class="fas fa-folder-open text-yellow-400"></i>
                         {{ ucfirst($recurringExpense->category->value) }}
                     </p>
                     |
-                    <p class="text-sm text-green-600 mt-1 mb-1 ml-1 mr-1">
+                    <p class="text-xs text-green-600 mt-1 mb-1 ml-1 mr-1">
                         KES {{ number_format($recurringExpense->amount, 2) }}
                     </p>
                     |
-                    <p class="text-sm mt-1 mb-1 mr-1 ml-1">
+                    <p class="text-xs mt-1 mb-1 mr-1 ml-1">
                         <i class="fas fa-calendar-alt text-orange-400"></i>
-                        {{ $recurringExpense->start_date->format('Y-m-d h:i A') }}
+                        {{ $recurringExpense->start_date->format('D, d M Y h:i A') }}
                     </p>
                 </div>
 
@@ -249,13 +249,13 @@
                                 @endif
                                 {{ $selectedExpense->is_active ? 'Active' : 'Inactive' }}
                             </p>
-                            <p><strong>Start Date:</strong> {{ $selectedExpense->start_date->format('Y-m-d h:i A') }}
+                            <p><strong>Start Date:</strong> {{ $selectedExpense->start_date->format('D, jS M Y h:i A') }}
                             </p>
                             <p><strong>Last
-                                    Processed:</strong> {{ $selectedExpense->last_processed_at?->format('Y-m-d h:i A') }}
+                                    Processed:</strong> {{ $selectedExpense->last_processed_at?->format('D, jS M Y h:i A') }}
                             </p>
                             <p><strong>Next Process
-                                    At:</strong> {{ $selectedExpense->next_process_at?->format('Y-m-d h:i A') }}</p>
+                                    At:</strong> {{ $selectedExpense->next_process_at?->format('D, jS M Y h:i A') }}</p>
                             <p><strong>Note:</strong> {{ $selectedExpense->notes }}</p>
                             <p><strong>Execution Day(s):</strong> {{ $selectedExpense->execution_days }}</p>
                         </div>
@@ -269,7 +269,7 @@
                                 @forelse($selectedExpense->generatedExpenses as $expense)
                                     <li class="border-b border-gray-600 pb-2">
                                         <p><strong>Processed
-                                                At:</strong> {{ $expense->created_at->format('Y-m-d h:i A') }}</p>
+                                                At:</strong> {{ $expense->created_at->format('D, jS M Y h:i A') }}</p>
                                         <p><strong>Amount:</strong> KES {{ number_format($expense->amount, 2) }}</p>
                                     </li>
                                 @empty

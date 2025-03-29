@@ -316,7 +316,7 @@ class RecurringExpenseManager extends Component
     public function resetFields()
     {
         $this->start_date = Carbon::now()->format('Y-m-d\TH:i');
-        $this->reset(['name', 'amount', 'start_date', 'category', 'recurring_expense_id', 'showForm']);
+        $this->reset(['name', 'amount', 'start_date', 'category', 'selectedExpenseId', 'showForm','days','dayOfWeek','dayOfMonth']);
     }
 
     public function render()

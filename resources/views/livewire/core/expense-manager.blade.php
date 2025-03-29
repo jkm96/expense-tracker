@@ -99,7 +99,7 @@
                             </div>
                             <p class="text-gray-300 text-sm">
                                 <i class="fas fa-calendar-alt text-orange-400"></i>
-                                {{ Carbon\Carbon::parse($expense->date)->format('jS M Y') }}
+                                {{ Carbon\Carbon::parse($expense->date)->format('D,jS M Y') }}
                             </p>
                         </div>
 
@@ -175,10 +175,10 @@
                         <p><strong>Amount:</strong>
                             KES {{ number_format($selectedExpense->amount, 2) }}</p>
                         <p><strong>Creation
-                                Date:</strong> {{ $selectedExpense->created_at->format('Y-m-d h:i A') }}
+                                Date:</strong> {{ $selectedExpense->created_at->format('D,jS M Y h:i A') }}
                         </p>
                         <p><strong>Last
-                                Modified:</strong> {{ $selectedExpense->updated_at?->format('Y-m-d h:i A') }}
+                                Modified:</strong> {{ $selectedExpense->updated_at?->format('D,jS M Y h:i A') }}
                         </p>
                         <p><strong>Note:</strong> {{ $selectedExpense->notes }}</p>
                     </div>
