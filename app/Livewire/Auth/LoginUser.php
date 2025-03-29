@@ -27,7 +27,7 @@ class LoginUser extends Component
             session()->regenerate();
             $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Welcome, ' . $this->identifier, 'type' => 'success']);
 
-            return redirect()->intended('user.dashboard');
+            return redirect()->intended(route('user.dashboard'));
         }
 
         $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Invalid credentials!', 'type' => 'error']);
