@@ -79,7 +79,7 @@
                     @endforeach
                 </select>
                 <button wire:click="toggleExportModal"
-                        class="bg-green-400 hover:bg-red-700 text-white text-sm px-1.5 py-0.5 rounded ml-1">
+                        class="bg-green-400 hover:bg-green-600 text-white text-sm px-1.5 py-0.5 rounded ml-1">
                     Export
                 </button>
             </div>
@@ -132,7 +132,7 @@
                             Cancel
                         </button>
                         <button wire:click="exportExpenses"
-                                class="bg-green-400 hover:bg-red-700 text-white text-sm px-1.5 py-0.5 rounded">
+                                class="bg-green-400 hover:bg-green-500 text-white text-sm px-1.5 py-0.5 rounded">
                             Export
                         </button>
                     </div>

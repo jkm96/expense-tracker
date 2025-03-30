@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Core;
 
+use App\Exports\ExpensesExport;
+use App\Exports\RecurringExpensesExport;
 use App\Models\RecurringExpense;
 use App\Notifications\ExpenseReminderNotification;
 use App\Utils\Constants\AppEventListener;
@@ -16,6 +18,7 @@ use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Maatwebsite\Excel\Facades\Excel;
 
 class RecurringExpenseManager extends Component
 {
@@ -36,6 +39,8 @@ class RecurringExpenseManager extends Component
     public $showDetailsModal = false;
     public $selectedExpense;
     public $showToggleModal = false;
+    public $exportFields = ['startDate' => null, 'endDate' => null, 'category' => null,'frequency'=> null];
+    public $showExportModal = false;
     public $selectedExpenseId;
 
     public $daysOfWeek = [
@@ -311,6 +316,36 @@ class RecurringExpenseManager extends Component
                 'recurringExpenseId' => $recurringExpenseId
             ]);
         }
+    }
+
+    public function toggleExportModal()
+    {
+        $this->showExportModal = !$this->showExportModal;
+    }
+
+    public function exportRecurringExpenses()
+    {
+        $this->validate([
+            'exportFields.startDate' => 'required|date',
+            'exportFields.endDate' => 'required|date|after_or_equal:exportFields.startDate',
+        ]);
+
+        $fileName = 'recurring_expenses_' . Carbon::now()->format('Ymd_His') . '.xlsx';
+
+
+        $this->dispatch(AppEventListener::GLOBAL_TOAST, details: [
+            'message' => 'Records exported successfully!',
+            'type' => 'success'
+        ]);
+
+//        $this->reset('exportFields');
+
+        return Excel::download(new RecurringExpensesExport(
+            $this->exportFields['startDate'],
+            $this->exportFields['endDate'],
+            $this->exportFields['category'],
+            $this->exportFields['frequency']
+        ), $fileName);
     }
 
     public function resetFields()

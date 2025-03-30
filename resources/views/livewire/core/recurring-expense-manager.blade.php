@@ -9,7 +9,8 @@
     @if ($showForm)
         <div wire:click.self="closeModal('form-modal')"
              class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
-            <div class="max-h-[400px] overflow-y-auto bg-gray-700 rounded-lg shadow-lg w-96 p-3 md:mr-0 md:ml-0 mr-1 ml-1">
+            <div
+                class="max-h-[400px] overflow-y-auto bg-gray-700 rounded-lg shadow-lg w-96 p-3 md:mr-0 md:ml-0 mr-1 ml-1">
                 <h2 class="text-lg font-bold mb-4">{{ $recurring_expense_id ? 'Edit Recurring Expense' : 'Add Recurring Expense' }}</h2>
 
                 <form wire:submit.prevent="upsertRecurringExpense" class="space-y-3">
@@ -60,7 +61,8 @@
                             <div class="grid grid-cols-7 gap-2 justify-center">
                                 @foreach($daysOfWeek as $key => $day)
                                     <label class="flex flex-col items-center space-y-1">
-                                        <input type="checkbox" wire:model="days" value="{{ $key }}" class="rounded-full w-3 h-3 text-blue-500 border-gray-400 focus:ring-2 focus:ring-blue-300">
+                                        <input type="checkbox" wire:model="days" value="{{ $key }}"
+                                               class="rounded-full w-3 h-3 text-blue-500 border-gray-400 focus:ring-2 focus:ring-blue-300">
                                         <span class="text-xs">{{ ucfirst($key) }}</span>
                                     </label>
                                 @endforeach
@@ -113,10 +115,10 @@
     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
         <h2 class="text-md font-bold mb-2 sm:mb-0">Recurring Expenses</h2>
 
-        <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-2">
             <!-- Category Filter -->
             <select wire:model.live="categoryFilter" wire:change="loadRecurringExpenses"
-                    class="w-full px-1.5 py-0.5 bg-gray-800 text-sm border rounded-full  border-gray-500 focus:outline-none
+                    class="w-full px-1.5 py-0.5 bg-gray-800 text-sm border rounded  border-gray-500 focus:outline-none
                               focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
                 <option value="all">All Categories</option>
                 @foreach($categories as $category)
@@ -126,15 +128,90 @@
 
             <!-- Frequency Filter -->
             <select wire:model.live="frequencyFilter" wire:change="loadRecurringExpenses"
-                    class="w-full px-1.5 py-0.5 bg-gray-800 text-sm border rounded-full  border-gray-500 focus:outline-none
+                    class="w-full px-1.5 py-0.5 bg-gray-800 text-sm border rounded  border-gray-500 focus:outline-none
                               focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
                 <option value="all">All Frequencies</option>
                 @foreach($frequencies as $freq)
                     <option value="{{ $freq->value }}">{{ ucfirst($freq->value) }}</option>
                 @endforeach
             </select>
+
+            <button wire:click="toggleExportModal"
+                    class="bg-green-400 hover:bg-green-600 text-white text-sm px-1.5 py-0.5 rounded ml-1">
+                Export
+            </button>
         </div>
     </div>
+
+    @if($showExportModal)
+        <div x-show="open"
+             x-transition.opacity
+             class="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+
+            <div @click.outside="toggleExportModal"
+                 class="bg-gray-700 rounded-md shadow-lg w-96 p-3 md:mr-0 md:ml-0 mr-1 ml-1">
+                <h2 class="text-md font-bold mb-4">Export Recurring Expenses</h2>
+
+                <div class="flex flex-row gap-4">
+                    <div class="mb-4 w-1/2">
+                        <label class="text-sm">Start date:</label>
+                        <input type="date" wire:model="exportFields.startDate"
+                               class="w-full p-1 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
+                        @error('exportFields.startDate') <span
+                            class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="mb-4 w-1/2">
+                        <label class="text-sm">End date:</label>
+                        <input type="date" wire:model="exportFields.endDate"
+                               class="w-full p-1 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
+                        @error('exportFields.endDate') <span
+                            class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="text-sm">Category:</label>
+                    <select wire:model="exportFields.category"
+                            class="w-full p-1 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none
+                                focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
+                        <option value="">Select Category</option>
+                        @foreach($categories as $category)
+                            <option value="{{ $category->value }}">{{ ucfirst($category->value) }}</option>
+                        @endforeach
+                    </select>
+                    @error('exportFields.category') <span
+                        class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="mb-4">
+                    <label class="text-sm">Frequency:</label>
+                    <select wire:model="exportFields.frequency"
+                            class="w-full p-1 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none
+                                focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
+                        <option value="">Select Frequency</option>
+                        @foreach($frequencies as $frequency)
+                            <option value="{{ $frequency->value }}">{{ ucfirst($frequency->value) }}</option>
+                        @endforeach
+                    </select>
+                    @error('exportFields.frequency') <span
+                        class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="mt-4 flex justify-between space-x-4">
+                    <button wire:click="toggleExportModal"
+                            class="bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm px-1.5 py-0.5 rounded">
+                        Cancel
+                    </button>
+                    <button wire:click="exportRecurringExpenses"
+                            class="bg-green-400 hover:bg-green-500 text-white text-sm px-1.5 py-0.5 rounded">
+                        Export
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    @endif
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
         @forelse($recurringExpenses as $recurringExpense)
@@ -249,7 +326,8 @@
                                 @endif
                                 {{ $selectedExpense->is_active ? 'Active' : 'Inactive' }}
                             </p>
-                            <p><strong>Start Date:</strong> {{ $selectedExpense->start_date->format('D, jS M Y h:i A') }}
+                            <p><strong>Start
+                                    Date:</strong> {{ $selectedExpense->start_date->format('D, jS M Y h:i A') }}
                             </p>
                             <p><strong>Last
                                     Processed:</strong> {{ $selectedExpense->last_processed_at?->format('D, jS M Y h:i A') }}
