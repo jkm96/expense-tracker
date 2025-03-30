@@ -47,7 +47,7 @@ class ExpensesExport implements FromCollection, WithHeadings, WithMapping
             $row->name,
             number_format($row->amount, 2),
             $row->date->format('D, jS M Y'),
-            $row->category,
+            $row->category->value,
             $row->notes,
             Carbon::parse($row->created_at)->format('D, jS M Y h:i A'),
         ];
