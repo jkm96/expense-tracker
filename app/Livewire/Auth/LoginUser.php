@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Auth;
 
+use App\Models\AuditLog;
 use App\Utils\Constants\AppEventListener;
+use App\Utils\Enums\AuditAction;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -25,7 +27,19 @@ class LoginUser extends Component
 
         if (Auth::attempt($credentials)) {
             session()->regenerate();
-            $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Welcome, ' . $this->identifier, 'type' => 'success']);
+            
+            $this->dispatch(AppEventListener::GLOBAL_TOAST, details: [
+                'message' => 'Welcome, ' . $this->identifier,
+                'type' => 'success']
+            );
+
+            AuditLog::log(
+                AuditAction::AUTH,
+                'User logged in successfully',
+                'User',
+                Auth::id(),
+                ['identifier' => $this->identifier, 'ip' => request()->ip()]
+            );
 
             return redirect()->intended(route('user.dashboard'));
         }

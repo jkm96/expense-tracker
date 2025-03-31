@@ -39,6 +39,7 @@ class ExpenseManager extends Component
     public $exportFields = ['startDate' => null, 'endDate' => null, 'category' => null];
     public $showExportModal = false;
     public $expenseIdToDelete;
+    public $totalExpenses;
 
     public function mount()
     {
@@ -110,6 +111,9 @@ class ExpenseManager extends Component
             ->orderBy('created_at', 'desc')
             ->paginate(10, ['*'], 'page', $this->page);
 
+        // Keep pagination instance so we can use `total()`
+        $this->paginatedExpenses = $paginatedExpenses; // ✅ Store the pagination instance
+
         // Group expenses by year-month
         $newExpenses = $paginatedExpenses->getCollection()->groupBy(function ($expense) {
             return Carbon::parse($expense->date)->format('Y - F');
@@ -128,6 +132,7 @@ class ExpenseManager extends Component
 
         $this->totals = $this->expenses->map(fn($group) => $group->sum('amount'));
 
+        $this->totalExpenses = $paginatedExpenses->total();
         $this->hasMorePages = $paginatedExpenses->hasMorePages();
     }
 
@@ -258,10 +263,19 @@ class ExpenseManager extends Component
 
     public function exportExpenses()
     {
-        $this->validate([
-            'exportFields.startDate' => 'required|date',
-            'exportFields.endDate' => 'required|date|after_or_equal:exportFields.startDate',
-        ]);
+        $this->validate(
+            [
+                'exportFields.startDate' => 'required|date',
+                'exportFields.endDate' => 'required|date|after_or_equal:exportFields.startDate',
+            ],
+            [
+                'exportFields.startDate.required' => 'The start date is required.',
+                'exportFields.startDate.date' => 'The start date must be a valid date.',
+                'exportFields.endDate.required' => 'The end date is required.',
+                'exportFields.endDate.date' => 'The end date must be a valid date.',
+                'exportFields.endDate.after_or_equal' => 'The end date must be after or equal to the start date.',
+            ]
+        );
 
         $fileName = 'expenses_' . Carbon::now()->format('Ymd_His') . '.xlsx';
 

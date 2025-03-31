@@ -155,17 +155,17 @@
                 <div class="flex flex-row gap-4">
                     <div class="mb-4 w-1/2">
                         <label class="text-sm">Start date:</label>
-                        <input type="date" wire:model="exportFields.startDate"
+                        <input type="date" wire:model="startDate"
                                class="w-full p-1 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
-                        @error('exportFields.startDate') <span
+                        @error('startDate') <span
                             class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
 
                     <div class="mb-4 w-1/2">
                         <label class="text-sm">End date:</label>
-                        <input type="date" wire:model="exportFields.endDate"
+                        <input type="date" wire:model="endDate"
                                class="w-full p-1 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
-                        @error('exportFields.endDate') <span
+                        @error('endDate') <span
                             class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
                 </div>

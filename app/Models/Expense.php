@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Utils\Enums\ExpenseCategory;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -37,4 +38,8 @@ class Expense extends Model
         'amount' => 'decimal:2',
         'category' => ExpenseCategory::class,
     ];
+    public function getFormattedDateAttribute()
+    {
+        return Carbon::parse($this->date)->format('D,jS M Y');
+    }
 }

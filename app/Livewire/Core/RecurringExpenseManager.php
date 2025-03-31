@@ -39,7 +39,8 @@ class RecurringExpenseManager extends Component
     public $showDetailsModal = false;
     public $selectedExpense;
     public $showToggleModal = false;
-    public $exportFields = ['startDate' => null, 'endDate' => null, 'category' => null,'frequency'=> null];
+    public $startDate, $endDate;
+    public $exportFields = ['category' => null,'frequency'=> null];
     public $showExportModal = false;
     public $selectedExpenseId;
 
@@ -52,6 +53,12 @@ class RecurringExpenseManager extends Component
         'fri' => 'Friday',
         'sat' => 'Saturday',
     ];
+
+    public function __construct()
+    {
+        $this->startDate = now()->startOfMonth()->toDateString();
+        $this->endDate = now()->toDateString();
+    }
 
     public function mount()
     {
@@ -326,9 +333,17 @@ class RecurringExpenseManager extends Component
     public function exportRecurringExpenses()
     {
         $this->validate([
-            'exportFields.startDate' => 'required|date',
-            'exportFields.endDate' => 'required|date|after_or_equal:exportFields.startDate',
-        ]);
+            'startDate' => 'required|date',
+            'endDate' => 'required|date|after_or_equal:startDate',
+        ],
+            [
+                'startDate.required' => 'The start date is required.',
+                'startDate.date' => 'The start date must be a valid date.',
+                'endDate.required' => 'The end date is required.',
+                'endDate.date' => 'The end date must be a valid date.',
+                'endDate.after_or_equal' => 'The end date must be after or equal to the start date.',
+            ]
+        );
 
         $fileName = 'recurring_expenses_' . Carbon::now()->format('Ymd_His') . '.xlsx';
 
@@ -341,8 +356,8 @@ class RecurringExpenseManager extends Component
 //        $this->reset('exportFields');
 
         return Excel::download(new RecurringExpensesExport(
-            $this->exportFields['startDate'],
-            $this->exportFields['endDate'],
+            $this->startDate,
+            $this->endDate,
             $this->exportFields['category'],
             $this->exportFields['frequency']
         ), $fileName);

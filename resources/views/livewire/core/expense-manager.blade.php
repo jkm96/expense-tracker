@@ -160,7 +160,7 @@
                             </div>
                             <p class="text-gray-300 text-sm">
                                 <i class="fas fa-calendar-alt text-orange-400"></i>
-                                {{ Carbon\Carbon::parse($expense->date)->format('D,jS M Y') }}
+                                {{ $expense->formatted_date }}
                             </p>
                         </div>
 
@@ -286,7 +286,9 @@
     <!-- Pagination Links -->
     <div class="mt-4 text-center">
         @if($hasMorePages)
-            <button wire:click="loadMore" class="px-2 py-1.5 bg-green-400 text-white rounded">Load More</button>
+            <button wire:click="loadMore" class="px-1.5 py-1 bg-green-400 text-sm text-white rounded">
+                Load More <span class="text-xs">({{ $expenses->flatten()->count() }} of {{ $totalExpenses }})</span>
+            </button>
         @endif
     </div>
 

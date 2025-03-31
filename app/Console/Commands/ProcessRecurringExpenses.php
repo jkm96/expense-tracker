@@ -3,11 +3,13 @@
 namespace App\Console\Commands;
 
 use App\Events\ExpenseReminderEvent;
+use App\Models\AuditLog;
 use App\Models\Expense;
 use App\Models\RecurringExpense;
 use App\Models\User;
 use App\Notifications\ExpenseReminderNotification;
 use App\Utils\Constants\AppEventListener;
+use App\Utils\Enums\AuditAction;
 use App\Utils\Enums\NotificationType;
 use App\Utils\Helpers\ExpenseHelper;
 use Carbon\Carbon;
@@ -70,6 +72,15 @@ class ProcessRecurringExpenses extends Command
 
                 $user = User::findOrFail($recurring->user_id);
                 if ($user) {
+                    AuditLog::log(
+                        AuditAction::COMMAND_EXECUTION,
+                        $user->id,
+                        "Recurring expense processed successfully",
+                        'RecurringExpense',
+                        $recurring->id,
+                        ['name' => $recurring->name, 'amount' => $recurring->amount]
+                    );
+
                     $message = "Your recurring expense: {$recurring->name} has been processed successfully at: {$now->format('Y-m-d h:i A')}";
                     $user->notify(new ExpenseReminderNotification($message, NotificationType::ALERT));
 

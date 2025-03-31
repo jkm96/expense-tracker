@@ -20,7 +20,7 @@ export default {
         },
         // Matches border color classes for red, green, gray, yellow, e.g., border-red-500
         {
-            pattern: /border-(red|green|gray|yellow)-\d{3}/,
+            pattern: /border-(red|green|orange|gray|yellow)-\d{3}/,
         },
     ],
     theme: {
