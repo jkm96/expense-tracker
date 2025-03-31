@@ -27,19 +27,23 @@ class LoginUser extends Component
 
         if (Auth::attempt($credentials)) {
             session()->regenerate();
-            
+
+            $userId = Auth::id();
+            AuditLog::log(
+                AuditAction::AUTH,
+                $userId,
+                'User logged in successfully',
+                'User',
+                $userId,
+                ['identifier' => $this->identifier, 'ip' => request()->ip()]
+            );
+
             $this->dispatch(AppEventListener::GLOBAL_TOAST, details: [
                 'message' => 'Welcome, ' . $this->identifier,
                 'type' => 'success']
             );
 
-            AuditLog::log(
-                AuditAction::AUTH,
-                'User logged in successfully',
-                'User',
-                Auth::id(),
-                ['identifier' => $this->identifier, 'ip' => request()->ip()]
-            );
+            session()->flash('success','Welcome, ' . $this->identifier);
 
             return redirect()->intended(route('user.dashboard'));
         }

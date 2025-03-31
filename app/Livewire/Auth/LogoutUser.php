@@ -12,19 +12,19 @@ class LogoutUser extends Component
 {
     public function logout()
     {
+        $user = Auth::user();
         AuditLog::log(
             AuditAction::AUTH,
+            $user->getAuthIdentifier(),
             'User logged out successfully',
             'User',
-            Auth::id(),
-            ['identifier' => Auth::user()->username, 'ip' => request()->ip()]
+            $user->getAuthIdentifier(),
+            ['identifier' => $user->username, 'ip' => request()->ip()]
         );
 
         Auth::logout();
-
         Session::flush();
 
-        // Redirect the user after logging out
         return redirect()->route('login.user')->with('success', 'You have been logged out successfully.');
     }
 

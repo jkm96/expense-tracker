@@ -61,7 +61,7 @@ class AuditLogManager extends Component
         if ($this->search) {
             $query->where(function ($q) {
                 $q->where('model_type', 'like', "%{$this->search}%")
-                    ->orWhere('changes', 'like', "%{$this->search}%");
+                    ->orWhere('activity', 'like', "%{$this->search}%");
             });
         }
 
