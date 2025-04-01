@@ -4,6 +4,8 @@ namespace App\Observers;
 
 use App\Models\AuditLog;
 use App\Utils\Enums\AuditAction;
+use App\Utils\Enums\ExpenseCategory;
+use BackedEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -33,6 +35,9 @@ class ModelActivityObserver
         $tableName = Str::title(str_replace('_',' ',$model->getTable()));
         $changes = null;
 
+        $original = collect($model->getOriginal())->map(function ($value) {
+            return $value instanceof BackedEnum ? $value->value : $value;
+        });
         switch ($action) {
             case AuditAction::CREATED:
                 $changes = $model->getAttributes();
@@ -40,7 +45,10 @@ class ModelActivityObserver
                 break;
 
             case AuditAction::UPDATED:
-                $changes = $model->getChanges();
+                $updated = collect($model->getAttributes())->map(function ($value) {
+                    return $value instanceof BackedEnum ? $value->value : $value;
+                });
+                $changes = $updated->diffAssoc($original);
                 $activity = "{$username} updated {$tableName} record ID: {$model->id}";
                 break;
 

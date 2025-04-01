@@ -9,6 +9,7 @@ use App\Utils\Constants\AppEventListener;
 use App\Utils\Enums\ExpenseCategory;
 use App\Utils\Enums\NotificationType;
 use App\Utils\Helpers\ExpenseHelper;
+use App\Utils\Validators\ExpenseValidator;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -147,15 +148,8 @@ class ExpenseManager extends Component
 
     public function addExpense()
     {
-        $rules = [
-            'name' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0',
-            'date' => 'required|date',
-            'category' => ['required', Rule::in(ExpenseCategory::cases())],
-            'notes' => 'nullable|string',
-        ];
+        $this->validate(ExpenseValidator::expenseRules(), ExpenseValidator::expenseMessages());
 
-        $this->validate($rules);
         $defaultNote = ExpenseHelper::generateDefaultNote($this->category, $this->name);
 
         if ($this->expense_id) {

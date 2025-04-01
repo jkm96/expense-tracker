@@ -11,6 +11,8 @@ use App\Utils\Enums\ExpenseCategory;
 use App\Utils\Enums\ExpenseFrequency;
 use App\Utils\Enums\NotificationType;
 use App\Utils\Helpers\ExpenseHelper;
+use App\Utils\Validators\ExpenseValidator;
+use App\Utils\Validators\RecurringExpenseValidator;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -40,7 +42,7 @@ class RecurringExpenseManager extends Component
     public $selectedExpense;
     public $showToggleModal = false;
     public $startDate, $endDate;
-    public $exportFields = ['category' => null,'frequency'=> null];
+    public $exportFields = ['category' => null, 'frequency' => null];
     public $showExportModal = false;
     public $selectedExpenseId;
 
@@ -71,7 +73,7 @@ class RecurringExpenseManager extends Component
     #[On('toggle-form')]
     public function toggleForm()
     {
-        if (!isset($this->start_date)){
+        if (!isset($this->start_date)) {
             $this->start_date = Carbon::now()->format('Y-m-d\TH:i');
         }
         $this->showForm = !$this->showForm;
@@ -130,18 +132,10 @@ class RecurringExpenseManager extends Component
 
     public function upsertRecurringExpense()
     {
-        $rules = [
-            'name' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0',
-            'start_date' => 'required|date',
-            'category' => ['required', Rule::in(ExpenseCategory::cases())],
-            'frequency' => ['required', Rule::in(ExpenseFrequency::cases())],
-            'days' => $this->frequency === ExpenseFrequency::DAILY->value ? 'required|array|min:1' : 'nullable',
-            'dayOfWeek' => $this->frequency === ExpenseFrequency::WEEKLY->value ? 'required|string|in:sunday,monday,tuesday,wednesday,thursday,friday,saturday' : 'nullable',
-            'dayOfMonth' => $this->frequency === ExpenseFrequency::MONTHLY->value ? 'required|date' : 'nullable',
-        ];
-
-        $this->validate($rules);
+        $this->validate(
+            ExpenseValidator::recurringExpenseRules($this->frequency),
+            ExpenseValidator::recurringExpenseMessages()
+        );
 
         $fullDays = collect($this->days)->map(function ($shortDay) {
             return $this->mapShortToFullDay($shortDay);
@@ -233,7 +227,7 @@ class RecurringExpenseManager extends Component
         $this->frequency = $recurringExpense->frequency->value;
 
         $scheduleConfig = json_decode($recurringExpense->schedule_config, true);
-        if ($scheduleConfig != null){
+        if ($scheduleConfig != null) {
             switch ($this->frequency) {
                 case ExpenseFrequency::DAILY->value:
                     $this->days = collect($scheduleConfig['days'])->map(function ($day) {
@@ -332,10 +326,11 @@ class RecurringExpenseManager extends Component
 
     public function exportRecurringExpenses()
     {
-        $this->validate([
-            'startDate' => 'required|date',
-            'endDate' => 'required|date|after_or_equal:startDate',
-        ],
+        $this->validate(
+            [
+                'startDate' => 'required|date',
+                'endDate' => 'required|date|after_or_equal:startDate',
+            ],
             [
                 'startDate.required' => 'The start date is required.',
                 'startDate.date' => 'The start date must be a valid date.',
@@ -366,7 +361,7 @@ class RecurringExpenseManager extends Component
     public function resetFields()
     {
         $this->start_date = Carbon::now()->format('Y-m-d\TH:i');
-        $this->reset(['name', 'amount', 'start_date', 'category', 'selectedExpenseId', 'showForm','days','dayOfWeek','dayOfMonth']);
+        $this->reset(['name', 'amount', 'start_date', 'category', 'selectedExpenseId', 'showForm', 'days', 'dayOfWeek', 'dayOfMonth']);
     }
 
     public function render()
