@@ -310,7 +310,8 @@ class RecurringExpenseManager extends Component
     public function showRecurringExpenseDetails($recurringExpenseId = null)
     {
         if (!empty($recurringExpenseId)) {
-            $this->selectedExpense = RecurringExpense::with('generatedExpenses')->findOrFail($recurringExpenseId);
+            $this->selectedExpense = RecurringExpense::with('generatedExpenses')
+                ->findOrFail($recurringExpenseId);
             $this->showDetailsModal = true;
             $this->dispatch(AppEventListener::VIEW_RECURRING_MODAL, details: [
                 'showModal' => $this->showDetailsModal,
@@ -326,22 +327,9 @@ class RecurringExpenseManager extends Component
 
     public function exportRecurringExpenses()
     {
-        $this->validate(
-            [
-                'startDate' => 'required|date',
-                'endDate' => 'required|date|after_or_equal:startDate',
-            ],
-            [
-                'startDate.required' => 'The start date is required.',
-                'startDate.date' => 'The start date must be a valid date.',
-                'endDate.required' => 'The end date is required.',
-                'endDate.date' => 'The end date must be a valid date.',
-                'endDate.after_or_equal' => 'The end date must be after or equal to the start date.',
-            ]
-        );
+        $this->validate(ExpenseValidator::exportRules(), ExpenseValidator::exportMessages());
 
         $fileName = 'recurring_expenses_' . Carbon::now()->format('Ymd_His') . '.xlsx';
-
 
         $this->dispatch(AppEventListener::GLOBAL_TOAST, details: [
             'message' => 'Records exported successfully!',

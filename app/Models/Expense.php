@@ -38,8 +38,9 @@ class Expense extends Model
         'amount' => 'decimal:2',
         'category' => ExpenseCategory::class,
     ];
+
     public function getFormattedDateAttribute()
     {
-        return Carbon::parse($this->date)->format('D,jS M Y');
+        return Carbon::parse($this->date)->format('D, jS M Y');
     }
 }

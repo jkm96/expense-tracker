@@ -35,7 +35,7 @@ class RecurringExpense extends Model
 
     public function generatedExpenses()
     {
-        return $this->hasMany(Expense::class, 'recurring_expense_id');
+        return $this->hasMany(Expense::class, 'recurring_expense_id')->orderByDesc('created_at');
     }
 
     public function getExecutionDaysAttribute()

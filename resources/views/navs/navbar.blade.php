@@ -1,5 +1,5 @@
 <nav class="bg-gray-900 text-white p-4 md:px-0 px-2">
-    <div class="container mx-auto px-4 flex justify-between items-center">
+    <div class="container mx-auto flex justify-between items-center">
         <!-- Left side -->
         @auth
             <a href="{{ route('user.dashboard') }}" class="font-bold text-xl hover:underline flex items-center">

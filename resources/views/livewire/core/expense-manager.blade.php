@@ -97,17 +97,19 @@
                     <div class="flex flex-row gap-4">
                         <div class="mb-4 w-1/2">
                             <label class="text-sm">Start date:</label>
-                            <input type="date" wire:model="exportFields.startDate"
-                                   class="w-full p-1 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
-                            @error('exportFields.startDate') <span
+                            <input type="date" wire:model="startDate"
+                                   class="w-full p-1 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none focus:border-gray-400 focus:ring-1
+                                   focus:ring-gray-400 focus:ring-opacity-50">
+                            @error('startDate') <span
                                 class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
 
                         <div class="mb-4 w-1/2">
                             <label class="text-sm">End date:</label>
-                            <input type="date" wire:model="exportFields.endDate"
-                                   class="w-full p-1 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
-                            @error('exportFields.endDate') <span
+                            <input type="date" wire:model="endDate"
+                                   class="w-full p-1 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none focus:border-gray-400 focus:ring-1
+                                   focus:ring-gray-400 focus:ring-opacity-50">
+                            @error('endDate') <span
                                 class="text-red-500 text-xs">{{ $message }}</span> @enderror
                         </div>
                     </div>
@@ -148,7 +150,7 @@
             <!-- Total Amount for the Group -->
             <p class="text-green-600 text-xs mb-1">Spent: KES {{ number_format($totals[$group], 2) }}</p>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1">
                 @foreach($groupedExpenses as $expense)
                     <div class="p-2 shadow-md rounded bg-gray-700 hover:bg-gray-600">
                         <div class="flex justify-between mb-1">
@@ -237,10 +239,10 @@
                         <p><strong>Amount:</strong>
                             KES {{ number_format($selectedExpense->amount, 2) }}</p>
                         <p><strong>Creation
-                                Date:</strong> {{ $selectedExpense->created_at->format('D,jS M Y h:i A') }}
+                                Date:</strong> {{ $selectedExpense->created_at->format('D, jS M Y h:i A') }}
                         </p>
                         <p><strong>Last
-                                Modified:</strong> {{ $selectedExpense->updated_at?->format('D,jS M Y h:i A') }}
+                                Modified:</strong> {{ $selectedExpense->updated_at?->format('D, jS M Y h:i A') }}
                         </p>
                         <p><strong>Note:</strong> {{ $selectedExpense->notes }}</p>
                     </div>
