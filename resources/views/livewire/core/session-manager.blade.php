@@ -152,6 +152,7 @@
             <div class="flex flex-col sm:flex-row gap-2 items-stretch max-w-xl">
                 <input
                     type="password"
+                    autocomplete="off"
                     wire:model.defer="password"
                     placeholder="Enter your password to confirm ..."
                     class="sm:w-1/2 w-full text-sm p-1 bg-gray-700 border rounded focus:ring focus:ring-blue-300"

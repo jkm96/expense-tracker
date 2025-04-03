@@ -32,8 +32,9 @@ class ExpenseManager extends Component
     public $name, $amount, $date, $category, $notes, $expense_id;
     public $showForm = false;
     public $categories = [];
-    #[Url]
     public $filter = 'all';
+    public $search;
+    protected $queryString = ['search', 'filter','page'];
     public $showDetailsModal = false;
     public $selectedExpense;
     public $showDeleteModal = false;
@@ -52,9 +53,20 @@ class ExpenseManager extends Component
     public function mount()
     {
         $this->date = Carbon::now()->format('Y-m-d');
-        $this->filter = 'all';
         $this->page = 1;
+        $this->filter = 'all';
         $this->categories = ExpenseCategory::cases();
+        $this->loadExpenses();
+    }
+
+    public function updatedSearch()
+    {
+        $this->loadExpenses();
+    }
+
+    public function updatedFilter()
+    {
+        $this->page = 1;
         $this->loadExpenses();
     }
 
@@ -96,12 +108,6 @@ class ExpenseManager extends Component
         $this->resetFields();
     }
 
-    public function updatedFilter()
-    {
-        $this->page = 1;
-        $this->loadExpenses();
-    }
-
     public function loadExpenses()
     {
         $query = Expense::where('user_id', Auth::id());
@@ -109,7 +115,14 @@ class ExpenseManager extends Component
         if ($this->filter !== 'all') {
             $query->where('category', '=', ExpenseCategory::from($this->filter));
         }
-        // Reset expenses on new filter to avoid persisting old records
+
+        if ($this->search) {
+            $query->where(function ($q) {
+                $q->where('name', 'like', "%{$this->search}%")
+                    ->orWhere('notes', 'like', "%{$this->search}%");
+            });
+        }
+
         if ($this->page === 1) {
             $this->expenses = collect();
         }

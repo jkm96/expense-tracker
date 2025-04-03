@@ -10,9 +10,11 @@
     <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
 
         <input type="text" wire:model.live.debounce.500ms="search"
+               autocomplete="off"
+               autocapitalize="off"
                class="px-1.5 py-0.5 bg-gray-800 text-sm border rounded  border-gray-500 focus:outline-none
                               focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50"
-               placeholder="🔍 Search logs...">
+               placeholder="🔍Search logs...">
 
         <div class="flex items-center space-x-2 mt-1 md:mt-0">
             <select wire:model.live="actionFilter"

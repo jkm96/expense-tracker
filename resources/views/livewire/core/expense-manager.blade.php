@@ -67,21 +67,32 @@
     @endif
 
     <div class="mb-5">
-        <div class="flex justify-between items-center">
-            <h2 class="text-md font-bold mb-2">Current Expenses</h2>
-            <div class="flex items-center">
-                <select wire:model.live="filter" wire:change="loadExpenses"
-                        class="w-full px-1.5 py-0.5 bg-gray-800 text-sm border rounded  border-gray-500 focus:outline-none
-                              focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
-                    <option value="all">All</option>
-                    @foreach($categories as $category)
-                        <option value="{{ $category->value }}">{{ ucfirst($category->value) }}</option>
-                    @endforeach
-                </select>
-                <button wire:click="toggleExportModal"
-                        class="bg-green-400 hover:bg-green-600 text-white text-sm px-1.5 py-0.5 rounded ml-1">
-                    Export
-                </button>
+        <div class="flex flex-col sm:flex-row justify-between w-full sm:w-auto">
+            <h2 class="text-md font-bold mb-2 sm:mb-0 sm:mr-4">Current Expenses</h2>
+
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
+                <input type="text" wire:model.live.debounce.500ms="search"
+                       autocomplete="off"
+                       autocapitalize="off"
+                       class="px-1.5 py-0.5 bg-gray-800 text-sm mb-2 sm:mb-0 sm:mr-1 rounded border border-gray-500 focus:outline-none
+                      focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50"
+                       placeholder="🔍Search expenses ...">
+
+                <div class="flex items-center space-x-1 mt-1 md:mt-0">
+                    <select wire:model.live="filter" wire:change="loadExpenses"
+                            class="w-1/2 sm:w-auto px-1.5 py-0.5 bg-gray-800 text-sm border rounded border-gray-500 focus:outline-none
+                           focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
+                        <option value="all">All</option>
+                        @foreach($categories as $category)
+                            <option value="{{ $category->value }}">{{ ucfirst($category->value) }}</option>
+                        @endforeach
+                    </select>
+
+                    <button wire:click="toggleExportModal"
+                            class="w-1/2 bg-green-400 hover:bg-green-600 text-white text-sm px-1.5 py-0.5 rounded sm:mt-0">
+                        Export
+                    </button>
+                </div>
             </div>
         </div>
 

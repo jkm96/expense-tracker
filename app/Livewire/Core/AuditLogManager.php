@@ -18,7 +18,6 @@ class AuditLogManager extends Component
     public $perPage = 10;
     public $auditActions = [];
     protected $queryString = ['search', 'actionFilter', 'perPage'];
-
     public $expandedLogs = [];
     public $filteredChanges = null;
 
