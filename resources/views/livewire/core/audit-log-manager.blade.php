@@ -60,9 +60,15 @@
                                 </span>
                                 </div>
 
-                                <div class="flex items-center mt-1 text-xs  text-gray-500">
+                                <div class="flex items-center mt-1 text-xs text-gray-400">
                                     <i class="fas fa-user mr-1 text-xs "></i>
-                                    <span>{{ $log->user->username ?? 'Unknown' }}</span>
+                                    <span>
+                                        @if(!empty($log->actor))
+                                            {{ $log->actor}}
+                                        @else
+                                            {{ $log->user->username }}
+                                        @endif
+                                    </span>
                                     <span class="mx-1">•</span>
                                     <i class="fas fa-clock mr-1 text-xs "></i>
                                     <span class="font-mono">{{ $log->formatted_created_at }}</span>

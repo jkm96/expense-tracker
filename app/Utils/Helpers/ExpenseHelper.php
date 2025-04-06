@@ -24,14 +24,25 @@ class ExpenseHelper
     {
         $days = $scheduleConfig['days'] ?? [];
         if (empty($days)) {
-            return $lastProcessed->copy()->addDay(); // Default to the next day
+            return $lastProcessed->copy()->addDay();
         }
 
-        $nextDay = collect($days)
-            ->map(fn($day) => Carbon::parse($day)) // Convert days to Carbon instances
-            ->first(fn($date) => $date->isFuture()); // Find the next available date
+        // Normalize days to lowercase for comparison
+        $validDays = collect($days)->map(fn($d) => strtolower($d))->toArray();
 
-        return $nextDay ? $nextDay->setTimeFrom($lastProcessed) : $lastProcessed->copy()->addDay();
+        // Start from the next day
+        $next = $lastProcessed->copy()->addDay();
+
+        // Search up to 7 days ahead
+        for ($i = 0; $i < 7; $i++) {
+            if (in_array(strtolower($next->format('l')), $validDays)) {
+                return $next->setTimeFrom($lastProcessed);
+            }
+
+            $next->addDay();
+        }
+
+        return $lastProcessed->copy()->addDay();
     }
 
     private static function getNextWeeklyProcessTime(Carbon $lastProcessed, array $scheduleConfig): Carbon

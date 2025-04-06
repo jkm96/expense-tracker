@@ -63,7 +63,8 @@ class ProcessRecurringExpenses extends Command
                 ]);
 
                 $scheduleConfig = json_decode($recurring->schedule_config, true) ?? [];
-                $nextProcessTime = ExpenseHelper::calculateNextProcessTime($recurring->frequency, $now, $scheduleConfig);
+                $lastProcessed = $recurring->last_processed_at ?? $recurring->start_date ?? now();
+                $nextProcessTime = ExpenseHelper::calculateNextProcessTime($recurring->frequency, $lastProcessed, $scheduleConfig);
 
                 $recurring->update([
                     'last_processed_at' => $now->toDateTimeString(),
@@ -74,6 +75,7 @@ class ProcessRecurringExpenses extends Command
                 if ($user) {
                     AuditLog::log(
                         AuditAction::COMMAND_EXECUTION,
+                        'System',
                         $user->id,
                         "Recurring expense processed successfully",
                         'RecurringExpense',

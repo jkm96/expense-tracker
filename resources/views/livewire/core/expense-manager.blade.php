@@ -68,9 +68,9 @@
 
     <div class="mb-5">
         <div class="flex flex-col sm:flex-row justify-between w-full sm:w-auto">
-            <h2 class="text-md font-bold mb-2 sm:mb-0 sm:mr-4">Current Expenses</h2>
+            <h2 class="text-md font-bold sm:mb-0 sm:mr-4">Current Expenses</h2>
 
-            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center">
                 <input type="text" wire:model.live.debounce.500ms="search"
                        autocomplete="off"
                        autocapitalize="off"
@@ -166,12 +166,11 @@
                     <div class="p-2 shadow-md rounded bg-gray-700 hover:bg-gray-600">
                         <div class="flex justify-between mb-1">
                             <div class="flex items-center gap-x-1">
-                                <!-- ✅ Category Color Circle -->
                                 <span
                                     class="w-3 h-3 rounded-full {{ get_category_color($expense->category)[0] }}"></span>
-                                <h2 class="font-semibold">{{ $expense->name }}</h2>
+                                <h2 class="font-semibold text-sm">{{ $expense->name }}</h2>
                             </div>
-                            <p class="text-gray-300 text-sm">
+                            <p class="text-gray-300 text-xs">
                                 <i class="fas fa-calendar-alt text-orange-400"></i>
                                 {{ $expense->formatted_date }}
                             </p>
@@ -179,23 +178,16 @@
 
                         <hr class="mt-1 mb-1 border-gray-600">
 
-                        <div class="flex items-center">
-                            <p class="text-sm mt-1 mb-1 mr-1">
+                        <div class="flex items-center text-gray-400">
+                            <p class="text-xs mt-1 mb-1 mr-1">
                                 <i class="fas fa-folder-open text-yellow-400"></i>
                                 {{ ucfirst($expense->category->value) }}
                             </p>
                             |
-                            <p class="text-sm mt-1 mb-1 mr-1 ml-1">
+                            <p class="text-xs mt-1 mb-1 mr-1 ml-1">
                                 <i class="fas fa-money-bill-wave text-green-600"></i>
                                 <small class="text-xs">KES</small> {{ number_format($expense->amount, 2) }}
                             </p>
-                            @if($expense->recurringExpense)
-                                |
-                                <p class="text-sm mt-1 mb-1 mr-1 ml-1">
-                                    <i class="fas fa-sync-alt text-orange-500"></i>
-                                    {{ ucfirst($expense->recurringExpense->frequency->value) }}
-                                </p>
-                            @endif
                         </div>
 
                         <!-- Content -->

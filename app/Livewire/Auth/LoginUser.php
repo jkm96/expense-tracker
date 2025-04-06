@@ -31,6 +31,7 @@ class LoginUser extends Component
             $userId = Auth::id();
             AuditLog::log(
                 AuditAction::AUTH,
+                $this->identifier,
                 $userId,
                 'User logged in successfully',
                 'User',

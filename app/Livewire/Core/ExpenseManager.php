@@ -198,7 +198,10 @@ class ExpenseManager extends Component
             Auth::user()->notify(new ExpenseReminderNotification($message, NotificationType::INFO));
             $this->dispatch(AppEventListener::NOTIFICATION_SENT);
 
-            $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Expense added successfully!', 'type' => 'success']);
+            $this->dispatch(AppEventListener::GLOBAL_TOAST, details: [
+                'message' => 'Expense added successfully!',
+                'type' => 'success'
+            ]);
         }
 
         $this->showForm = false;

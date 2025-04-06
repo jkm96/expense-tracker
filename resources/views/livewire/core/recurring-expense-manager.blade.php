@@ -229,7 +229,7 @@
                             <span
                                 class="w-3 h-3 rounded-full {{ get_category_color($recurringExpense->category)[0] }}"></span>
                         @endif
-                        <h2 class="font-semibold text-md">{{ $recurringExpense->name }}</h2>
+                        <h2 class="font-semibold text-sm">{{ $recurringExpense->name }}</h2>
                     </div>
                     <div class="flex items-center gap-x-1">
                         <p class="text-gray-300 text-xs">
@@ -246,13 +246,14 @@
 
                 <hr class="mt-1 mb-1 border-gray-600">
 
-                <div class="flex items-center">
+                <div class="flex text-gray-400 items-center">
                     <p class="text-xs mt-1 mb-1 mr-1">
                         <i class="fas fa-folder-open text-yellow-400"></i>
                         {{ ucfirst($recurringExpense->category->value) }}
                     </p>
                     |
-                    <p class="text-xs text-green-600 mt-1 mb-1 ml-1 mr-1">
+                    <p class="text-xs mt-1 mb-1 ml-1 mr-1">
+                        <i class="fas fa-money-bill-wave text-green-600"></i>
                         KES {{ number_format($recurringExpense->amount, 2) }}
                     </p>
                     |

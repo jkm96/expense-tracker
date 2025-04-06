@@ -15,6 +15,7 @@ class LogoutUser extends Component
         $user = Auth::user();
         AuditLog::log(
             AuditAction::AUTH,
+            $user->username,
             $user->getAuthIdentifier(),
             'User logged out successfully',
             'User',

@@ -15,7 +15,7 @@ class AuditLog extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'action','activity', 'model_type', 'model_id', 'changes', 'ip_address'
+        'user_id', 'action','actor','activity', 'model_type', 'model_id', 'changes', 'ip_address'
     ];
 
     protected $casts = [
@@ -35,7 +35,7 @@ class AuditLog extends Model
 
     public function getFormattedCreatedAtAttribute()
     {
-        return Carbon::parse($this->created_at)->format('Y-m-d H:i:s');
+        return Carbon::parse($this->created_at)->format('Y-m-d H:i:s A');
     }
 
     public function getReadableMessageAttribute()
@@ -55,6 +55,7 @@ class AuditLog extends Model
             AuditAction::CREATED => ['icon' => 'fas fa-plus-circle', 'color' => 'text-green-700', 'border' => 'border-green-700'],
             AuditAction::UPDATED => ['icon' => 'fas fa-edit', 'color' => 'text-orange-500', 'border' => 'border-orange-500'],
             AuditAction::DELETED => ['icon' => 'fas fa-trash-alt', 'color' => 'text-red-500', 'border' => 'border-red-500'],
+            AuditAction::COMMAND_EXECUTION => ['icon' => 'fa-solid fa-gear', 'color' => 'text-red-500', 'border' => 'border-red-500'],
             default => ['icon' => 'fas fa-question-circle', 'color' => 'text-gray-500', 'border' => 'border-gray-400'],
         };
     }
@@ -64,6 +65,7 @@ class AuditLog extends Model
      */
     public static function log(
         AuditAction|string $action,
+        ?string $actor = null,
         ?int $userId = null,
         ?string $activity = null,
         ?string $modelType = null,
@@ -73,6 +75,7 @@ class AuditLog extends Model
         self::create([
             'user_id' => $userId ?? Auth::id(),
             'action' => $action instanceof AuditAction ? $action->value : $action,
+            'actor'=> $actor,
             'activity' => $activity ?? ucfirst(strtolower($action)),
             'model_type' => $modelType,
             'model_id' => $modelId,

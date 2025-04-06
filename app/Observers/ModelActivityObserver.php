@@ -38,10 +38,11 @@ class ModelActivityObserver
         $original = collect($model->getOriginal())->map(function ($value) {
             return $value instanceof BackedEnum ? $value->value : $value;
         });
+
         switch ($action) {
             case AuditAction::CREATED:
                 $changes = $model->getAttributes();
-                $activity = "{$username} created a new {$tableName} record ID: {$model->id}";
+                $activity = "A new record was added to {$tableName} with ID {$model->id}.";
                 break;
 
             case AuditAction::UPDATED:
@@ -49,26 +50,32 @@ class ModelActivityObserver
                     return $value instanceof BackedEnum ? $value->value : $value;
                 });
                 $changes = $updated->diffAssoc($original);
-                $activity = "{$username} updated {$tableName} record ID: {$model->id}";
+
+                if ($changes->isNotEmpty()) {
+                    $activity = "The record with ID {$model->id} in {$tableName} was updated.";
+                } else {
+                    $activity = "The record with ID {$model->id} in {$tableName} was updated, but no changes were detected.";
+                }
                 break;
 
             case AuditAction::DELETED:
                 $changes = $model->getOriginal();
-                $activity = "{$username} deleted {$tableName} record ID: {$model->id}";
+                $activity = "The record with ID {$model->id} was deleted from {$tableName}.";
                 break;
 
             case AuditAction::COMMAND_EXECUTION:
-                $activity = "Command executed affecting {$tableName}, record ID: {$model->id}";
+                $activity = "A system command was executed that affected {$tableName}, impacting the record with ID {$model->id}.";
                 break;
 
             default:
-                $activity = "{$username} performed {$action->value} on {$tableName} ID: {$model->id}";
+                $activity = "An action ({$action->value}) was performed on {$tableName} for the record with ID {$model->id}.";
                 break;
         }
 
         AuditLog::create([
             'user_id' => $userId,
             'action' => $action,
+            'actor' => $username,
             'activity' => $activity,
             'model_type' => get_class($model),
             'model_id' => $model->id,
