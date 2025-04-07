@@ -64,7 +64,13 @@ class ProcessRecurringExpenses extends Command
 
                 $scheduleConfig = json_decode($recurring->schedule_config, true) ?? [];
                 $lastProcessed = $recurring->last_processed_at ?? $recurring->start_date ?? now();
-                $nextProcessTime = ExpenseHelper::calculateNextProcessTime($recurring->frequency, $lastProcessed, $scheduleConfig);
+
+                $nextProcessTime = ExpenseHelper::calculateNextProcessTime(
+                    $recurring->frequency,
+                    $recurring->start_date,
+                    $lastProcessed,
+                    $scheduleConfig
+                );
 
                 $recurring->update([
                     'last_processed_at' => $now->toDateTimeString(),

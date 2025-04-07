@@ -10,51 +10,58 @@ use InvalidArgumentException;
 
 class ExpenseHelper
 {
-    public static function calculateNextProcessTime(ExpenseFrequency $frequency, Carbon $lastProcessed, array $scheduleConfig = []): Carbon
+    public static function calculateNextProcessTime(ExpenseFrequency $frequency, string $startDate, string $lastProcessed, array $scheduleConfig = []): Carbon
     {
+        $lastProcessed = Carbon::parse($lastProcessed);
+        $originalTime = Carbon::parse($startDate)->format('H:i:s');
         return match ($frequency) {
-            ExpenseFrequency::DAILY => self::getNextDailyProcessTime($lastProcessed, $scheduleConfig),
-            ExpenseFrequency::WEEKLY => self::getNextWeeklyProcessTime($lastProcessed, $scheduleConfig),
-            ExpenseFrequency::MONTHLY => self::getNextMonthlyProcessTime($lastProcessed, $scheduleConfig),
+            ExpenseFrequency::DAILY => self::getNextDailyProcessTime($lastProcessed, $scheduleConfig, $originalTime),
+            ExpenseFrequency::WEEKLY => self::getNextWeeklyProcessTime($lastProcessed, $scheduleConfig, $originalTime),
+            ExpenseFrequency::MONTHLY => self::getNextMonthlyProcessTime($lastProcessed, $scheduleConfig, $originalTime),
             default => throw new InvalidArgumentException("Invalid frequency"),
         };
     }
 
-    private static function getNextDailyProcessTime(Carbon $lastProcessed, array $scheduleConfig): Carbon
+    private static function getNextDailyProcessTime(Carbon $lastProcessed, array $scheduleConfig,string $timeOfDay): Carbon
     {
         $days = $scheduleConfig['days'] ?? [];
-        if (empty($days)) {
-            return $lastProcessed->copy()->addDay();
-        }
-
-        // Normalize days to lowercase for comparison
         $validDays = collect($days)->map(fn($d) => strtolower($d))->toArray();
 
-        // Start from the next day
-        $next = $lastProcessed->copy()->addDay();
+        $next = $lastProcessed->copy()->addDay()->setTimeFromTimeString($timeOfDay);
 
-        // Search up to 7 days ahead
         for ($i = 0; $i < 7; $i++) {
             if (in_array(strtolower($next->format('l')), $validDays)) {
-                return $next->setTimeFrom($lastProcessed);
+                return $next;
             }
 
             $next->addDay();
         }
 
-        return $lastProcessed->copy()->addDay();
+        return $lastProcessed->copy()->addDay()->setTimeFromTimeString($timeOfDay);
     }
 
-    private static function getNextWeeklyProcessTime(Carbon $lastProcessed, array $scheduleConfig): Carbon
+    private static function getNextWeeklyProcessTime(Carbon $lastProcessed, array $scheduleConfig, string $timeOfDay): Carbon
     {
         $dayOfWeek = $scheduleConfig['day_of_week'] ?? null;
-        return $dayOfWeek ? Carbon::parse("next $dayOfWeek")->setTimeFrom($lastProcessed) : $lastProcessed->copy()->addWeek();
+
+        if ($dayOfWeek) {
+            $next = Carbon::parse("next $dayOfWeek", $lastProcessed->timezone)->setTimeFromTimeString($timeOfDay);
+            return $next;
+        }
+
+        return $lastProcessed->copy()->addWeek()->setTimeFromTimeString($timeOfDay);
     }
 
-    private static function getNextMonthlyProcessTime(Carbon $lastProcessed, array $scheduleConfig): Carbon
+    private static function getNextMonthlyProcessTime(Carbon $lastProcessed, array $scheduleConfig, string $timeOfDay): Carbon
     {
         $dayOfMonth = $scheduleConfig['day_of_month'] ?? null;
-        return $dayOfMonth ? $lastProcessed->copy()->addMonth()->day($dayOfMonth) : $lastProcessed->copy()->addMonth();
+
+        if ($dayOfMonth) {
+            $next = $lastProcessed->copy()->addMonth()->setDay($dayOfMonth)->setTimeFromTimeString($timeOfDay);
+            return $next;
+        }
+
+        return $lastProcessed->copy()->addMonth()->setTimeFromTimeString($timeOfDay);
     }
 
     public static function generateDefaultNote(string $category, string $name): string

@@ -145,12 +145,17 @@ class RecurringExpenseManager extends Component
             'days' => $this->frequency === ExpenseFrequency::DAILY->value ? $fullDays : null,
             'day_of_week' => $this->frequency === ExpenseFrequency::WEEKLY->value ? $this->dayOfWeek : null,
             'day_of_month' => $this->frequency === ExpenseFrequency::MONTHLY->value ? $this->dayOfMonth : null,
-        ]);
+        ]) ?? [];
 
-        $nextProcessAt = ExpenseHelper::calculateNextProcessTime(
+        $now = now();
+        $initialNextProcess = ExpenseHelper::calculateNextProcessTime(
             ExpenseFrequency::from($this->frequency),
-            Carbon::parse($this->start_date)
+            $this->start_date,
+            $this->start_date,
+            json_decode($scheduleConfig, true)
         );
+        $startDate = Carbon::parse($this->start_date);
+        $nextProcessAt = $startDate->lte($now) ? $now : $initialNextProcess;
 
         if ($this->recurring_expense_id) {
             // Update Existing Recurring Expense
