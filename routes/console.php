@@ -4,8 +4,10 @@ use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('app:notify-missing-expenses')
     ->everyFourHours()
-    ->runInBackground();
+    ->runInBackground()
+    ->withoutOverlapping();
 
 Schedule::command('app:process-recurring-expenses')
     ->everyTwoMinutes()
-    ->runInBackground();
+    ->runInBackground()
+    ->withoutOverlapping();

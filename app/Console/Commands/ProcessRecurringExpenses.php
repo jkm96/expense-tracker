@@ -52,6 +52,16 @@ class ProcessRecurringExpenses extends Command
             try {
                 $logger->info("Processing: {$recurring->name}");
 
+                $alreadyExists = Expense::where('recurring_expense_id', $recurring->id)
+                    ->whereDate('date', $now->toDateString())
+                    ->where('name', $recurring->name)
+                    ->exists();
+
+                if ($alreadyExists) {
+                    $logger->info("Skipping duplicate expense for: {$recurring->name} on {$now->toDateString()}");
+                    return;
+                }
+
                 Expense::create([
                     'user_id' => $recurring->user_id,
                     'recurring_expense_id' => $recurring->id,
@@ -63,7 +73,7 @@ class ProcessRecurringExpenses extends Command
                 ]);
 
                 $scheduleConfig = json_decode($recurring->schedule_config, true) ?? [];
-                $lastProcessed = $recurring->last_processed_at ?? $recurring->start_date ?? now();
+                $lastProcessed = $recurring->start_date ?? now();
 
                 $nextProcessTime = ExpenseHelper::calculateNextProcessTime(
                     $recurring->frequency,

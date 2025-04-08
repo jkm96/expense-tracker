@@ -170,6 +170,7 @@ class RecurringExpenseManager extends Component
                 'frequency' => $this->frequency,
                 'schedule_config' => $scheduleConfig,
                 'next_process_at' => $nextProcessAt,
+                'last_processed_at' => null,
             ]);
 
             $this->dispatch(AppEventListener::GLOBAL_TOAST, details: [
