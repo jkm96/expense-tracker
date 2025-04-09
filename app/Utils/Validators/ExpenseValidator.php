@@ -41,7 +41,7 @@ class ExpenseValidator
         return [
             'name' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0',
-            'start_date' => 'required|date',
+            'start_date' => ['required', 'date', 'after_or_equal:now'],
             'category' => ['required', Rule::in(ExpenseCategory::cases())],
             'frequency' => ['required', Rule::in(ExpenseFrequency::cases())],
             'days' => $frequency === ExpenseFrequency::DAILY->value ? 'required|array|min:1' : 'nullable',
@@ -62,6 +62,7 @@ class ExpenseValidator
 
             'start_date.required' => 'Please provide a start date.',
             'start_date.date' => 'The start date must be a valid date.',
+            'start_date.after_or_equal' => 'The start date must not be in the past.',
 
             'category.required' => 'Please select an expense category.',
             'category.in' => 'Invalid category selected.',

@@ -43,9 +43,15 @@ class ProcessRecurringExpenses extends Command
         $logger->info('Started processing recurring expenses!');
 
         $now = Carbon::now();
+        $graceWindow = $now->copy()->subMinutes(config('app.recurring_process_grace_minutes'));
 
         $recurringExpenses = RecurringExpense::where('is_active', true)
             ->where('next_process_at', '<=', $now)
+            ->where('next_process_at', '>=', $graceWindow)
+            ->where(function ($query) {
+                $query->whereNull('last_processed_at')
+                    ->orWhereColumn('next_process_at', '>', 'last_processed_at');
+            })
             ->get();
 
         $recurringExpenses->each(function ($recurring) use ($now,$logger) {
@@ -73,9 +79,10 @@ class ProcessRecurringExpenses extends Command
                 ]);
 
                 $scheduleConfig = json_decode($recurring->schedule_config, true) ?? [];
-                $lastProcessed = $recurring->start_date ?? now();
+                $lastProcessed = $recurring->last_processed_at ?? $recurring->start_date ?? now();
 
                 $nextProcessTime = ExpenseHelper::calculateNextProcessTime(
+                    $recurring->name,
                     $recurring->frequency,
                     $recurring->start_date,
                     $lastProcessed,

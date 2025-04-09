@@ -127,7 +127,7 @@ class RecurringExpenseManager extends Component
             $query->where('frequency', $this->frequencyFilter);
         }
 
-        $this->recurringExpenses = $query->latest()->get();
+        $this->recurringExpenses = $query->orderBy('created_at', 'desc')->get();
     }
 
     public function upsertRecurringExpense()
@@ -147,15 +147,21 @@ class RecurringExpenseManager extends Component
             'day_of_month' => $this->frequency === ExpenseFrequency::MONTHLY->value ? $this->dayOfMonth : null,
         ]) ?? [];
 
-        $now = now();
-        $initialNextProcess = ExpenseHelper::calculateNextProcessTime(
-            ExpenseFrequency::from($this->frequency),
-            $this->start_date,
-            $this->start_date,
-            json_decode($scheduleConfig, true)
-        );
         $startDate = Carbon::parse($this->start_date);
-        $nextProcessAt = $startDate->lte($now) ? $now : $initialNextProcess;
+
+        if ($startDate->isToday()) {
+            // Future time today
+            $nextProcessAt = $startDate;
+        } else {
+            // Future day
+            $nextProcessAt = ExpenseHelper::calculateNextProcessTime(
+                $this->name,
+                ExpenseFrequency::from($this->frequency),
+                $this->start_date,
+                $startDate,
+                json_decode($scheduleConfig, true)
+            );
+        }
 
         if ($this->recurring_expense_id) {
             // Update Existing Recurring Expense

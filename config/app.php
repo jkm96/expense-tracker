@@ -39,7 +39,7 @@ return [
     |
     */
 
-    'debug' => (bool) env('APP_DEBUG', false),
+    'debug' => (bool)env('APP_DEBUG', false),
 
     /*
     |--------------------------------------------------------------------------
@@ -123,4 +123,26 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Recurring Process Grace Period
+    |--------------------------------------------------------------------------
+    |
+    | This configuration option defines the grace period (in minutes) for processing
+    | recurring expenses. It specifies how much time after the scheduled next process
+    | time is allowed before the expense is considered overdue.
+    |
+    | If the recurring expense's next process time is within this grace period,
+    | it will be considered eligible for processing. This is useful to account
+    | for small timing discrepancies or delays in the system, ensuring that expenses
+    | aren't missed or processed too early.
+    |
+    | The value is retrieved from the environment variable `RECURRING_PROCESS_GRACE_MINUTES`,
+    | and defaults to 5 minutes if not specified.
+    |
+    | Example: 5
+    |
+    */
+
+    'recurring_process_grace_minutes' => env('RECURRING_PROCESS_GRACE_MINUTES', 5),
 ];
