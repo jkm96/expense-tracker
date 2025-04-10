@@ -13,14 +13,6 @@ class ExpenseHelper
 {
     public static function calculateNextProcessTime(string $expenseName,ExpenseFrequency $frequency, string $startDate, string $lastProcessed, array $scheduleConfig = []): Carbon
     {
-        $logger = Log::channel('commandlog');
-        $logger->info("Calculating next process at for: {$expenseName}", [
-            'start_date' => $startDate,
-            'last_processed_at' => $lastProcessed,
-            'frequency' => $frequency->value,
-            'schedule_config' => $scheduleConfig
-        ]);
-
         $lastProcessed = Carbon::parse($lastProcessed);
         $originalTime = Carbon::parse($startDate)->format('H:i:s');
         return match ($frequency) {
