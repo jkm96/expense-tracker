@@ -65,6 +65,16 @@ class ExpenseHelper
         return $lastProcessed->copy()->addMonth()->setTimeFromTimeString($timeOfDay);
     }
 
+    public static function isExecutionDay(Carbon $date, array $scheduleConfig): bool
+    {
+        if (empty($scheduleConfig['days'])) {
+            return true;
+        }
+
+        $dayOfWeek = strtolower($date->format('l')); // e.g., 'wednesday'
+        return in_array($dayOfWeek, array_map('strtolower', $scheduleConfig['days']));
+    }
+
     public static function generateDefaultNote(string $category, string $name): string
     {
         $formattedName = Str::title($name);

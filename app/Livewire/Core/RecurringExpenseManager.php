@@ -148,23 +148,27 @@ class RecurringExpenseManager extends Component
         ]) ?? [];
 
         $startDate = Carbon::parse($this->start_date);
+        $schedule = json_decode($scheduleConfig, true);
 
-        if ($startDate->isToday()) {
-            // Future time today
+        if (
+            $startDate->isFuture() &&
+            ExpenseHelper::isExecutionDay($startDate, $schedule)
+        ) {
+            // First time ever: start_date is in future and a valid execution day
             $nextProcessAt = $startDate;
         } else {
-            // Future day
+            // Use calculation based on frequency and last processed
+            $lastProcessed = $this->last_processed_at ?? $startDate;
             $nextProcessAt = ExpenseHelper::calculateNextProcessTime(
                 $this->name,
                 ExpenseFrequency::from($this->frequency),
                 $this->start_date,
-                $startDate,
-                json_decode($scheduleConfig, true)
+                $lastProcessed,
+                $schedule
             );
         }
 
         if ($this->recurring_expense_id) {
-            // Update Existing Recurring Expense
             $recurringExpense = RecurringExpense::findOrFail($this->recurring_expense_id);
 
             $recurringExpense->update([
