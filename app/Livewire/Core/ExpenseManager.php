@@ -5,6 +5,7 @@ namespace App\Livewire\Core;
 use App\Exports\ExpensesExport;
 use App\Models\Expense;
 use App\Notifications\ExpenseReminderNotification;
+use App\Services\Expense\ExpenseServiceInterface;
 use App\Utils\Constants\AppEventListener;
 use App\Utils\Enums\ExpenseCategory;
 use App\Utils\Enums\NotificationType;
@@ -34,7 +35,7 @@ class ExpenseManager extends Component
     public $categories = [];
     public $filter = 'all';
     public $search;
-    protected $queryString = ['search', 'filter','page'];
+    protected $queryString = ['search', 'filter', 'page'];
     public $showDetailsModal = false;
     public $selectedExpense;
     public $showDeleteModal = false;
@@ -108,29 +109,14 @@ class ExpenseManager extends Component
         $this->resetFields();
     }
 
-    public function loadExpenses()
+    public function loadExpenses(ExpenseServiceInterface $expenseService)
     {
-        $query = Expense::where('user_id', Auth::id());
-
-        if ($this->filter !== 'all') {
-            $query->where('category', '=', ExpenseCategory::from($this->filter));
-        }
-
-        if ($this->search) {
-            $query->where(function ($q) {
-                $q->where('name', 'like', "%{$this->search}%")
-                    ->orWhere('notes', 'like', "%{$this->search}%");
-            });
-        }
-
-        if ($this->page === 1) {
-            $this->expenses = collect();
-        }
-
-        $paginatedExpenses = $query
-            ->orderBy('date', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10, ['*'], 'page', $this->page);
+        $paginatedExpenses = $expenseService->fetchByUser([
+            "filter" => $this->filter,
+            "search" => $this->search,
+            "current_page" => $this->page,
+            "per_page" => 10
+        ]);
 
         // Group expenses by year-month
         $newExpenses = $paginatedExpenses->getCollection()->groupBy(function ($expense) {
@@ -163,37 +149,27 @@ class ExpenseManager extends Component
         ]);
     }
 
-    public function addExpense()
+    public function addExpense(ExpenseServiceInterface $expenseService)
     {
         $this->validate(ExpenseValidator::expenseRules(), ExpenseValidator::expenseMessages());
 
         $defaultNote = ExpenseHelper::generateDefaultNote($this->category, $this->name);
 
+        $expense = $expenseService->addOrUpdate([
+            'name' => Str::title($this->name),
+            'amount' => $this->amount,
+            'date' => $this->date,
+            'category' => $this->category,
+            'notes' => !empty($this->notes) ? $this->notes : $defaultNote,
+        ], $this->expense_id);
+
+        // Determine if it's an update or create
         if ($this->expense_id) {
-            // Update existing expense
-            $expense = Expense::where('id', $this->expense_id)->where('user_id', Auth::id())->first();
-            if ($expense) {
-                $expense->update([
-                    'name' => Str::title($this->name),
-                    'amount' => $this->amount,
-                    'date' => $this->date,
-                    'category' => ExpenseCategory::tryFrom($this->category)?->value,
-                    'notes' => !empty($this->notes) ? $this->notes : $defaultNote,
-                ]);
-
-                $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Expense updated successfully!', 'type' => 'success']);
-            }
-        } else {
-            // Create new expense
-            $expense = Expense::create([
-                'name' => Str::title($this->name),
-                'amount' => $this->amount,
-                'date' => $this->date,
-                'category' => $this->category,
-                'notes' => !empty($this->notes) ? $this->notes : $defaultNote,
-                'user_id' => Auth::id(),
+            $this->dispatch(AppEventListener::GLOBAL_TOAST, details: [
+                'message' => 'Expense updated successfully!',
+                'type' => 'success'
             ]);
-
+        } else {
             $message = "A new expense {$expense->name} added on {$expense->created_at->format('Y-m-d h:i A')}";
             Auth::user()->notify(new ExpenseReminderNotification($message, NotificationType::INFO));
             $this->dispatch(AppEventListener::NOTIFICATION_SENT);
@@ -207,14 +183,14 @@ class ExpenseManager extends Component
         $this->showForm = false;
         $this->dispatch(AppEventListener::EXPENSE_FORM, details: ['showForm' => $this->showForm, 'expenseId' => null]);
         $this->resetFields();
-        $this->loadExpenses();
+        $this->loadExpenses($expenseService);
     }
 
     #[On('edit-expense')]
-    public function editExpense($expenseId)
+    public function editExpense(ExpenseServiceInterface $expenseService, $expenseId)
     {
         if (!empty($expenseId)) {
-            $expense = Expense::where('id', $expenseId)->where('user_id', Auth::id())->first();
+            $expense = $expenseService->find($expenseId);
 
             if ($expense) {
                 $this->expense_id = $expense->id;

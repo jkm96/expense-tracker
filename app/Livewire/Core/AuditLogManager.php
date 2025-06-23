@@ -3,6 +3,7 @@
 namespace App\Livewire\Core;
 
 use App\Models\AuditLog;
+use App\Services\Audit\AuditLogServiceInterface;
 use App\Utils\Enums\AuditAction;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -53,22 +54,13 @@ class AuditLogManager extends Component
         $this->resetPage();
     }
 
-    public function render()
+    public function render(AuditLogServiceInterface $auditLogService)
     {
-        $query = AuditLog::with('user')->where('user_id', Auth::id());
-
-        if ($this->search) {
-            $query->where(function ($q) {
-                $q->where('model_type', 'like', "%{$this->search}%")
-                    ->orWhere('activity', 'like', "%{$this->search}%");
-            });
-        }
-
-        if ($this->actionFilter && $this->actionFilter !== 'all') {
-            $query->where('action', $this->actionFilter);
-        }
-
-        $auditLogs = $query->latest()->paginate($this->perPage);
+        $auditLogs = $auditLogService->getUserAuditLogs([
+            "search" => $this->search,
+            "action" => $this->actionFilter,
+            "per_page" => $this->perPage
+        ]);
 
         return view('livewire.core.audit-log-manager', compact('auditLogs'));
     }

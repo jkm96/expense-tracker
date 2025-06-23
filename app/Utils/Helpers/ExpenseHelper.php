@@ -31,7 +31,7 @@ class ExpenseHelper
         $next = $lastProcessed->copy()->addDay()->setTimeFromTimeString($timeOfDay);
 
         for ($i = 0; $i < 7; $i++) {
-            if (in_array(strtolower($next->format('l')), $validDays)) {
+            if (in_array(strtolower($next->format('l')), $validDays) && $next->greaterThan($lastProcessed)) {
                 return $next;
             }
 
