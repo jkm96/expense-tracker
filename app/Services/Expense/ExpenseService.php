@@ -18,8 +18,8 @@ class ExpenseService implements ExpenseServiceInterface
     public function fetchByUser(array $params)
     {
         $filter = $params["filter"];
-        $search = $params["filter"];
-        $page = $params["page"];
+        $search = $params["search"];
+        $page = $params["current_page"];
         $perPage = $params["per_page"];
         $query = Expense::where('user_id', $this->userId);
 

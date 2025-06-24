@@ -27,7 +27,7 @@ class ExpenseManager extends Component
 
     public $expenses = [];
     public $totals = [];
-    public $page = 1;
+    public $currentPage = 1;
     public $hasMorePages = true;
 
     public $name, $amount, $date, $category, $notes, $expense_id;
@@ -54,7 +54,7 @@ class ExpenseManager extends Component
     public function mount()
     {
         $this->date = Carbon::now()->format('Y-m-d');
-        $this->page = 1;
+        $this->currentPage = 1;
         $this->filter = 'all';
         $this->categories = ExpenseCategory::cases();
         $this->loadExpenses();
@@ -67,13 +67,13 @@ class ExpenseManager extends Component
 
     public function updatedFilter()
     {
-        $this->page = 1;
+        $this->currentPage = 1;
         $this->loadExpenses();
     }
 
     public function loadMore()
     {
-        $this->page++;
+        $this->currentPage++;
         $this->loadExpenses();
     }
 
@@ -109,12 +109,12 @@ class ExpenseManager extends Component
         $this->resetFields();
     }
 
-    public function loadExpenses(ExpenseServiceInterface $expenseService)
+    public function loadExpenses()
     {
-        $paginatedExpenses = $expenseService->fetchByUser([
+        $paginatedExpenses = app(ExpenseServiceInterface::class)->fetchByUser([
             "filter" => $this->filter,
             "search" => $this->search,
-            "current_page" => $this->page,
+            "current_page" => $this->currentPage,
             "per_page" => 10
         ]);
 
@@ -181,9 +181,12 @@ class ExpenseManager extends Component
         }
 
         $this->showForm = false;
-        $this->dispatch(AppEventListener::EXPENSE_FORM, details: ['showForm' => $this->showForm, 'expenseId' => null]);
+        $this->dispatch(AppEventListener::EXPENSE_FORM, details: [
+            'showForm' => $this->showForm,
+            'expenseId' => null
+        ]);
         $this->resetFields();
-        $this->loadExpenses($expenseService);
+        $this->loadExpenses();
     }
 
     #[On('edit-expense')]
@@ -210,10 +213,10 @@ class ExpenseManager extends Component
     }
 
     #[On('show-expense-details')]
-    public function showExpenseDetails($expenseId = null)
+    public function showExpenseDetails(ExpenseServiceInterface $expenseService, $expenseId = null)
     {
         if (!empty($expenseId)) {
-            $this->selectedExpense = Expense::findOrFail($expenseId);
+            $this->selectedExpense = $expenseService->find($expenseId);
             $this->showDetailsModal = true;
             $this->dispatch(AppEventListener::VIEW_EXPENSE_MODAL, details: [
                 'showModal' => $this->showDetailsModal,
@@ -228,16 +231,13 @@ class ExpenseManager extends Component
         $this->showDeleteModal = true;
     }
 
-    public function confirmDelete()
+    public function confirmDelete(ExpenseServiceInterface $expenseService)
     {
-        $expense = Expense::where('id', $this->expenseIdToDelete)->where('user_id', Auth::id())->first();
-        if ($expense) {
-            $expense->delete();
-            $this->dispatch(AppEventListener::GLOBAL_TOAST, details: [
-                'message' => 'Expense deleted successfully!',
-                'type' => 'success'
-            ]);
-        }
+        $expenseService->delete($this->expenseIdToDelete);
+        $this->dispatch(AppEventListener::GLOBAL_TOAST, details: [
+            'message' => 'Expense deleted successfully!',
+            'type' => 'success'
+        ]);
 
         $this->showDeleteModal = false;
         $this->expenseIdToDelete = null;
