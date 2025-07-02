@@ -46,8 +46,7 @@ class ExpenseHelper
         $dayOfWeek = $scheduleConfig['day_of_week'] ?? null;
 
         if ($dayOfWeek) {
-            $next = Carbon::parse("next $dayOfWeek", $lastProcessed->timezone)->setTimeFromTimeString($timeOfDay);
-            return $next;
+            return Carbon::parse("next $dayOfWeek", $lastProcessed->timezone)->setTimeFromTimeString($timeOfDay);
         }
 
         return $lastProcessed->copy()->addWeek()->setTimeFromTimeString($timeOfDay);
@@ -58,8 +57,7 @@ class ExpenseHelper
         $dayOfMonth = $scheduleConfig['day_of_month'] ?? null;
 
         if ($dayOfMonth) {
-            $next = $lastProcessed->copy()->addMonth()->setDay($dayOfMonth)->setTimeFromTimeString($timeOfDay);
-            return $next;
+            return $lastProcessed->copy()->addMonth()->setDay($dayOfMonth)->setTimeFromTimeString($timeOfDay);
         }
 
         return $lastProcessed->copy()->addMonth()->setTimeFromTimeString($timeOfDay);

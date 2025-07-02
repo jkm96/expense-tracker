@@ -12,7 +12,6 @@ Route::group(['middleware' => ['guest']], function () {
     Route::get('register', [AuthController::class, 'register'])->name('register.user');
     Route::get('login', [AuthController::class, 'login'])->name('login.user');
     Route::get('verify-account', [AuthController::class, 'verify'])->name('email.verification');
-    Route::get('resend-verification', [AuthController::class, 'resend_verification'])->name('resend.verification');
     Route::get('forgot-password', [AuthController::class, 'forgot_password'])->name('forgot.password');
     Route::get('reset-password', [AuthController::class, 'reset_password'])->name('reset.password');
 });

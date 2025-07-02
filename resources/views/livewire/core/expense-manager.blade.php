@@ -127,15 +127,16 @@
 
                     <div class="mb-4">
                         <label class="text-sm">Category:</label>
-                        <select wire:model="exportFields.category"
+                        <select wire:model="category"
                                 class="w-full p-1 text-sm bg-gray-700 border border-gray-500 rounded focus:outline-none
                                 focus:border-gray-400 focus:ring-1 focus:ring-gray-400 focus:ring-opacity-50">
                             <option value="">Select Category</option>
+                            <option value="all">All</option>
                             @foreach($categories as $category)
                                 <option value="{{ $category->value }}">{{ ucfirst($category->value) }}</option>
                             @endforeach
                         </select>
-                        @error('exportFields.category') <span
+                        @error('category') <span
                             class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
 

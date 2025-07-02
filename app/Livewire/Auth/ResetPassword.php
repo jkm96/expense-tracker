@@ -3,6 +3,7 @@
 namespace App\Livewire\Auth;
 
 use App\Models\User;
+use App\Services\Auth\AuthServiceInterface;
 use App\Utils\Constants\AppEventListener;
 use App\Utils\Constants\MessageType;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +22,7 @@ class ResetPassword extends Component
         $this->token = $token;
     }
 
-    public function resetPassword()
+    public function resetPassword(AuthServiceInterface $authService)
     {
         $this->validate([
             'email' => 'required|email|exists:users,email',
@@ -29,23 +30,24 @@ class ResetPassword extends Component
             'token' => 'required',
         ]);
 
-        $resetEntry = DB::table('password_reset_tokens')
-            ->where('email', $this->email)
-            ->where('token', $this->token)
-            ->first();
+        $success = $authService->resetPassword([
+            'email' => $this->email,
+            'password' => $this->password,
+            'token' => $this->token,
+        ]);
 
-        if (!$resetEntry) {
-            $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Invalid or expired token.', 'type' => MessageType::ERROR]);
+        if (!$success) {
+            $this->dispatch(AppEventListener::GLOBAL_TOAST, details: [
+                'message' => 'Invalid or expired token.',
+                'type' => MessageType::ERROR,
+            ]);
             return redirect()->back();
         }
 
-        User::where('email', $this->email)->update([
-            'password' => Hash::make($this->password),
+        $this->dispatch(AppEventListener::GLOBAL_TOAST, details: [
+            'message' => 'Password reset successfully.',
+            'type' => MessageType::SUCCESS,
         ]);
-
-        DB::table('password_reset_tokens')->where('email', $this->email)->delete();
-
-        $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Password reset successfully.', 'type' => MessageType::SUCCESS]);
         $this->dispatch('delayed-redirect', route('login.user'));
     }
 

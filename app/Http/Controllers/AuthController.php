@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\AuthService;
+use App\Services\Auth\AuthService;
+use App\Services\Auth\AuthServiceInterface;
 use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
-    private AuthService $_authService;
+    private AuthServiceInterface $authService;
 
-    public function __construct(AuthService $authService)
+    public function __construct(AuthServiceInterface $authService)
     {
-        $this->_authService = $authService;
+        $this->authService = $authService;
     }
 
     public function register()
@@ -42,12 +43,11 @@ class AuthController extends Controller
     public function verify(Request $request)
     {
         $token = $request->query('token');
-        return $this->_authService->verifyUserEmail($token);
-    }
 
-    public function resend_verification(Request $request)
-    {
-        $token = $request->query('token');
-        return $this->_authService->verifyUserEmail($token);
+        [$success, $message] = $this->authService->verifyUserEmail($token);
+
+        $status = $success ? 'success' : 'error';
+
+        return redirect()->route('login.user')->with($status, $message);
     }
 }

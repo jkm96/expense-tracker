@@ -29,7 +29,7 @@ class ExpensesExport implements FromCollection, WithHeadings, WithMapping
             $this->endDate
         ]);
 
-        if (!empty($this->category)) {
+        if (!empty($this->category) && $this->category !== 'all') {
             $query->where('category', $this->category);
         }
 

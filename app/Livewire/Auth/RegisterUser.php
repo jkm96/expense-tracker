@@ -5,6 +5,7 @@ namespace App\Livewire\Auth;
 use App\Jobs\DispatchEmailNotificationsJob;
 use App\Models\User;
 use App\Models\UserVerification;
+use App\Services\Auth\AuthServiceInterface;
 use App\Utils\Constants\AppEmailType;
 use App\Utils\Constants\AppEventListener;
 use Illuminate\Support\Facades\Hash;
@@ -25,7 +26,7 @@ class RegisterUser extends Component
         return view('livewire.auth.register-user');
     }
 
-    public function registerUser()
+    public function registerUser(AuthServiceInterface $authService)
     {
         $this->validate([
             'username' => 'required|string|max:255',
@@ -33,33 +34,18 @@ class RegisterUser extends Component
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $user = User::create([
+        $authService->registerUser([
             'username' => $this->username,
             'email' => $this->email,
-            'password' => Hash::make($this->password),
-            'is_active' => 1
+            'password' => $this->password,
         ]);
 
-        //send email verification message
-        $token = Str::random(100);
-        $verificationUrl = route('email.verification', ['token' => $token]);
-        UserVerification::create([
-            'user_id' => $user->id,
-            'token' => $token
+        $this->dispatch(AppEventListener::GLOBAL_TOAST, details: [
+            'message' => 'Account created successfully!',
+            'type' => 'success'
         ]);
 
-        $details = [
-            'type' => AppEmailType::USER_VERIFICATION,
-            'recipientEmail' => trim($this->email),
-            'username' => trim($this->username),
-            'verificationUrl' => trim($verificationUrl),
-        ];
-
-        DispatchEmailNotificationsJob::dispatch($details);
-
-        $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Account created successfully!', 'type' => 'success']);
-        $this->reset(['username','email','password','password_confirmation']);
-
+        $this->reset(['username', 'email', 'password', 'password_confirmation']);
         $this->isCreated = true;
     }
 }

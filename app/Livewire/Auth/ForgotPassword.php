@@ -4,6 +4,7 @@ namespace App\Livewire\Auth;
 
 use App\Jobs\DispatchEmailNotificationsJob;
 use App\Models\User;
+use App\Services\Auth\AuthServiceInterface;
 use App\Utils\Constants\AppEmailType;
 use App\Utils\Constants\AppEventListener;
 use Carbon\Carbon;
@@ -17,43 +18,19 @@ class ForgotPassword extends Component
     public $email;
     public $message;
 
-    public function sendResetLink()
+    public function sendResetLink(AuthServiceInterface $authService)
     {
         $this->validate([
             'email' => 'required|email',
         ]);
-        $userEmail = trim($this->email);
-        $userExists = User::where('email', $userEmail)->first();
 
-        $message = 'A password reset link has been sent to your email';
-        if ($userExists == null) {
-            $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => $message, 'type' => 'success']);
-            $this->reset(['email']);
+        $authService->sendPasswordResetLink($this->email);
 
-            return redirect()->back();
-        }
+        $this->dispatch(AppEventListener::GLOBAL_TOAST, details: [
+            'message' => 'A password reset link has been sent to your email',
+            'type' => 'success'
+        ]);
 
-        $token = Str::random(164);
-        DB::table('password_reset_tokens')->updateOrInsert(
-            ['email' => $this->email],
-            [
-                'token' => $token,
-                'created_at' => Carbon::now(),
-            ]
-        );
-
-        $resetPassUrl = route('reset.password', ['email' => $userEmail, 'token' => $token]);
-        Log::info($resetPassUrl);
-        $details = [
-            'type' => AppEmailType::USER_FORGOT_PASSWORD,
-            'recipientEmail' => trim($userEmail),
-            'username' => trim($userExists->username),
-            'resetPassUrl' => trim($resetPassUrl),
-        ];
-
-        DispatchEmailNotificationsJob::dispatch($details);
-
-        $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => $message, 'type' => 'success']);
         $this->reset(['email']);
 
         return redirect()->back();

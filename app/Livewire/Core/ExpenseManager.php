@@ -40,7 +40,6 @@ class ExpenseManager extends Component
     public $selectedExpense;
     public $showDeleteModal = false;
     public $startDate, $endDate;
-    public $exportFields = ['category' => null];
     public $showExportModal = false;
     public $expenseIdToDelete;
     public $totalExpenses;
@@ -253,20 +252,25 @@ class ExpenseManager extends Component
 
     public function exportExpenses()
     {
-        $this->validate(ExpenseValidator::exportRules(), ExpenseValidator::exportMessages());
-        $fileName = 'expenses_' . Carbon::now()->format('Ymd_His') . '.xlsx';
+        $this->validate([
+            'startDate' => 'required',
+            'endDate' => 'required',
+            'category' => 'required',
+        ]);
+
+        $fileName = $this->category. '_expenses_' .
+            Carbon::parse($this->startDate)->format('Ymd') . '_to_' .
+            Carbon::parse($this->endDate)->format('Ymd') . '.xlsx';
 
         $this->dispatch(AppEventListener::GLOBAL_TOAST, details: [
             'message' => 'Expense exported successfully!',
             'type' => 'success'
         ]);
 
-//        $this->reset('exportFields');
-
         return Excel::download(new ExpensesExport(
             $this->startDate,
             $this->endDate,
-            $this->exportFields['category']
+            $this->category
         ), $fileName);
     }
 

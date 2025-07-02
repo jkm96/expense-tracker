@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('app:notify-missing-expenses')
-    ->everyFourHours()
+    ->daily()
     ->runInBackground()
     ->withoutOverlapping();
 
