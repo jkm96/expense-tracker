@@ -6,11 +6,11 @@ use App\Models\Expense;
 
 interface ExpenseServiceInterface
 {
-    public function fetchByUser(array $params);
+    public function fetchByUser(int $userId,array $params);
 
-    public function addOrUpdate(array $data, ?int $expenseId): Expense;
+    public function addOrUpdate(int $userId,array $data, ?int $expenseId): Expense;
 
-    public function delete(int $expenseId): bool;
+    public function delete(int $userId, int $expenseId): bool;
 
     public function find($expenseId);
 }

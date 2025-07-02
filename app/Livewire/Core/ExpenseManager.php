@@ -153,14 +153,14 @@ class ExpenseManager extends Component
         $this->validate(ExpenseValidator::expenseRules(), ExpenseValidator::expenseMessages());
 
         $defaultNote = ExpenseHelper::generateDefaultNote($this->category, $this->name);
-
-        $expense = $expenseService->addOrUpdate([
+        $request = [
             'name' => Str::title($this->name),
             'amount' => $this->amount,
             'date' => $this->date,
             'category' => $this->category,
             'notes' => !empty($this->notes) ? $this->notes : $defaultNote,
-        ], $this->expense_id);
+        ];
+        $expense = $expenseService->addOrUpdate(Auth::id(), $request, $this->expense_id);
 
         // Determine if it's an update or create
         if ($this->expense_id) {
@@ -232,7 +232,7 @@ class ExpenseManager extends Component
 
     public function confirmDelete(ExpenseServiceInterface $expenseService)
     {
-        $expenseService->delete($this->expenseIdToDelete);
+        $expenseService->delete(Auth::id(),$this->expenseIdToDelete);
         $this->dispatch(AppEventListener::GLOBAL_TOAST, details: [
             'message' => 'Expense deleted successfully!',
             'type' => 'success'
@@ -258,7 +258,7 @@ class ExpenseManager extends Component
             'category' => 'required',
         ]);
 
-        $fileName = $this->category. '_expenses_' .
+        $fileName = $this->category . '_expenses_' .
             Carbon::parse($this->startDate)->format('Ymd') . '_to_' .
             Carbon::parse($this->endDate)->format('Ymd') . '.xlsx';
 

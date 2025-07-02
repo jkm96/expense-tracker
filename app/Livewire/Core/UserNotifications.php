@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Core;
 
+use App\Services\Notifications\NotificationServiceInterface;
 use App\Utils\Constants\AppEventListener;
 use App\Utils\Enums\NotificationType;
 use App\Utils\Helpers\DateHelper;
@@ -18,15 +19,15 @@ class UserNotifications extends Component
 
     protected $listeners = ['notification-sent' => 'loadUnreadCount'];
 
-    public function mount()
+    public function mount(NotificationServiceInterface $notificationService)
     {
-        $this->loadUnreadCount();
+        $this->loadUnreadCount($notificationService);
     }
 
     #[On('notification-sent')]
-    public function loadUnreadCount()
+    public function loadUnreadCount(NotificationServiceInterface $notificationService)
     {
-        $this->unreadCount = Auth::user()->unreadNotifications()->count();
+        $this->unreadCount = $notificationService->getUnreadCount(Auth::id());
         $this->dispatch('$refresh');
     }
 
@@ -40,45 +41,36 @@ class UserNotifications extends Component
         $this->nextPage();
     }
 
-    public function markAsRead($notificationId)
+    public function markAsRead(NotificationServiceInterface $notificationService, $notificationId)
     {
-        $notification = Auth::user()->notifications()->find($notificationId);
-
-        if ($notification && !$notification->read_at) {
-            $notification->markAsRead();
-            $this->loadUnreadCount();
-        }
+        $notificationService->markAsRead(Auth::id(), $notificationId);
+        $this->loadUnreadCount($notificationService);
     }
 
-    public function markAllAsRead()
+    public function markAllAsRead(NotificationServiceInterface $notificationService)
     {
-        Auth::user()->unreadNotifications->markAsRead();
-        $this->loadUnreadCount();
+        $notificationService->markAllAsRead(Auth::id());
+        $this->loadUnreadCount($notificationService);
         $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Marked all notifications as read!', 'type' => 'success']);
     }
 
-    public function deleteNotification($notificationId)
+    public function deleteNotification(NotificationServiceInterface $notificationService, $notificationId)
     {
-        Auth::user()->notifications()->where('id', $notificationId)->delete();
-        $this->loadUnreadCount();
+        $notificationService->delete(Auth::id(), $notificationId);
+        $this->loadUnreadCount($notificationService);
         $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Deleted notification!', 'type' => 'success']);
     }
 
-    public function deleteAllNotifications()
+    public function deleteAllNotifications(NotificationServiceInterface $notificationService)
     {
-        Auth::user()->notifications()->delete();
-        $this->loadUnreadCount();
+        $notificationService->deleteAll(Auth::id());
+        $this->loadUnreadCount($notificationService);
         $this->dispatch(AppEventListener::GLOBAL_TOAST, details: ['message' => 'Deleted all notifications!', 'type' => 'success']);
     }
 
-    public function render()
+    public function render(NotificationServiceInterface $notificationService)
     {
-        $notifications = Auth::user()->notifications()->latest()->paginate(10)->through(function ($notification) {
-            $notification->type = NotificationType::tryFrom($notification->data['type']) ?? NotificationType::REMINDER;
-            $notification->formattedTimestamp = DateHelper::formatTimestamp($notification->created_at);
-
-            return $notification;
-        });
+        $notifications = $notificationService->retrieveAll(Auth::id(), 10);
 
         return view('livewire.core.user-notifications', [
             'notifications' => $notifications,

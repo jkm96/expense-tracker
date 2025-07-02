@@ -8,20 +8,13 @@ use Illuminate\Support\Facades\Auth;
 
 class ExpenseService implements ExpenseServiceInterface
 {
-    private int $userId;
-
-    public function __construct()
-    {
-        $this->userId = Auth::id();
-    }
-
-    public function fetchByUser(array $params)
+    public function fetchByUser(int $userId, array $params)
     {
         $filter = $params["filter"];
         $search = $params["search"];
         $page = $params["current_page"];
         $perPage = $params["per_page"];
-        $query = Expense::where('user_id', $this->userId);
+        $query = Expense::where('user_id', $userId);
 
         if ($filter !== 'all') {
             $query->where('category', '=', ExpenseCategory::from($filter));
@@ -38,14 +31,14 @@ class ExpenseService implements ExpenseServiceInterface
 
     }
 
-    public function addOrUpdate(array $data, ?int $expenseId): Expense
+    public function addOrUpdate(int $userId, array $data, ?int $expenseId): Expense
     {
         $expenseData = array_merge($data, [
-            'user_id' => $this->userId,
+            'user_id' => $userId,
         ]);
 
         if ($expenseId) {
-            $expense = Expense::where('id', $expenseId)->where('user_id', $this->userId)->firstOrFail();
+            $expense = Expense::where('id', $expenseId)->where('user_id', $userId)->firstOrFail();
             $expense->update($expenseData);
             return $expense;
         }
@@ -53,9 +46,9 @@ class ExpenseService implements ExpenseServiceInterface
         return Expense::create($expenseData);
     }
 
-    public function delete(int $expenseId): bool
+    public function delete(int $userId, int $expenseId): bool
     {
-        $expense = Expense::where('id', $expenseId)->where('user_id', $this->userId)->first();
+        $expense = Expense::where('id', $expenseId)->where('user_id', $userId)->first();
         return $expense ? $expense->delete() : false;
     }
 
